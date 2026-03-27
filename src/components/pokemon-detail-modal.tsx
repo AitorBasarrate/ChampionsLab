@@ -8,9 +8,10 @@ import { USAGE_DATA } from "@/lib/usage-data";
 import { getTeamsForPokemon } from "@/lib/winning-teams";
 import { POKEMON_SEED } from "@/lib/pokemon-data";
 import { cn } from "@/lib/utils";
-import { X, Sparkles, Zap, Trophy, Coins, Star, Shield, Sword, Target, Gauge, Timer, TrendingUp, Users, Wrench } from "lucide-react";
+import { X, Sparkles, Zap, Trophy, Coins, Star, Shield, Sword, Target, Gauge, Timer, TrendingUp, Users, Wrench, BarChart3 } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
 import { deflateRaw } from "pako";
+import { SIM_POKEMON, SIM_TOTAL_BATTLES } from "@/lib/simulation-data";
 
 interface PokemonDetailModalProps {
   pokemon: ChampionsPokemon | null;
@@ -18,12 +19,12 @@ interface PokemonDetailModalProps {
 }
 
 function getMemberSprite(member: WinningTeamMember): string {
+  const pkm = POKEMON_SEED.find(p => p.id === member.pokemonId);
   if (member.isMega) {
-    const pkm = POKEMON_SEED.find(p => p.id === member.pokemonId);
     const megaForm = pkm?.forms?.find(f => f.isMega);
     if (megaForm) return megaForm.sprite;
   }
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${member.pokemonId}.png`;
+  return pkm?.sprite ?? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${member.pokemonId}.png`;
 }
 
 function getMemberDisplayName(member: WinningTeamMember): string {
@@ -35,14 +36,40 @@ function getMemberDisplayName(member: WinningTeamMember): string {
   return member.name;
 }
 
+function isMegaStoneItem(item: string): boolean {
+  return item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
+}
+
 function buildTeamBuilderUrl(team: WinningTeam): string {
   const data = {
     n: team.name,
-    s: team.pokemon.map((m) => ({
-      p: m.pokemonId,
-      m: [] as string[],
-      sp: [0, 0, 0, 0, 0, 0],
-    })),
+    s: team.pokemon.map((m) => {
+      const sets = USAGE_DATA[m.pokemonId] ?? [];
+      // Pick the best matching set: mega set for mega members, non-mega for base
+      const bestSet = m.isMega
+        ? sets.find(s => isMegaStoneItem(s.item)) ?? sets[0]
+        : sets.find(s => !isMegaStoneItem(s.item)) ?? sets[0];
+      if (bestSet) {
+        return {
+          p: m.pokemonId,
+          a: bestSet.ability,
+          t: bestSet.nature,
+          m: bestSet.moves,
+          sp: [bestSet.sp.hp, bestSet.sp.attack, bestSet.sp.defense, bestSet.sp.spAtk, bestSet.sp.spDef, bestSet.sp.speed],
+          i: bestSet.item,
+          mg: m.isMega || undefined,
+        };
+      }
+      // Fallback: just ID + first 4 moves from pokemon data
+      const pkm = POKEMON_SEED.find(p => p.id === m.pokemonId);
+      return {
+        p: m.pokemonId,
+        a: pkm?.abilities[0]?.name,
+        m: pkm?.moves.slice(0, 4).map(mv => mv.name) ?? [],
+        sp: [0, 0, 0, 0, 0, 0],
+        mg: m.isMega || undefined,
+      };
+    }),
   };
   const compressed = deflateRaw(JSON.stringify(data));
   const b64 = btoa(String.fromCharCode(...compressed))
@@ -597,11 +624,77 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                     exit={{ opacity: 0, x: 20 }}
                     className="space-y-3"
                   >
-                    <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Common Sets</h3>
-                    {(USAGE_DATA[pokemon.id] || []).length === 0 ? (
-                      <p className="text-sm text-gray-400 italic">No usage data available.</p>
-                    ) : (
-                      (USAGE_DATA[pokemon.id] || []).map((set, idx) => (
+                    {/* Simulation Stats */}
+                    {(() => {
+                      const isMegaView = activeForm > 0 && currentForm?.isMega;
+                      const simKey = isMegaView ? `${pokemon.id}-mega` : `${pokemon.id}`;
+                      const simData = SIM_POKEMON[simKey];
+                      if (simData && SIM_TOTAL_BATTLES > 0) {
+                        return (
+                          <div className="p-4 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-white space-y-3 mb-2">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                <BarChart3 className="w-3.5 h-3.5 text-indigo-600" />
+                              </div>
+                              <span className="text-sm font-bold tracking-tight text-gray-900">
+                                Simulation Stats {isMegaView ? "(Mega)" : ""}
+                              </span>
+                              <span className="text-[10px] text-gray-400 ml-auto">
+                                {SIM_TOTAL_BATTLES.toLocaleString()} battles
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 text-[12px]">
+                              <div className="bg-indigo-100/50 rounded-lg px-2.5 py-1.5 text-center">
+                                <span className="text-indigo-400 font-medium block">ELO</span>
+                                <p className="font-extrabold text-indigo-700 text-lg">{simData.elo.toLocaleString()}</p>
+                              </div>
+                              <div className="bg-indigo-100/50 rounded-lg px-2.5 py-1.5 text-center">
+                                <span className="text-indigo-400 font-medium block">Win Rate</span>
+                                <p className={cn("font-extrabold text-lg", simData.winRate >= 55 ? "text-emerald-600" : simData.winRate >= 45 ? "text-indigo-700" : "text-red-500")}>{simData.winRate}%</p>
+                              </div>
+                              <div className="bg-indigo-100/50 rounded-lg px-2.5 py-1.5 text-center">
+                                <span className="text-indigo-400 font-medium block">Games</span>
+                                <p className="font-extrabold text-indigo-700 text-lg">{simData.appearances.toLocaleString()}</p>
+                              </div>
+                            </div>
+                            {simData.bestPartners.length > 0 && (
+                              <div>
+                                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Best Partners</span>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                  {simData.bestPartners.map((partner) => (
+                                    <span
+                                      key={partner.name}
+                                      className="px-2.5 py-1 text-[11px] font-semibold bg-white rounded-lg border border-indigo-200 text-indigo-700"
+                                    >
+                                      {partner.name} ({partner.winRate}%)
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+
+                    <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                      {activeForm > 0 && currentForm?.isMega ? "Mega Sets" : "Common Sets"}
+                    </h3>
+                    {(() => {
+                      const allSets = USAGE_DATA[pokemon.id] || [];
+                      const isMegaView = activeForm > 0 && currentForm?.isMega;
+                      const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
+                      const filteredSets = pokemon.hasMega
+                        ? isMegaView
+                          ? allSets.filter(s => isMegaItem(s.item))
+                          : allSets.filter(s => !isMegaItem(s.item))
+                        : allSets;
+
+                      if (filteredSets.length === 0) {
+                        return <p className="text-sm text-gray-400 italic">No {isMegaView ? "mega " : ""}sets available.</p>;
+                      }
+                      return filteredSets.map((set, idx) => (
                         <div
                           key={idx}
                           className="p-4 rounded-2xl border border-gray-200/80 bg-gradient-to-br from-gray-50 to-white space-y-3"
@@ -668,8 +761,8 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                             </div>
                           </div>
                         </div>
-                      ))
-                    )}
+                      ));
+                    })()}
                   </motion.div>
                 )}
 

@@ -8,7 +8,7 @@ import type { ChampionsPokemon, CommonSet } from "@/lib/types";
 import { POKEMON_SEED } from "@/lib/pokemon-data";
 import { USAGE_DATA } from "@/lib/usage-data";
 import { simulateBattle } from "./battle-sim";
-import { analyzeTeamSynergy } from "./synergy";
+import { analyzeTeamSynergy, scorePokemonFit } from "./synergy";
 import { PREBUILT_TEAMS } from "./generated-teams";
 import { generateTeams, type GeneratedTeam } from "./team-generator";
 import { TOURNAMENT_TEAMS } from "./vgc-data";
@@ -84,7 +84,7 @@ export interface MLInsight {
 
 export class SimulationDatabase {
   teamELO: Map<string, ELOEntry> = new Map();
-  pokemonStats: Map<number, PokemonStats> = new Map();
+  pokemonStats: Map<string, PokemonStats> = new Map(); // key: "id" or "id-mega"
   moveStats: Map<string, MoveStats> = new Map();
   archetypeStats: Map<string, ArchetypeStats> = new Map();
   pairWinRates: Map<string, { wins: number; games: number }> = new Map();
@@ -131,19 +131,22 @@ export class SimulationDatabase {
     loser.lastUpdated = Date.now();
   }
 
-  recordPokemonResult(pokemonIds: number[], won: boolean, setKeys: string[]): void {
+  recordPokemonResult(pokemonIds: number[], megaFlags: boolean[], won: boolean, setKeys: string[]): void {
     for (let i = 0; i < pokemonIds.length; i++) {
       const id = pokemonIds[i];
-      if (!this.pokemonStats.has(id)) {
+      const isMega = megaFlags[i] ?? false;
+      const key = isMega ? `${id}-mega` : `${id}`;
+      if (!this.pokemonStats.has(key)) {
         const pokemon = POKEMON_SEED.find(p => p.id === id);
-        this.pokemonStats.set(id, {
-          id, name: pokemon?.name ?? `#${id}`,
+        const megaForm = isMega ? pokemon?.forms?.find(f => f.isMega) : null;
+        this.pokemonStats.set(key, {
+          id, name: megaForm ? megaForm.name : (pokemon?.name ?? `#${id}`),
           appearances: 0, wins: 0, losses: 0, winRate: 0,
           avgTeammateCount: 0, bestPartners: [], worstMatchups: [],
           bestSets: [], elo: DEFAULT_ELO,
         });
       }
-      const stats = this.pokemonStats.get(id)!;
+      const stats = this.pokemonStats.get(key)!;
       stats.appearances++;
       if (won) stats.wins++;
       else stats.losses++;
@@ -154,12 +157,13 @@ export class SimulationDatabase {
       stats.elo = Math.round(stats.elo + (K_FACTOR / 2) * ((won ? 1 : 0) - expectedW));
     }
 
-    // Record pair win rates
-    for (let i = 0; i < pokemonIds.length; i++) {
-      for (let j = i + 1; j < pokemonIds.length; j++) {
-        const key = [pokemonIds[i], pokemonIds[j]].sort((a, b) => a - b).join("-");
-        if (!this.pairWinRates.has(key)) this.pairWinRates.set(key, { wins: 0, games: 0 });
-        const pair = this.pairWinRates.get(key)!;
+    // Record pair win rates (using mega-aware keys)
+    const keys = pokemonIds.map((id, i) => (megaFlags[i] ? `${id}-mega` : `${id}`));
+    for (let i = 0; i < keys.length; i++) {
+      for (let j = i + 1; j < keys.length; j++) {
+        const pairKey = [keys[i], keys[j]].sort().join("|");
+        if (!this.pairWinRates.has(pairKey)) this.pairWinRates.set(pairKey, { wins: 0, games: 0 });
+        const pair = this.pairWinRates.get(pairKey)!;
         pair.games++;
         if (won) pair.wins++;
       }
@@ -213,6 +217,17 @@ interface TeamEntry {
   pokemon: ChampionsPokemon[];
   sets: CommonSet[];
   pokemonIds: number[];
+  megaFlags: boolean[];
+}
+
+/** Detect mega flags for a team based on mega stone items */
+function detectMegaFlags(pokemon: ChampionsPokemon[], sets: CommonSet[]): boolean[] {
+  return sets.map((s, i) => {
+    const p = pokemon[i];
+    if (!p || !p.hasMega || !p.forms) return false;
+    const item = s.item;
+    return item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
+  });
 }
 
 /** Build a competitive set for a Pokémon using USAGE_DATA */
@@ -223,6 +238,17 @@ function autoSet(pokemon: ChampionsPokemon, existingSets: CommonSet[]): CommonSe
   const hasMega = existingSets.some(s => s.item.endsWith("ite") || s.item.endsWith("ite X") || s.item.endsWith("ite Y"));
   const available = hasMega ? sets.filter(s => !(s.item.endsWith("ite") || s.item.endsWith("ite X") || s.item.endsWith("ite Y"))) : sets;
   return available[0] ?? sets[0];
+}
+
+/** Get a non-mega set for a Pokémon, avoiding mega stones if team already has one */
+function getNonMegaSet(pokemonId: number, existingSets: CommonSet[]): CommonSet | null {
+  const sets = USAGE_DATA[pokemonId];
+  if (!sets || sets.length === 0) return null;
+  const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
+  const nonMega = sets.filter(s => !isMegaItem(s.item));
+  if (nonMega.length > 0) return nonMega[0];
+  // Fallback: swap mega stone for Life Orb
+  return { ...sets[0], item: "Life Orb" };
 }
 
 function buildTeamPool(): TeamEntry[] {
@@ -236,13 +262,15 @@ function buildTeamPool(): TeamEntry[] {
       if (p) pokemon.push(p);
     }
     if (pokemon.length >= 4 && pre.sets.length >= 4) {
+      const sliced = pokemon.slice(0, pre.sets.length);
       pool.push({
         id: pre.id,
         name: pre.name,
         archetype: pre.archetype,
-        pokemon: pokemon.slice(0, pre.sets.length),
+        pokemon: sliced,
         sets: pre.sets,
-        pokemonIds: pokemon.slice(0, pre.sets.length).map(p => p.id),
+        pokemonIds: sliced.map(p => p.id),
+        megaFlags: detectMegaFlags(sliced, pre.sets),
       });
     }
   }
@@ -260,13 +288,15 @@ function buildTeamPool(): TeamEntry[] {
       sets.push(set);
     }
     if (pokemon.length >= 4 && sets.length >= 4) {
+      const sliced = pokemon.slice(0, sets.length);
       pool.push({
         id: tt.id,
         name: `${tt.tournament} ${tt.year} — ${tt.player}`,
         archetype: tt.archetype,
-        pokemon: pokemon.slice(0, sets.length),
+        pokemon: sliced,
         sets,
-        pokemonIds: pokemon.slice(0, sets.length).map(p => p.id),
+        pokemonIds: sliced.map(p => p.id),
+        megaFlags: detectMegaFlags(sliced, sets),
       });
     }
   }
@@ -276,14 +306,105 @@ function buildTeamPool(): TeamEntry[] {
   for (let i = 0; i < generated.length; i++) {
     const g = generated[i];
     if (g.pokemon.length >= 4 && g.sets.length >= 4) {
+      const sliced = g.pokemon.slice(0, g.sets.length);
       pool.push({
         id: `gen-${i}`,
         name: g.name,
         archetype: g.archetype,
-        pokemon: g.pokemon.slice(0, g.sets.length),
+        pokemon: sliced,
         sets: g.sets,
-        pokemonIds: g.pokemon.slice(0, g.sets.length).map(p => p.id),
+        pokemonIds: sliced.map(p => p.id),
+        megaFlags: detectMegaFlags(sliced, g.sets),
       });
+    }
+  }
+
+  // 4. Generate MEGA VARIANT teams — for every mega-capable Pokémon, 
+  //    create teams that use the mega stone if not already covered
+  const megaPokemon = POKEMON_SEED.filter(p => p.hasMega && p.forms?.some(f => f.isMega));
+  for (const mp of megaPokemon) {
+    const megaSets = USAGE_DATA[mp.id]?.filter(s =>
+      s.item.endsWith("ite") || s.item.endsWith("ite X") || s.item.endsWith("ite Y") || s.item.endsWith("ite Z")
+    );
+    if (!megaSets || megaSets.length === 0) continue;
+
+    // Also generate base-form only teams (non-mega sets)
+    const baseSets = USAGE_DATA[mp.id]?.filter(s =>
+      !(s.item.endsWith("ite") || s.item.endsWith("ite X") || s.item.endsWith("ite Y") || s.item.endsWith("ite Z"))
+    );
+
+    // Mega variant teams
+    for (let v = 0; v < 3; v++) {
+      const megaSet = megaSets[v % megaSets.length];
+      const team: ChampionsPokemon[] = [mp];
+      const teamSets: CommonSet[] = [megaSet];
+      const usedIds = new Set([mp.id]);
+
+      // Fill team with compatible Pokémon (no mega stones — team already has one)
+      const candidates = POKEMON_SEED
+        .filter(p => !usedIds.has(p.id) && USAGE_DATA[p.id]?.length)
+        .map(p => ({ pokemon: p, fit: scorePokemonFit(p, team) }))
+        .sort((a, b) => b.fit.score - a.fit.score);
+
+      for (const c of candidates) {
+        if (team.length >= 6) break;
+        const set = getNonMegaSet(c.pokemon.id, teamSets);
+        if (set) {
+          team.push(c.pokemon);
+          teamSets.push(set);
+          usedIds.add(c.pokemon.id);
+        }
+      }
+
+      if (team.length >= 4) {
+        const megaForm = mp.forms?.find(f => f.isMega);
+        pool.push({
+          id: `mega-${mp.id}-v${v}`,
+          name: `${megaForm?.name ?? `Mega ${mp.name}`} Build v${v + 1}`,
+          archetype: `Mega ${mp.name}`,
+          pokemon: team,
+          sets: teamSets,
+          pokemonIds: team.map(p => p.id),
+          megaFlags: detectMegaFlags(team, teamSets),
+        });
+      }
+    }
+
+    // Base-form variant teams (for Pokémon that have megas but we want base data too)
+    if (baseSets && baseSets.length > 0) {
+      for (let v = 0; v < 2; v++) {
+        const baseSet = baseSets[v % baseSets.length];
+        const team: ChampionsPokemon[] = [mp];
+        const teamSets: CommonSet[] = [baseSet];
+        const usedIds = new Set([mp.id]);
+
+        const candidates = POKEMON_SEED
+          .filter(p => !usedIds.has(p.id) && USAGE_DATA[p.id]?.length)
+          .map(p => ({ pokemon: p, fit: scorePokemonFit(p, team) }))
+          .sort((a, b) => b.fit.score - a.fit.score);
+
+        for (const c of candidates) {
+          if (team.length >= 6) break;
+          const set = getNonMegaSet(c.pokemon.id, teamSets);
+          if (set) {
+            team.push(c.pokemon);
+            teamSets.push(set);
+            usedIds.add(c.pokemon.id);
+          }
+        }
+
+        if (team.length >= 4) {
+          pool.push({
+            id: `base-${mp.id}-v${v}`,
+            name: `${mp.name} (Base) Build v${v + 1}`,
+            archetype: `${mp.name} Base`,
+            pokemon: team,
+            sets: teamSets,
+            pokemonIds: team.map(p => p.id),
+            megaFlags: detectMegaFlags(team, teamSets),
+          });
+        }
+      }
     }
   }
 
@@ -358,10 +479,10 @@ function analyzeAndGenerateInsights(db: SimulationDatabase): MLInsight[] {
   const goodPairs = [...db.pairWinRates.entries()]
     .filter(([, v]) => v.games >= 5)
     .map(([key, v]) => {
-      const [id1, id2] = key.split("-").map(Number);
-      const p1 = POKEMON_SEED.find(p => p.id === id1);
-      const p2 = POKEMON_SEED.find(p => p.id === id2);
-      return { key, name: `${p1?.name ?? id1} + ${p2?.name ?? id2}`, winRate: Math.round((v.wins / v.games) * 1000) / 10, games: v.games };
+      const [key1, key2] = key.split("|");
+      const s1 = db.pokemonStats.get(key1);
+      const s2 = db.pokemonStats.get(key2);
+      return { key, name: `${s1?.name ?? key1} + ${s2?.name ?? key2}`, winRate: Math.round((v.wins / v.games) * 1000) / 10, games: v.games };
     })
     .sort((a, b) => b.winRate - a.winRate);
 
@@ -470,10 +591,10 @@ function generateMetaSnapshot(db: SimulationDatabase): MetaSnapshot {
     .sort((a, b) => (b[1].wins / b[1].games) - (a[1].wins / a[1].games))
     .slice(0, 5)
     .map(([key]) => {
-      const [id1, id2] = key.split("-").map(Number);
-      const p1 = POKEMON_SEED.find(p => p.id === id1);
-      const p2 = POKEMON_SEED.find(p => p.id === id2);
-      return `${p1?.name ?? id1} + ${p2?.name ?? id2}`;
+      const [key1, key2] = key.split("|");
+      const s1 = db.pokemonStats.get(key1);
+      const s2 = db.pokemonStats.get(key2);
+      return `${s1?.name ?? key1} + ${s2?.name ?? key2}`;
     });
 
   return { tier1, tier2, tier3, dominantArchetypes: archetypes, underratedPokemon: underrated, overratedPokemon: overrated, bestCores };
@@ -529,8 +650,8 @@ export async function runMLSimulation(config: Partial<SimulationConfig> = {}): P
       const avgRemaining = t1Wins > 0 ? totalRemaining / t1Wins : 0;
 
       db.updateELO(winner.id, loser.id, avgTurns, avgRemaining);
-      db.recordPokemonResult(winner.pokemonIds, true, winner.sets.map(s => `${s.name}|${s.item}`));
-      db.recordPokemonResult(loser.pokemonIds, false, loser.sets.map(s => `${s.name}|${s.item}`));
+      db.recordPokemonResult(winner.pokemonIds, winner.megaFlags, true, winner.sets.map(s => `${s.name}|${s.item}`));
+      db.recordPokemonResult(loser.pokemonIds, loser.megaFlags, false, loser.sets.map(s => `${s.name}|${s.item}`));
 
       const allWinnerMoves = winner.sets.flatMap(s => s.moves);
       const allLoserMoves = loser.sets.flatMap(s => s.moves);
@@ -607,14 +728,15 @@ export async function runMLSimulation(config: Partial<SimulationConfig> = {}): P
   // Build best partner data for each Pokemon
   for (const [key, pair] of db.pairWinRates) {
     if (pair.games < 3) continue;
-    const [id1, id2] = key.split("-").map(Number);
+    const [key1, key2] = key.split("|");
     const wr = Math.round((pair.wins / pair.games) * 1000) / 10;
 
-    for (const [myId, partnerId] of [[id1, id2], [id2, id1]]) {
-      const stats = db.pokemonStats.get(myId);
-      const partner = POKEMON_SEED.find(p => p.id === partnerId);
-      if (stats && partner) {
-        stats.bestPartners.push({ id: partnerId, name: partner.name, winRate: wr, games: pair.games });
+    for (const [myKey, partnerKey] of [[key1, key2], [key2, key1]]) {
+      const stats = db.pokemonStats.get(myKey);
+      const partnerStats = db.pokemonStats.get(partnerKey);
+      if (stats && partnerStats) {
+        const partnerId = parseInt(partnerKey);
+        stats.bestPartners.push({ id: partnerId, name: partnerStats.name, winRate: wr, games: pair.games });
       }
     }
   }
@@ -649,12 +771,12 @@ export async function runMLSimulation(config: Partial<SimulationConfig> = {}): P
   const bestPairs = [...db.pairWinRates.entries()]
     .filter(([, v]) => v.games >= 5)
     .map(([key, v]) => {
-      const [id1, id2] = key.split("-").map(Number);
-      const p1 = POKEMON_SEED.find(p => p.id === id1);
-      const p2 = POKEMON_SEED.find(p => p.id === id2);
+      const [key1, key2] = key.split("|");
+      const s1 = db.pokemonStats.get(key1);
+      const s2 = db.pokemonStats.get(key2);
       return {
-        pokemon1: p1?.name ?? `#${id1}`,
-        pokemon2: p2?.name ?? `#${id2}`,
+        pokemon1: s1?.name ?? key1,
+        pokemon2: s2?.name ?? key2,
         winRate: Math.round((v.wins / v.games) * 1000) / 10,
         games: v.games,
       };

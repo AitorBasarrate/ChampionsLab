@@ -30,77 +30,52 @@ import {
   type CorePair,
   type MetaTeamPrediction,
 } from "@/lib/engine";
+import {
+  SIM_POKEMON, SIM_PAIRS, SIM_ARCHETYPES, SIM_META,
+  SIM_TOTAL_BATTLES, SIM_DATE, SIM_MOVES,
+} from "@/lib/simulation-data";
 
-// ── ML SIMULATION RESULTS (from 1M battles) ────────────────────────────
-// These are the converged results from the 1,000,000 battle simulation
-const ML_POKEMON_RANKINGS = [
-  { name: "Kingambit",        elo: 77764, wr: 51.1, games: 440921 },
-  { name: "Slowbro",          elo: 59996, wr: 60.2, games: 35970 },
-  { name: "Garchomp",         elo: 50764, wr: 50.2, games: 1600288 },
-  { name: "Dragapult",        elo: 47716, wr: 50.4, games: 730167 },
-  { name: "Torkoal",          elo: 46220, wr: 51.6, games: 177402 },
-  { name: "Scizor",           elo: 45172, wr: 51.3, games: 216783 },
-  { name: "Snorlax",          elo: 42348, wr: 59.3, games: 27580 },
-  { name: "Azumarill",        elo: 29476, wr: 52.2, games: 81119 },
-  { name: "Milotic",          elo: 27140, wr: 53.9, games: 41081 },
-  { name: "Archaludon",       elo: 26004, wr: 56.3, games: 24345 },
-  { name: "Corviknight",      elo: 23372, wr: 57.2, games: 19042 },
-  { name: "Gyarados",         elo: 23180, wr: 50.2, games: 693220 },
-  { name: "Rhyperior",        elo: 22500, wr: 50.9, games: 141565 },
-  { name: "Hydreigon",        elo: 21260, wr: 54.9, games: 25014 },
-  { name: "Hatterene",        elo: 16748, wr: 50.2, games: 486178 },
-  { name: "Garganacl",        elo: 16200, wr: 53.4, games: 30682 },
-  { name: "Hisuian Zoroark",  elo: 15400, wr: 53.0, games: 30626 },
-  { name: "Gliscor",          elo: 14800, wr: 58.7, games: 9371 },
-  { name: "Whimsicott",       elo: 14200, wr: 51.2, games: 45000 },
-  { name: "Metagross",        elo: 13800, wr: 52.4, games: 14200 },
-];
+// ── ML SIMULATION RESULTS — derived from simulation-data.ts ────────────
+const ML_POKEMON_RANKINGS = Object.values(SIM_POKEMON)
+  .sort((a, b) => b.elo - a.elo)
+  .map(p => ({ name: p.name, elo: p.elo, wr: p.winRate, games: p.appearances }));
 
-const ML_BEST_MOVES = [
-  { name: "Body Slam",      wr: 59.3, uses: 27580 },
-  { name: "High Horsepower", wr: 59.3, uses: 27580 },
-  { name: "Curse",          wr: 59.3, uses: 27580 },
-  { name: "Beat Up",        wr: 58.9, uses: 4546 },
-  { name: "Dual Wingbeat",  wr: 58.7, uses: 9371 },
-  { name: "Electro Shot",   wr: 56.3, uses: 24345 },
-  { name: "Iron Defense",   wr: 55.9, uses: 9877 },
-  { name: "Volt Switch",    wr: 55.3, uses: 9541 },
-  { name: "Poison Jab",     wr: 55.1, uses: 39648 },
-  { name: "Roost",          wr: 54.9, uses: 14630 },
-];
+const ML_BEST_CORES = SIM_PAIRS
+  .sort((a, b) => b.winRate - a.winRate)
+  .slice(0, 20)
+  .map(p => ({ pair: `${p.pokemon1} + ${p.pokemon2}`, wr: p.winRate, games: p.games }));
 
-const ML_ARCHETYPES = [
-  { name: "Slowbro Trick Room",     elo: 32380, wr: 65.6 },
-  { name: "Aurora Veil",            elo: 9172,  wr: 60.7 },
-  { name: "Steel Stall",            elo: 8588,  wr: 59.8 },
-  { name: "Beat Up",                elo: 7964,  wr: 58.9 },
-  { name: "Dragon Spam",            elo: 7172,  wr: 57.5 },
-  { name: "Belly Drum",             elo: 6188,  wr: 56.0 },
-  { name: "Hard Trick Room",        elo: 9532,  wr: 55.1 },
-  { name: "Balance",                elo: 15676, wr: 54.4 },
-  { name: "Hyper Offense",          elo: 12508, wr: 51.4 },
-];
+const ML_ARCHETYPES = SIM_ARCHETYPES
+  .sort((a, b) => b.elo - a.elo)
+  .map(a => ({ name: a.name, elo: a.elo, wr: a.winRate }));
 
-const ML_BEST_CORES = [
-  { pair: "Gliscor + Archaludon",        wr: 71.0, games: 3677 },
-  { pair: "Azumarill + Archaludon",      wr: 71.0, games: 3677 },
-  { pair: "Corviknight + Archaludon",    wr: 71.0, games: 3677 },
-  { pair: "Gyarados + Corviknight",      wr: 71.0, games: 3677 },
-  { pair: "Azumarill + Gliscor",         wr: 71.0, games: 3677 },
-  { pair: "Gliscor + Dragapult",         wr: 71.0, games: 3677 },
-  { pair: "Snorlax + Incineroar",        wr: 69.1, games: 3946 },
-  { pair: "Arcanine + Hydreigon",        wr: 68.2, games: 3847 },
-];
+const ML_INSIGHTS: { type: "meta" | "synergy" | "counter" | "pokemon"; text: string; confidence: number }[] = (() => {
+  const insights: { type: "meta" | "synergy" | "counter" | "pokemon"; text: string; confidence: number }[] = [];
+  if (ML_POKEMON_RANKINGS.length >= 3) {
+    insights.push({ type: "meta", text: `Top meta threats: ${ML_POKEMON_RANKINGS.slice(0, 3).map(p => `${p.name} (${p.wr}% WR, ${p.elo.toLocaleString()} ELO)`).join(", ")}`, confidence: 95 });
+  }
+  if (ML_BEST_CORES.length >= 3) {
+    insights.push({ type: "synergy", text: `Strongest cores: ${ML_BEST_CORES.slice(0, 4).map(c => `${c.pair} (${c.wr}%)`).join(", ")}`, confidence: 90 });
+  }
+  const megaPokemon = ML_POKEMON_RANKINGS.filter(p => p.name.includes("Mega "));
+  if (megaPokemon.length > 0) {
+    insights.push({ type: "pokemon", text: `Top Mega Pokémon: ${megaPokemon.slice(0, 5).map(p => `${p.name} (${p.wr}% WR)`).join(", ")}`, confidence: 85 });
+  }
+  const overrated = ML_POKEMON_RANKINGS.filter(p => p.games > 1000 && p.wr < 45).sort((a, b) => a.wr - b.wr).slice(0, 4);
+  if (overrated.length > 0) {
+    insights.push({ type: "pokemon", text: `Overrated Pokémon (high usage, low WR): ${overrated.map(p => `${p.name} (${p.wr}%)`).join(", ")}`, confidence: 80 });
+  }
+  if (ML_ARCHETYPES.length >= 3) {
+    insights.push({ type: "meta", text: `Best archetypes: ${ML_ARCHETYPES.slice(0, 3).map(a => `${a.name} (${a.wr}% WR)`).join(", ")}`, confidence: 85 });
+  }
+  return insights;
+})();
 
-const ML_INSIGHTS = [
-  { type: "meta" as const, text: "Top meta threats: Kingambit (51.1% WR, 77764 ELO), Slowbro (60.2% WR, 59996 ELO), Garchomp (50.2% WR, 50764 ELO)", confidence: 95 },
-  { type: "synergy" as const, text: "Strongest cores: Gliscor + Archaludon (71%), Azumarill + Archaludon (71%), Corviknight + Archaludon (71%), Gyarados + Corviknight (71%)", confidence: 90 },
-  { type: "counter" as const, text: "Mega Kangaskhan hard-counters Setup (81.8% WR over 22 games)", confidence: 85 },
-  { type: "counter" as const, text: "Rain Offense hard-counters Mega Gardevoir (88.1% WR over 168 games)", confidence: 85 },
-  { type: "counter" as const, text: "Beat Up hard-counters Sun Trick Room (75% WR over 12 games)", confidence: 75 },
-  { type: "pokemon" as const, text: "Overrated Pokémon (high usage, low WR): Flareon (38.8%), Aggron (36%), Toxapex (38.1%), Spiritomb (29.3%)", confidence: 80 },
-  { type: "meta" as const, text: "Highest win-rate moves: Body Slam (59.3%), High Horsepower (59.3%), Curse (59.3%), Beat Up (58.9%), Dual Wingbeat (58.7%)", confidence: 85 },
-];
+// Best moves derived from simulation data
+const ML_BEST_MOVES = SIM_MOVES
+  .sort((a, b) => b.winRate - a.winRate)
+  .slice(0, 15)
+  .map(m => ({ name: m.name, wr: m.winRate, uses: m.appearances }));
 
 function getPokemonByName(name: string) {
   return POKEMON_SEED.find(p => p.name === name);
@@ -145,7 +120,7 @@ export default function MetaPage() {
           </span>
         </h1>
         <p className="text-muted-foreground mt-2 text-sm max-w-2xl">
-          Deep competitive analysis powered by the <span className="font-semibold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Champions Lab Advanced VGC Battle Engine</span> — <span className="font-semibold text-foreground">1,000,000+ simulated battles</span> with full damage calc, ELO rankings,
+          Deep competitive analysis powered by the <span className="font-semibold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Champions Lab Advanced VGC Battle Engine</span> — <span className="font-semibold text-foreground">{SIM_TOTAL_BATTLES > 0 ? SIM_TOTAL_BATTLES.toLocaleString() : "1,000,000+"}  simulated battles</span> with full damage calc, ELO rankings,
           win-rate matrices across {TOURNAMENT_TEAMS.length} tournament teams, {TOURNAMENT_USAGE.length} usage entries, and {CORE_PAIRS.length} core pair combinations.
         </p>
         <div className="flex items-center gap-4 mt-3">

@@ -12,6 +12,34 @@ import { getMove, isSpreadMove, type EngineMove, MOVE_DATA } from "./move-data";
 import { getAbilityEffect, isWeatherSetter } from "./ability-data";
 import type { NatureName } from "./natures";
 
+// ── MEGA DETECTION ───────────────────────────────────────────────────────────
+
+function isMegaStoneItem(item: string): boolean {
+  return item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
+}
+
+/** Resolve mega form data for a Pokémon holding its mega stone */
+function resolveMegaForm(pokemon: ChampionsPokemon, set: CommonSet): {
+  baseStats: BaseStats;
+  types: PokemonType[];
+  ability: string;
+  isMega: boolean;
+} {
+  if (!pokemon.hasMega || !pokemon.forms || !isMegaStoneItem(set.item)) {
+    return { baseStats: pokemon.baseStats, types: [...pokemon.types], ability: set.ability, isMega: false };
+  }
+  const megaForm = pokemon.forms.find(f => f.isMega);
+  if (!megaForm) {
+    return { baseStats: pokemon.baseStats, types: [...pokemon.types], ability: set.ability, isMega: false };
+  }
+  return {
+    baseStats: megaForm.baseStats,
+    types: [...megaForm.types] as PokemonType[],
+    ability: megaForm.abilities[0]?.name ?? set.ability,
+    isMega: true,
+  };
+}
+
 // ── BATTLE STATE ─────────────────────────────────────────────────────────────
 
 interface BattlePokemon {
@@ -32,6 +60,8 @@ interface BattlePokemon {
   itemConsumed: boolean;
   ability: string;
   types: PokemonType[];
+  isMega: boolean;
+  effectiveBaseStats: BaseStats;
 }
 
 interface FieldState {
@@ -58,7 +88,8 @@ interface BattleState {
 // ── BATTLE POKEMON FACTORY ───────────────────────────────────────────────────
 
 function createBattlePokemon(pokemon: ChampionsPokemon, set: CommonSet): BattlePokemon {
-  const stats = calculateStats(pokemon.baseStats, set.sp, set.nature as NatureName);
+  const mega = resolveMegaForm(pokemon, set);
+  const stats = calculateStats(mega.baseStats, set.sp, set.nature as NatureName);
   return {
     pokemon,
     set,
@@ -75,8 +106,10 @@ function createBattlePokemon(pokemon: ChampionsPokemon, set: CommonSet): BattleP
     protectCount: 0,
     item: set.item,
     itemConsumed: false,
-    ability: set.ability,
-    types: [...pokemon.types] as PokemonType[],
+    ability: mega.ability,
+    types: mega.types,
+    isMega: mega.isMega,
+    effectiveBaseStats: mega.baseStats,
   };
 }
 
@@ -194,7 +227,7 @@ function evaluateMoveOption(
     if (!target || target.isFainted) continue;
     
     const attacker: DamageCalcPokemon = {
-      baseStats: user.pokemon.baseStats,
+      baseStats: user.effectiveBaseStats,
       sp: user.set.sp,
       nature: user.set.nature as NatureName,
       types: user.types,
@@ -207,7 +240,7 @@ function evaluateMoveOption(
     };
     
     const defender: DamageCalcTarget = {
-      baseStats: target.pokemon.baseStats,
+      baseStats: target.effectiveBaseStats,
       sp: target.set.sp,
       nature: target.set.nature as NatureName,
       types: target.types,
@@ -519,7 +552,7 @@ function executeMove(
     };
     
     const attacker: DamageCalcPokemon = {
-      baseStats: user.pokemon.baseStats,
+      baseStats: user.effectiveBaseStats,
       sp: user.set.sp,
       nature: user.set.nature as NatureName,
       types: user.types,
@@ -532,7 +565,7 @@ function executeMove(
     };
     
     const defender: DamageCalcTarget = {
-      baseStats: t.pokemon.baseStats,
+      baseStats: t.effectiveBaseStats,
       sp: t.set.sp,
       nature: t.set.nature as NatureName,
       types: t.types,

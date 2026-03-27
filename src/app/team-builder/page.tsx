@@ -51,6 +51,46 @@ const MAX_PER_STAT = 32;
 const STAT_KEYS: (keyof StatPoints)[] = ["hp", "attack", "defense", "spAtk", "spDef", "speed"];
 const STAT_LABELS: Record<string, string> = { hp: "HP", attack: "Atk", defense: "Def", spAtk: "SpA", spDef: "SpD", speed: "Spe" };
 
+// ── Showdown EV ↔ SP conversion ─────────────────────────────────────────
+// Showdown: 0-252 per stat (multiples of 4), 510 total
+// Champions Lab: 0-32 per stat, 64 total
+function evsToStatPoints(evs: StatPoints): StatPoints {
+  const raw = STAT_KEYS.map(k => (evs[k] / 252) * MAX_PER_STAT);
+  const result = raw.map(v => Math.floor(v));
+  let total = result.reduce((a, b) => a + b, 0);
+  // distribute remaining budget by highest fractional part
+  const fracs = raw.map((v, i) => ({ i, f: v - result[i] }))
+    .filter(x => x.f > 0)
+    .sort((a, b) => b.f - a.f);
+  for (const { i } of fracs) {
+    if (total >= MAX_TOTAL_POINTS) break;
+    if (result[i] < MAX_PER_STAT) { result[i]++; total++; }
+  }
+  const sp: StatPoints = { ...EMPTY_STAT_POINTS };
+  STAT_KEYS.forEach((k, i) => { sp[k] = result[i]; });
+  return sp;
+}
+
+function statPointsToEVs(sp: StatPoints): StatPoints {
+  const result = STAT_KEYS.map(k => {
+    const ev = Math.round((sp[k] / MAX_PER_STAT) * 252);
+    return Math.min(252, Math.round(ev / 4) * 4);
+  });
+  let total = result.reduce((a, b) => a + b, 0);
+  while (total > 510) {
+    let minIdx = -1, minVal = Infinity;
+    for (let i = 0; i < result.length; i++) {
+      if (result[i] > 0 && result[i] < minVal) { minVal = result[i]; minIdx = i; }
+    }
+    if (minIdx === -1) break;
+    result[minIdx] = Math.max(0, result[minIdx] - 4);
+    total = result.reduce((a, b) => a + b, 0);
+  }
+  const evs: StatPoints = { ...EMPTY_STAT_POINTS };
+  STAT_KEYS.forEach((k, i) => { evs[k] = result[i]; });
+  return evs;
+}
+
 function createEmptySlot(): TeamSlot {
   return { pokemon: null, moves: [], statPoints: { ...EMPTY_STAT_POINTS } };
 }
@@ -663,6 +703,7 @@ export default function TeamBuilderPage() {
       let nature: string | undefined;
       const moves: string[] = [];
       const sp: StatPoints = { hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed: 0 };
+      let isNativeSP = false;
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
         if (line.startsWith("Ability:")) {
@@ -672,6 +713,7 @@ export default function TeamBuilderPage() {
         } else if (line.startsWith("- ")) {
           moves.push(line.slice(2).trim());
         } else if (line.startsWith("EVs:") || line.startsWith("Stat Points:")) {
+          const isStatPoints = line.startsWith("Stat Points:");
           const evStr = line.replace(/^(?:EVs|Stat Points):/, "").trim();
           const evParts = evStr.split("/").map(s => s.trim());
           for (const part of evParts) {
@@ -687,14 +729,19 @@ export default function TeamBuilderPage() {
               else if (stat === "spe") sp.speed = val;
             }
           }
+          // If "Stat Points:" with small values, treat as native SP (no conversion)
+          const maxVal = Math.max(sp.hp, sp.attack, sp.defense, sp.spAtk, sp.spDef, sp.speed);
+          if (isStatPoints && maxVal <= MAX_PER_STAT) isNativeSP = true;
         }
       }
+      // Convert Showdown EVs to our stat point system (skip if already native SP)
+      const converted = isNativeSP ? sp : evsToStatPoints(sp);
       newSlots.push({
         pokemon,
         ability: ability ?? pokemon.abilities[0]?.name,
         nature: nature ?? "Adamant",
         moves: moves.length > 0 ? moves.slice(0, 4) : pokemon.moves.slice(0, 4).map(m => m.name),
-        statPoints: sp,
+        statPoints: converted,
         item,
       });
     }
@@ -719,8 +766,13 @@ export default function TeamBuilderPage() {
 
         lines.push(`Level: 50`);
         lines.push(`IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe`);
-        const sp = s.statPoints;
-        lines.push(`Stat Points: ${sp.hp} HP / ${sp.attack} Atk / ${sp.defense} Def / ${sp.spAtk} SpA / ${sp.spDef} SpD / ${sp.speed} Spe`);
+        // Convert our stat points to Showdown EVs for compatibility
+        const evs = statPointsToEVs(s.statPoints);
+        const evParts = STAT_KEYS
+          .map(k => ({ val: evs[k], label: STAT_LABELS[k] }))
+          .filter(e => e.val > 0)
+          .map(e => `${e.val} ${e.label}`);
+        if (evParts.length > 0) lines.push(`EVs: ${evParts.join(" / ")}`);
         s.moves.forEach((m) => lines.push(`- ${m}`));
         return lines.join("\n");
       })
@@ -1114,20 +1166,44 @@ export default function TeamBuilderPage() {
                     <button onClick={() => setSelectedSlotIndex(null)} className="p-1.5 rounded-lg hover:bg-gray-100"><X className="w-4 h-4" /></button>
                   </div>
 
-                  {/* Quick Apply Sets */}
-                  {slotSuggestion && slotSuggestion.altSets.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-[10px] text-muted-foreground uppercase font-medium mb-2">Quick Apply — Competitive Sets</p>
-                      <div className="flex flex-wrap gap-2">
-                        {slotSuggestion.altSets.slice(0, 5).map((s, i) => (
-                          <button key={i} onClick={() => applySet(selectedSlotIndex, s.set)} className="px-3 py-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 border border-violet-200 hover:border-violet-300 transition-all text-[11px] font-medium text-violet-700">
+                  {/* Auto-Fill + Quick Apply Sets */}
+                  <div className="mb-4">
+                    <p className="text-[10px] text-muted-foreground uppercase font-medium mb-2">Quick Apply — Competitive Sets</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(() => {
+                        const sets = USAGE_DATA[editPkm.id] ?? [];
+                        const isMega = editSlotData.isMega || false;
+                        const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
+                        const filteredSets = editPkm.hasMega
+                          ? isMega ? sets.filter(s => isMegaItem(s.item)) : sets.filter(s => !isMegaItem(s.item))
+                          : sets;
+                        const bestSet = filteredSets[0];
+                        return (
+                          <>
+                            {bestSet && (
+                              <button
+                                onClick={() => applySet(selectedSlotIndex, { ability: bestSet.ability, moves: bestSet.moves, sp: bestSet.sp, nature: bestSet.nature, item: bestSet.item })}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 hover:border-emerald-400 transition-all text-[11px] font-bold text-emerald-700 flex items-center gap-1.5"
+                              >
+                                <Zap className="w-3 h-3" /> Auto-Fill Best Set
+                              </button>
+                            )}
+                            {filteredSets.slice(bestSet ? 1 : 0, 5).map((s, i) => (
+                              <button key={i} onClick={() => applySet(selectedSlotIndex, { ability: s.ability, moves: s.moves, sp: s.sp, nature: s.nature, item: s.item })} className="px-3 py-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 border border-violet-200 hover:border-violet-300 transition-all text-[11px] font-medium text-violet-700">
+                                {s.name}
+                              </button>
+                            ))}
+                          </>
+                        );
+                      })()}
+                      {slotSuggestion && slotSuggestion.altSets.length > 0 && slotSuggestion.altSets.slice(0, 3).map((s, i) => (
+                        <button key={`sug-${i}`} onClick={() => applySet(selectedSlotIndex, s.set)} className="px-3 py-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 border border-violet-200 hover:border-violet-300 transition-all text-[11px] font-medium text-violet-700">
                             {s.set.name}
                             <span className={cn("ml-1.5 text-[9px] font-bold", s.matchScore >= 70 ? "text-green-600" : s.matchScore >= 50 ? "text-amber-600" : "text-gray-400")}>{s.matchScore}%</span>
                           </button>
                         ))}
                       </div>
                     </div>
-                  )}
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                     {/* Col 1: Moves */}
