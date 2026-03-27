@@ -39,7 +39,8 @@ import {
 } from "@/lib/engine";
 import {
   getSavedTeams, saveTeam, deleteTeam, deserializeTeam, saveLastTeam, getLastTeam,
-  type SavedTeam,
+  serializeTeam,
+  type SavedTeam, type SavedTeamSlot,
 } from "@/lib/storage";
 
 const EMPTY_STAT_POINTS: StatPoints = { hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed: 0 };
@@ -108,9 +109,57 @@ export default function TeamBuilderPage() {
     setShuffledTeams(shuffled);
   }, []);
 
-  // Load saved teams on mount + restore last team if available
+  // Build shareable URL from current team
+  const buildShareUrl = useCallback(() => {
+    const filled = slots.filter(s => s.pokemon);
+    if (filled.length === 0) return "";
+    const data = {
+      n: teamName,
+      s: serializeTeam(slots).map(s => ({
+        p: s.pokemonId,
+        a: s.ability,
+        t: s.nature,
+        m: s.moves,
+        sp: [s.statPoints.hp, s.statPoints.attack, s.statPoints.defense, s.statPoints.spAtk, s.statPoints.spDef, s.statPoints.speed],
+        te: s.teraType,
+        i: s.item,
+        mg: s.isMega,
+      })),
+    };
+    const encoded = btoa(JSON.stringify(data));
+    return `${window.location.origin}/team-builder?team=${encoded}`;
+  }, [slots, teamName]);
+
+  // Load saved teams on mount + restore last team if available OR load from share URL
   useEffect(() => {
     setSavedTeams(getSavedTeams());
+
+    // Check for shared team URL first
+    const params = new URLSearchParams(window.location.search);
+    const teamParam = params.get("team");
+    if (teamParam) {
+      try {
+        const data = JSON.parse(atob(teamParam));
+        if (data.s && Array.isArray(data.s)) {
+          const restored: SavedTeamSlot[] = data.s.map((s: { p: number; a?: string; t?: string; m: string[]; sp: number[]; te?: string; i?: string; mg?: boolean }) => ({
+            pokemonId: s.p,
+            ability: s.a,
+            nature: s.t,
+            moves: s.m || [],
+            statPoints: { hp: s.sp?.[0] || 0, attack: s.sp?.[1] || 0, defense: s.sp?.[2] || 0, spAtk: s.sp?.[3] || 0, spDef: s.sp?.[4] || 0, speed: s.sp?.[5] || 0 },
+            teraType: s.te,
+            item: s.i,
+            isMega: s.mg,
+          }));
+          setSlots(deserializeTeam(restored));
+          setTeamName(data.n || "Shared Team");
+          // Clean URL without reload
+          window.history.replaceState({}, "", "/team-builder");
+          return;
+        }
+      } catch { /* invalid param, fall through to normal load */ }
+    }
+
     const last = getLastTeam();
     if (last && last.slots.length > 0) {
       setSlots(deserializeTeam(last.slots));
@@ -152,7 +201,7 @@ export default function TeamBuilderPage() {
     const filled = slots.filter(s => s.pokemon);
     if (filled.length === 0) return;
 
-    const W = 1200, cardH = 200, headerH = 120, footerH = 80;
+    const W = 1200, cardH = 200, headerH = 200, footerH = 60;
     const H = headerH + Math.ceil(filled.length / 2) * cardH + footerH;
     const canvas = document.createElement("canvas");
     canvas.width = W;
@@ -173,20 +222,45 @@ export default function TeamBuilderPage() {
     for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
     for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
 
-    // Header
+    // Header — Load and draw logo
+    const logo = await new Promise<HTMLImageElement | null>((resolve) => {
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = "/logo.png";
+    });
+    if (logo) {
+      const logoSize = 72;
+      ctx.drawImage(logo, 40, 20, logoSize, logoSize);
+    }
+
+    // Brand name next to logo
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 36px Inter, system-ui, sans-serif";
-    ctx.fillText(teamName, 40, 55);
-    ctx.font = "16px Inter, system-ui, sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    ctx.fillText(`${filled.length} Pokémon · Champions Lab`, 40, 85);
+    ctx.font = "bold 42px Inter, system-ui, sans-serif";
+    ctx.fillText("Champions Lab", 126, 62);
+
+    // Website URL
+    ctx.font = "bold 18px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#a78bfa";
+    ctx.fillText("championslab.xyz", 126, 88);
+
+    // Team name
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 32px Inter, system-ui, sans-serif";
+    ctx.fillText(teamName, 40, 140);
+
+    // Subtitle
+    ctx.font = "15px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fillText(`${filled.length} Pokémon · The Ultimate Competitive Pokémon Companion`, 40, 166);
 
     // Accent line
-    const accentGrad = ctx.createLinearGradient(40, 100, 400, 100);
+    const accentGrad = ctx.createLinearGradient(40, 180, 500, 180);
     accentGrad.addColorStop(0, "#8b5cf6");
     accentGrad.addColorStop(1, "#06b6d4");
     ctx.fillStyle = accentGrad;
-    ctx.fillRect(40, 100, 360, 3);
+    ctx.fillRect(40, 180, 460, 3);
 
     // Load sprites as images
     const spritePromises = filled.map(s => {
@@ -228,9 +302,10 @@ export default function TeamBuilderPage() {
       ctx.font = "bold 20px Inter, system-ui, sans-serif";
       ctx.fillText(p.name, x + 110, y + 48);
       if (s.item) {
+        const nameWidth = ctx.measureText(p.name).width;
         ctx.font = "13px Inter, system-ui, sans-serif";
         ctx.fillStyle = "rgba(255,255,255,0.5)";
-        ctx.fillText(`@ ${s.item}`, x + 110 + ctx.measureText(p.name).width + 8, y + 48);
+        ctx.fillText(`@ ${s.item}`, x + 110 + nameWidth + 10, y + 48);
       }
 
       // Nature + Ability
@@ -298,22 +373,20 @@ export default function TeamBuilderPage() {
     // Footer
     ctx.fillStyle = "rgba(255,255,255,0.05)";
     ctx.fillRect(0, H - footerH, W, footerH);
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    ctx.font = "14px Inter, system-ui, sans-serif";
-    ctx.fillText("championslab.xyz", 40, H - 32);
-    ctx.fillStyle = "rgba(255,255,255,0.25)";
-    ctx.font = "12px Inter, system-ui, sans-serif";
-    ctx.fillText("Built with Champions Lab · The Ultimate Competitive Pokémon Companion", 40, H - 12);
+    ctx.fillStyle = "rgba(255,255,255,0.3)";
+    ctx.font = "13px Inter, system-ui, sans-serif";
+    ctx.fillText("Built with Champions Lab · championslab.xyz", 40, H - 22);
 
-    // Logo (text-based if we can't load it)
     ctx.fillStyle = "#8b5cf6";
-    ctx.font = "bold 18px Inter, system-ui, sans-serif";
+    ctx.font = "bold 16px Inter, system-ui, sans-serif";
     ctx.textAlign = "right";
-    ctx.fillText("⚡ Champions Lab", W - 40, H - 28);
+    ctx.fillText("⚡ Champions Lab", W - 40, H - 22);
     ctx.textAlign = "left";
 
     const dataUrl = canvas.toDataURL("image/png");
     setShareImageUrl(dataUrl);
+    setShareUrl(buildShareUrl());
+    setUrlCopied(false);
     setShowShare(true);
   };
 
@@ -325,11 +398,14 @@ export default function TeamBuilderPage() {
     a.click();
   };
 
-  const copyShareImage = async () => {
-    if (!shareImageUrl) return;
-    const res = await fetch(shareImageUrl);
-    const blob = await res.blob();
-    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+  const [shareUrl, setShareUrl] = useState("");
+  const [urlCopied, setUrlCopied] = useState(false);
+
+  const copyShareUrl = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setUrlCopied(true);
+    setTimeout(() => setUrlCopied(false), 2000);
   };
 
   const filledSlots = slots.filter((s) => s.pokemon !== null);
@@ -627,7 +703,7 @@ export default function TeamBuilderPage() {
               Share
             </button>
             <button
-              onClick={() => { setSlots(Array.from({ length: 6 }, createEmptySlot)); setCurrentTeamId(undefined); setSelectedSlotIndex(null); }}
+              onClick={() => { setSlots(Array.from({ length: 6 }, createEmptySlot)); setCurrentTeamId(undefined); setSelectedSlotIndex(null); setTeamName("My Team"); }}
               className="px-4 py-2 text-sm rounded-xl glass glass-hover flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors"
             >
               <Trash2 className="w-4 h-4" />
@@ -1243,6 +1319,24 @@ export default function TeamBuilderPage() {
               <div className="rounded-xl overflow-hidden border border-gray-200/60 mb-4">
                 <img src={shareImageUrl} alt="Team card" className="w-full" />
               </div>
+              {shareUrl && (
+                <div className="mb-4 flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={shareUrl}
+                    className="flex-1 px-3 py-2 text-xs rounded-lg bg-gray-100 border border-gray-200 text-gray-600 truncate"
+                    onClick={(e) => (e.target as HTMLInputElement).select()}
+                  />
+                  <button
+                    onClick={copyShareUrl}
+                    className={cn("px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5", urlCopied ? "bg-green-100 text-green-700" : "bg-violet-100 text-violet-700 hover:bg-violet-200")}
+                  >
+                    {urlCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {urlCopied ? "Copied!" : "Copy Link"}
+                  </button>
+                </div>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={downloadShareImage}
@@ -1252,11 +1346,11 @@ export default function TeamBuilderPage() {
                   Download Image
                 </button>
                 <button
-                  onClick={copyShareImage}
-                  className="flex-1 py-2.5 rounded-xl glass glass-hover text-sm font-medium flex items-center justify-center gap-2"
+                  onClick={copyShareUrl}
+                  className={cn("flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all", urlCopied ? "bg-green-100 text-green-700" : "glass glass-hover")}
                 >
-                  <Copy className="w-4 h-4" />
-                  Copy to Clipboard
+                  {urlCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {urlCopied ? "Link Copied!" : "Copy Link"}
                 </button>
               </div>
             </motion.div>
