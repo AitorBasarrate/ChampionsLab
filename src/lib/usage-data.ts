@@ -43,7 +43,7 @@ export const USAGE_DATA: Record<number, CommonSet[]> = {
   26: [
     { name: "Fast Attacker", nature: "Timid", ability: "Lightning Rod", item: "Life Orb", moves: ["Thunderbolt", "Psychic", "Surf", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
     { name: "Fake Out Support", nature: "Jolly", ability: "Lightning Rod", item: "Focus Sash", moves: ["Fake Out", "Volt Switch", "Nuzzle", "Protect"], sp: { hp: 4, attack: 0, defense: 0, spAtk: 30, spDef: 0, speed: 32 } },
-    { name: "Mega X Physical", nature: "Jolly", ability: "Volt Rush", item: "Raichunite X", moves: ["Wild Charge", "Close Combat", "Fake Out", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Mega X Physical", nature: "Jolly", ability: "Volt Rush", item: "Raichunite X", moves: ["Volt Tackle", "Close Combat", "Fake Out", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
     { name: "Mega Y Special", nature: "Timid", ability: "Mind Surge", item: "Raichunite Y", moves: ["Thunderbolt", "Psychic", "Focus Blast", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
   ],
 

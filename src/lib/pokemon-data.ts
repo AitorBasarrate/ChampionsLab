@@ -5263,6 +5263,15 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
         "description": "The target is attacked by a kick launched with muscle-packed power."
       },
       {
+        "name": "Volt Tackle",
+        "type": "electric",
+        "category": "physical",
+        "power": 120,
+        "accuracy": 100,
+        "pp": 15,
+        "description": "A life-risking tackle that slightly hurts the user."
+      },
+      {
         "name": "Zap Cannon",
         "type": "electric",
         "category": "special",
