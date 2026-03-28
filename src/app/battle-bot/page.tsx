@@ -8,7 +8,10 @@ import {
   Zap, Loader2, Trophy, Shield, ChevronRight, Save, FolderOpen, Trash2,
   Eye, Crosshair, TrendingUp, Clock, Users, Flame, ChevronDown,
   SkipForward, Pause, RotateCcw, Award, Skull, Heart, Wind,
+  Calculator, FlaskConical,
 } from "lucide-react";
+import DamageCalculator from "@/components/damage-calculator";
+import TeamTester from "@/components/team-tester";
 import { POKEMON_SEED } from "@/lib/pokemon-data";
 import type { ChampionsPokemon, CommonSet, StatPoints, PokemonType } from "@/lib/types";
 import { TYPE_COLORS } from "@/lib/types";
@@ -346,7 +349,10 @@ function runFullSimulation(
   };
 }
 
+type MainTab = "battle-engine" | "damage-calc" | "team-tester";
+
 export default function BattleBotPage() {
+  const [mainTab, setMainTab] = useState<MainTab>("battle-engine");
   const [selectedPokemon, setSelectedPokemon] = useState<ChampionsPokemon[]>([]);
   const [selectedSets, setSelectedSets] = useState<CommonSet[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -528,6 +534,38 @@ export default function BattleBotPage() {
         </div>
       </motion.div>
 
+      {/* ── MAIN TAB NAVIGATION ──────────────────────────────────────── */}
+      <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-8">
+        {([
+          { id: "battle-engine" as MainTab, icon: Swords, label: "Battle Engine" },
+          { id: "damage-calc" as MainTab, icon: Calculator, label: "Damage Calculator" },
+          { id: "team-tester" as MainTab, icon: FlaskConical, label: "Team Tester" },
+        ]).map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setMainTab(tab.id)}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all",
+              mainTab === tab.id
+                ? "bg-white shadow-sm text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── DAMAGE CALCULATOR TAB ────────────────────────────────────── */}
+      {mainTab === "damage-calc" && <DamageCalculator />}
+
+      {/* ── TEAM TESTER TAB ──────────────────────────────────────────── */}
+      {mainTab === "team-tester" && <TeamTester />}
+
+      {/* ── BATTLE ENGINE TAB ────────────────────────────────────────── */}
+      {mainTab === "battle-engine" && (
+      <>
       <div className="grid lg:grid-cols-[380px_1fr] gap-8">
         {/* ═══════════════════════════════════════════════════════════════ */}
         {/* LEFT: TEAM INPUT + SETTINGS                                    */}
@@ -1331,7 +1369,7 @@ export default function BattleBotPage() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* POKEMON PICKER MODAL                                           */}
+      {/* POKEMON PICKER MODAL (Battle Engine)                           */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       <AnimatePresence>
         {pickerOpen && (
@@ -1384,6 +1422,8 @@ export default function BattleBotPage() {
           </>
         )}
       </AnimatePresence>
+      </>
+      )}
     </div>
   );
 }
