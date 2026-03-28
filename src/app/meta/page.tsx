@@ -35,30 +35,61 @@ import {
   SIM_TOTAL_BATTLES, SIM_DATE, SIM_MOVES,
 } from "@/lib/simulation-data";
 
-// ── PERCENTILE-BASED TIER CALCULATION ────────────────────────────────────
-const _qualifiedWRs = Object.values(SIM_POKEMON)
-  .filter(p => p.appearances >= 500)
-  .map(p => p.winRate)
-  .sort((a, b) => b - a);
-const _qLen = _qualifiedWRs.length;
-const TIER_S = _qualifiedWRs[Math.max(0, Math.floor(_qLen * 0.04))] ?? 55;
-const TIER_A = _qualifiedWRs[Math.max(0, Math.floor(_qLen * 0.15))] ?? 51;
-const TIER_B = _qualifiedWRs[Math.max(0, Math.floor(_qLen * 0.65))] ?? 46;
-const TIER_C = _qualifiedWRs[Math.max(0, Math.floor(_qLen * 0.88))] ?? 40;
-
-function getMLTier(wr: number, games: number): "S" | "A" | "B" | "C" | "D" {
-  if (games < 500) return "D";   // Insufficient data
-  if (wr >= TIER_S) return "S";  // Top 4%
-  if (wr >= TIER_A) return "A";  // Top 15%
-  if (wr >= TIER_B) return "B";  // Top 65%
-  if (wr >= TIER_C) return "C";  // Top 88%
-  return "D";                    // Bottom 12%
+// ── HYBRID TIER CALCULATION (ML + Tournament Data) ────────────────────────
+// Thresholds from ML data only (keeps percentiles stable). Individual Pokemon
+// get a composite score blending ML + tournament, which is compared against
+// these ML-only cutoffs — so tournament data acts as a pure positive adjustment.
+const _tournamentMap = new Map(TOURNAMENT_USAGE.map(u => [u.pokemonId, u]));
+function _getCompositeWR(simEntry: (typeof SIM_POKEMON)[keyof typeof SIM_POKEMON]): number {
+  const t = _tournamentMap.get(simEntry.id);
+  if (!t) return simEntry.winRate;
+  // Blend 60% ML + 40% tournament WR, plus moderate top-cut bonus
+  return simEntry.winRate * 0.6 + t.winRate * 0.4 + (t.topCutRate ?? 0) * 0.15;
 }
 
-// ── ML SIMULATION RESULTS — derived from simulation-data.ts ────────────
+// Percentile thresholds computed from COMPOSITE win-rates to keep distribution stable
+const _qualifiedCWRs = Object.values(SIM_POKEMON)
+  .filter(p => p.appearances >= 500)
+  .map(p => _getCompositeWR(p))
+  .sort((a, b) => b - a);
+const _qLen = _qualifiedCWRs.length;
+const TIER_S = _qualifiedCWRs[Math.max(0, Math.floor(_qLen * 0.05))] ?? 55;  // Top 5%
+const TIER_A = _qualifiedCWRs[Math.max(0, Math.floor(_qLen * 0.25))] ?? 51;  // Top 25%
+const TIER_B = _qualifiedCWRs[Math.max(0, Math.floor(_qLen * 0.65))] ?? 46;  // Top 65%
+const TIER_C = _qualifiedCWRs[Math.max(0, Math.floor(_qLen * 0.88))] ?? 40;  // Top 88%
+
+const TIER_ORDER = { S: 0, A: 1, B: 2, C: 3, D: 4 } as const;
+const TIERS_BY_ORDER = ["S", "A", "B", "C", "D"] as const;
+
+function getMLTier(compositeWR: number, games: number, pokemonId?: number): "S" | "A" | "B" | "C" | "D" {
+  let baseTier: "S" | "A" | "B" | "C" | "D" = "D";
+  if (games >= 500) {
+    if (compositeWR >= TIER_S) baseTier = "S";
+    else if (compositeWR >= TIER_A) baseTier = "A";
+    else if (compositeWR >= TIER_B) baseTier = "B";
+    else if (compositeWR >= TIER_C) baseTier = "C";
+  }
+  // Tournament performance floor: proven tournament success can lift a tier
+  if (pokemonId != null) {
+    const t = _tournamentMap.get(pokemonId);
+    if (t) {
+      let floor: "S" | "A" | "B" | "C" | "D" = "D";
+      if (t.winRate >= 54 && t.topCutRate >= 10) floor = "S";
+      else if (t.winRate >= 51 && t.topCutRate >= 5) floor = "A";
+      else if (t.winRate >= 49 && t.topCutRate >= 2) floor = "B";
+      if (TIER_ORDER[floor] < TIER_ORDER[baseTier]) baseTier = floor;
+    }
+  }
+  return baseTier;
+}
+
+// ── ML SIMULATION RESULTS — derived from simulation-data.ts + tournament ──
 const ML_POKEMON_RANKINGS = Object.values(SIM_POKEMON)
   .sort((a, b) => b.elo - a.elo)
-  .map(p => ({ name: p.name, elo: p.elo, wr: p.winRate, games: p.appearances, tier: getMLTier(p.winRate, p.appearances) }));
+  .map(p => {
+    const cwr = _getCompositeWR(p);
+    return { name: p.name, elo: p.elo, wr: p.winRate, compositeWR: cwr, games: p.appearances, tier: getMLTier(cwr, p.appearances, p.id) };
+  });
 
 const ML_BEST_CORES = SIM_PAIRS
   .sort((a, b) => b.winRate - a.winRate)
@@ -98,7 +129,49 @@ const ML_BEST_MOVES = SIM_MOVES
   .map(m => ({ name: m.name, wr: m.winRate, uses: m.appearances }));
 
 function getPokemonByName(name: string) {
-  return POKEMON_SEED.find(p => p.name === name);
+  // Direct match first
+  const direct = POKEMON_SEED.find(p => p.name === name);
+  if (direct) return direct;
+  // Handle mega names: "Mega Greninja" → look up "Greninja"
+  if (name.startsWith("Mega ")) {
+    const baseName = name.replace(/^Mega /, "").replace(/ [XYZ]$/, "");
+    return POKEMON_SEED.find(p => p.name === baseName);
+  }
+  return undefined;
+}
+
+/** Get the correct sprite URL for a pokemon, handling mega forms */
+function getSpriteForName(name: string): string | null {
+  const pokemon = getPokemonByName(name);
+  if (!pokemon) return null;
+  if (name.startsWith("Mega ")) {
+    const megaForms = pokemon.forms?.filter(f => f.isMega) ?? [];
+    // Match specific form variant (X, Y, Z)
+    const suffix = name.match(/ ([XYZ])$/)?.[1];
+    if (suffix) {
+      const form = megaForms.find(f => f.name.endsWith(` ${suffix}`)) ?? megaForms[0];
+      return form?.sprite ?? pokemon.sprite;
+    }
+    // Just "Mega Greninja" → first mega form
+    return megaForms[0]?.sprite ?? pokemon.sprite;
+  }
+  return pokemon.sprite;
+}
+
+/** Get the types for a pokemon by name, handling mega forms */
+function getTypesForName(name: string): string[] | null {
+  const pokemon = getPokemonByName(name);
+  if (!pokemon) return null;
+  if (name.startsWith("Mega ")) {
+    const megaForms = pokemon.forms?.filter(f => f.isMega) ?? [];
+    const suffix = name.match(/ ([XYZ])$/)?.[1];
+    if (suffix) {
+      const form = megaForms.find(f => f.name.endsWith(` ${suffix}`)) ?? megaForms[0];
+      return form?.types ?? pokemon.types;
+    }
+    return megaForms[0]?.types ?? pokemon.types;
+  }
+  return pokemon.types;
 }
 
 type ActiveTab = "overview" | "pokemon" | "teams" | "cores" | "matchups" | "moves";
@@ -240,11 +313,11 @@ export default function MetaPage() {
               </h3>
               <div className="space-y-2">
                 {ML_POKEMON_RANKINGS.slice(0, 5).map((p, i) => {
-                  const pokemon = getPokemonByName(p.name);
+                  const sprite = getSpriteForName(p.name);
                   return (
                     <div key={p.name} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
                       <span className="text-xs font-bold text-muted-foreground w-4">#{i + 1}</span>
-                      {pokemon && <Image src={pokemon.sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
+                      {sprite && <Image src={sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold truncate">{p.name}</p>
                         <p className="text-[10px] text-muted-foreground">{p.games.toLocaleString()} games</p>
@@ -321,6 +394,8 @@ export default function MetaPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {ML_POKEMON_RANKINGS.slice(0, 10).map((p, i) => {
                 const pokemon = getPokemonByName(p.name);
+                const sprite = getSpriteForName(p.name);
+                const types = getTypesForName(p.name);
                 const usageData = pokemon ? TOURNAMENT_USAGE.find(u => u.pokemonId === pokemon.id) : null;
                 const tier = p.tier;
                 return (
@@ -328,7 +403,7 @@ export default function MetaPage() {
                     onClick={() => setModal({ kind: "pokemon", name: p.name })}>
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        {pokemon && <Image src={pokemon.sprite} alt={p.name} width={48} height={48} className="rounded-lg" unoptimized />}
+                        {sprite && <Image src={sprite} alt={p.name} width={48} height={48} className="rounded-lg" unoptimized />}
                         <span className={cn("absolute -top-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold", tier === "S" ? "bg-amber-400 text-white" : tier === "A" ? "bg-blue-400 text-white" : "bg-gray-300 text-gray-700")}>{i + 1}</span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -336,7 +411,7 @@ export default function MetaPage() {
                           <span className="text-sm font-bold">{p.name}</span>
                           <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", tier === "S" ? "bg-amber-100 text-amber-700" : tier === "A" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{tier}-Tier</span>
                         </div>
-                        {pokemon && <div className="flex gap-0.5 mt-0.5">{pokemon.types.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t]}AA` }}>{t}</span>)}</div>}
+                        {types && <div className="flex gap-0.5 mt-0.5">{types.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t as PokemonType]}AA` }}>{t}</span>)}</div>}
                         <div className="flex gap-3 mt-1 text-[10px] text-muted-foreground">
                           <span>ELO: {p.elo.toLocaleString()}</span>
                           <span>{p.games.toLocaleString()} games</span>
@@ -496,8 +571,8 @@ export default function MetaPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {c.pair.split(" + ").map(name => {
-                            const p = getPokemonByName(name);
-                            return p ? <Image key={name} src={p.sprite} alt={name} width={28} height={28} className="rounded" unoptimized /> : <span key={name} className="text-xs">{name}</span>;
+                            const sp = getSpriteForName(name);
+                            return sp ? <Image key={name} src={sp} alt={name} width={28} height={28} className="rounded" unoptimized /> : <span key={name} className="text-xs">{name}</span>;
                           })}
                           <span className="text-xs font-semibold">{c.pair}</span>
                         </div>
@@ -749,17 +824,18 @@ export default function MetaPage() {
                 </thead>
                 <tbody>
                   {ML_POKEMON_RANKINGS.map((p, i) => {
-                    const pokemon = getPokemonByName(p.name);
+                    const sprite = getSpriteForName(p.name);
+                    const types = getTypesForName(p.name);
                     const tier = p.tier;
                     return (
                       <tr key={p.name} className={cn("border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer", selectedPokemon === p.name && "bg-violet-50")} onClick={() => setSelectedPokemon(selectedPokemon === p.name ? null : p.name)}>
                         <td className="py-2.5 px-3 text-xs font-bold text-muted-foreground">{i + 1}</td>
                         <td className="py-2.5 px-3">
                           <div className="flex items-center gap-2">
-                            {pokemon && <Image src={pokemon.sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
+                            {sprite && <Image src={sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
                             <div>
                               <span className="text-sm font-semibold">{p.name}</span>
-                              {pokemon && <div className="flex gap-0.5 mt-0.5">{pokemon.types.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t]}AA` }}>{t.slice(0, 3)}</span>)}</div>}
+                              {types && <div className="flex gap-0.5 mt-0.5">{types.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t as PokemonType]}AA` }}>{t.slice(0, 3)}</span>)}</div>}
                             </div>
                           </div>
                         </td>
@@ -961,8 +1037,8 @@ export default function MetaPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {c.pair.split(" + ").map(name => {
-                      const p = getPokemonByName(name);
-                      return p ? <Image key={name} src={p.sprite} alt={name} width={36} height={36} className="rounded" unoptimized /> : <span key={name} className="text-xs">{name}</span>;
+                      const sp = getSpriteForName(name);
+                      return sp ? <Image key={name} src={sp} alt={name} width={36} height={36} className="rounded" unoptimized /> : <span key={name} className="text-xs">{name}</span>;
                     })}
                     <div className="flex-1" />
                     <span className="text-xs text-muted-foreground">{c.games.toLocaleString()} games</span>
@@ -1136,20 +1212,27 @@ export default function MetaPage() {
             {modal.kind === "pokemon" && (() => {
               const pokemon = getPokemonByName(modal.name);
               if (!pokemon) return <div className="p-8 text-center text-muted-foreground">Pokémon not found</div>;
+              const isMega = modal.name.startsWith("Mega ");
+              const megaSprite = getSpriteForName(modal.name);
+              const megaTypes = getTypesForName(modal.name);
+              const displayName = modal.name;
               const mlData = ML_POKEMON_RANKINGS.find(p => p.name === modal.name);
               const usageData = TOURNAMENT_USAGE.find(u => u.pokemonId === pokemon.id);
               const corePairs = getCorePairsForPokemon(pokemon.id);
               const teamAppearances = getTournamentTeamsWithPokemon(pokemon.id);
               const prebuiltTeams = getPrebuiltTeamsWithPokemon(pokemon.id);
               const tier = mlData ? mlData.tier : usageData ? (usageData.usageRate >= 30 ? "S" : usageData.usageRate >= 15 ? "A" : "B") : "—";
+              // For mega forms, try to get mega stats from the form data
+              const megaForm = isMega ? (pokemon.forms?.filter(f => f.isMega) ?? [])[0] : null;
+              const displayStats = megaForm?.baseStats ?? pokemon.baseStats;
               return (
                 <div className="p-6 space-y-6">
                   {/* Header */}
                   <div className="flex items-center gap-5">
-                    <Image src={pokemon.officialArt} alt={pokemon.name} width={120} height={120} className="drop-shadow-xl" unoptimized />
+                    <Image src={megaSprite ?? pokemon.officialArt} alt={displayName} width={120} height={120} className="drop-shadow-xl" unoptimized />
                     <div>
-                      <h2 className="text-2xl font-extrabold">{pokemon.name}</h2>
-                      <div className="flex gap-1.5 mt-1">{pokemon.types.map(t => <span key={t} className="px-2.5 py-1 text-[10px] font-bold uppercase rounded-lg text-white" style={{ backgroundColor: TYPE_COLORS[t] }}>{t}</span>)}</div>
+                      <h2 className="text-2xl font-extrabold">{displayName}</h2>
+                      <div className="flex gap-1.5 mt-1">{(megaTypes ?? pokemon.types).map(t => <span key={t} className="px-2.5 py-1 text-[10px] font-bold uppercase rounded-lg text-white" style={{ backgroundColor: TYPE_COLORS[t as PokemonType] }}>{t}</span>)}</div>
                       <div className="flex items-center gap-3 mt-2">
                         {tier !== "—" && <span className={cn("px-2.5 py-1 text-xs font-bold rounded-lg", tier === "S" ? "bg-amber-100 text-amber-700" : tier === "A" ? "bg-blue-100 text-blue-700" : tier === "B" ? "bg-gray-100 text-gray-700" : tier === "C" ? "bg-gray-50 text-gray-500" : "bg-red-50 text-red-400")}>{tier}-Tier</span>}
                         {mlData && <span className="text-sm text-muted-foreground">ML #{ML_POKEMON_RANKINGS.indexOf(mlData) + 1} · ELO {mlData.elo.toLocaleString()}</span>}
@@ -1160,7 +1243,7 @@ export default function MetaPage() {
                   {/* Stats bars */}
                   <div className="grid grid-cols-6 gap-4">
                     {(["hp", "attack", "defense", "spAtk", "spDef", "speed"] as const).map(stat => {
-                      const v = pokemon.baseStats[stat];
+                      const v = displayStats[stat];
                       const label = { hp: "HP", attack: "Atk", defense: "Def", spAtk: "SpA", spDef: "SpD", speed: "Spe" }[stat];
                       return (
                         <div key={stat} className="text-center">
