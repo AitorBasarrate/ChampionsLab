@@ -16,6 +16,9 @@ const CHANGELOGS: Record<string, { description: string; entries: ChangelogEntry[
       {
         date: "29/03/2026",
         items: [
+          "Dark mode support across all pages and modals",
+          "Fixed Pokémon name readability in dark mode",
+          "Custom Champions Lab favicon replacing default icon",
           "147 Pokémon roster with 11 regional forms",
           "Full Mega Evolution support with dynamic stats",
           "Tier rankings powered by 2M+ battle simulations",
@@ -31,6 +34,7 @@ const CHANGELOGS: Record<string, { description: string; entries: ChangelogEntry[
       {
         date: "29/03/2026",
         items: [
+          "Dark mode support with smooth theme toggle",
           "2,000,000 battle simulations with ML-powered insights",
           "Dynamic tier thresholds based on percentile rankings",
           "Engine Quality metrics: 10.7 avg turns, 23.1% Protect, 8.7% switch rate, 98.8% move coverage",
@@ -48,6 +52,10 @@ const CHANGELOGS: Record<string, { description: string; entries: ChangelogEntry[
       {
         date: "29/03/2026",
         items: [
+          "15+ ability fixes: Liquid Voice, Armor Tail, Mega Launcher, Strong Jaw, Bulletproof, Scrappy, Contrary, Weak Armor, Unaware, Wind Rider, and more",
+          "Blaze/Overgrow/Torrent/Swarm low-HP boost implemented",
+          "Permafrost Fist and Libero abilities added",
+          "Dark mode support for battle interface and tabs",
           "VGC world-class AI with intelligent Protect, switching, and move selection",
           "2M+ battle engine with full damage calc, abilities, items, weather, terrain",
           "Battle replay with turn-by-turn logs",
@@ -65,6 +73,8 @@ const CHANGELOGS: Record<string, { description: string; entries: ChangelogEntry[
       {
         date: "29/03/2026",
         items: [
+          "Dark mode support for team builder interface",
+          "SP cap fixed to 66 total points with +/- 2 buttons",
           "AI-powered teammate suggestions based on synergy analysis",
           "Recommended competitive sets from usage data",
           "Share teams via compressed URLs",
@@ -81,6 +91,7 @@ const CHANGELOGS: Record<string, { description: string; entries: ChangelogEntry[
       {
         date: "29/03/2026",
         items: [
+          "Dark mode support",
           "Complete VGC ruleset guide for beginners",
           "Role guides: sweeper, wall, pivot, support",
           "Strategy fundamentals for the Champions format",
@@ -100,7 +111,7 @@ export function LastUpdated({ page }: { page: keyof typeof CHANGELOGS }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 transition-all group"
+        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 hover:border-emerald-300 dark:hover:border-emerald-500/30 transition-all group"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
         Last updated 29/03/2026
@@ -121,14 +132,14 @@ export function LastUpdated({ page }: { page: keyof typeof CHANGELOGS }) {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-white dark:bg-[#111a2e] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-200/10 overflow-hidden"
             >
-              <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+              <div className="p-5 border-b border-gray-100 dark:border-gray-200/10 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-emerald-500" />
                   <h3 className="text-lg font-bold">What&apos;s New</h3>
                 </div>
-                <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-200/10 transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -137,7 +148,7 @@ export function LastUpdated({ page }: { page: keyof typeof CHANGELOGS }) {
                 {data.entries.map((entry) => (
                   <div key={entry.date}>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700">{entry.date}</span>
+                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">{entry.date}</span>
                     </div>
                     <ul className="space-y-1.5">
                       {entry.items.map((item, i) => (
