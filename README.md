@@ -10,6 +10,7 @@
 
 <p align="center">
   <a href="https://championslab.xyz">🌐 Live Site</a> · 
+  <a href="https://github.com/Andrew21P/ChampionsLab">📦 GitHub</a> · 
   <a href="#features">✨ Features</a> · 
   <a href="#tech-stack">🛠 Tech Stack</a> · 
   <a href="#contributing">🤝 Contributing</a>
@@ -95,8 +96,8 @@ Educational hub covering:
 
 ```bash
 # Clone the repository
-git clone <repo-url>
-cd champions-lab
+git clone https://github.com/Andrew21P/ChampionsLab.git
+cd ChampionsLab/champions-lab
 
 # Install dependencies
 npm install

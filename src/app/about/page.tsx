@@ -180,7 +180,7 @@ export default function AboutPage() {
             </p>
             <p>
               You can report bugs, suggest features, or contribute code. Use the contact form below to get in touch,
-              or open an issue on our GitHub repository.
+              or open an issue on our <a href="https://github.com/Andrew21P/ChampionsLab" target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-600 hover:text-emerald-700 underline underline-offset-2">GitHub repository</a>.
             </p>
           </div>
         </div>
