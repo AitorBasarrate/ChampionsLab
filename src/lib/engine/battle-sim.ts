@@ -1196,6 +1196,17 @@ function executeMove(
       }
     }
     
+    // Bulletproof: immune to bullet/bomb moves
+    if (t.ability === "Bulletproof" && move.flags?.bullet && user.ability !== "Mold Breaker") {
+      continue;
+    }
+
+    // Wind Rider: immune to wind moves, boosts Attack
+    if (t.ability === "Wind Rider" && move.flags?.wind && user.ability !== "Mold Breaker") {
+      t.boosts.attack = Math.min(6, t.boosts.attack + 1);
+      continue;
+    }
+
     // Type immunity from abilities (Water Absorb, Volt Absorb, Lightning Rod, etc.)
     const targetImmunity = getTypeImmunity(t.ability);
     if (targetImmunity && move.type === targetImmunity && user.ability !== "Mold Breaker") {
@@ -1238,6 +1249,12 @@ function executeMove(
       isCrit: Math.random() < 0.0625,
     };
     
+    // Unaware: ignore opponent's stat boosts
+    const atkStages = t.ability === "Unaware" ? 0 : user.boosts.attack;
+    const spAtkStages = t.ability === "Unaware" ? 0 : user.boosts.spAtk;
+    const defStages = user.ability === "Unaware" ? 0 : t.boosts.defense;
+    const spDefStages = user.ability === "Unaware" ? 0 : t.boosts.spDef;
+
     const attacker: DamageCalcPokemon = {
       baseStats: user.effectiveBaseStats,
       sp: user.set.sp,
@@ -1245,8 +1262,8 @@ function executeMove(
       types: user.types,
       ability: user.ability,
       item: user.item,
-      atkStages: user.boosts.attack,
-      spAtkStages: user.boosts.spAtk,
+      atkStages,
+      spAtkStages,
       isBurned: user.status === "burn",
       currentHPPercent: (user.currentHP / user.maxHP) * 100,
     };
@@ -1258,8 +1275,8 @@ function executeMove(
       types: t.types,
       ability: t.ability,
       item: t.item,
-      defStages: t.boosts.defense,
-      spDefStages: t.boosts.spDef,
+      defStages,
+      spDefStages,
     };
     
     const result = calculateDamage(attacker, defender, moveName, options);
@@ -1340,6 +1357,12 @@ function executeMove(
       user.currentHP = Math.min(user.maxHP, user.currentHP + Math.floor(damage * (move.flags.drain / 100)));
     }
     
+    // Weak Armor: when hit by physical move, -1 Def, +2 Speed
+    if (t.ability === "Weak Armor" && move.category === "physical" && t.currentHP > 0) {
+      t.boosts.defense = Math.max(-6, t.boosts.defense - 1);
+      t.boosts.speed = Math.min(6, t.boosts.speed + 2);
+    }
+
     // Secondary effects
     if (move.secondary && Math.random() * 100 < move.secondary.chance) {
       if (move.secondary.status && !t.status && t.currentHP > 0) {
@@ -1352,8 +1375,10 @@ function executeMove(
         const boostTarget = move.secondary.self ? user : t;
         for (const [stat, stages] of Object.entries(move.secondary.boosts)) {
           if (stat in boostTarget.boosts) {
+            // Contrary: reverse stat changes on the target
+            const contraryMult = boostTarget.ability === "Contrary" ? -1 : 1;
             (boostTarget.boosts as Record<string, number>)[stat] = Math.max(-6, Math.min(6,
-              (boostTarget.boosts as Record<string, number>)[stat] + (stages as number)
+              (boostTarget.boosts as Record<string, number>)[stat] + (stages as number) * contraryMult
             ));
           }
         }
@@ -1362,10 +1387,12 @@ function executeMove(
     
     // Self boosts from move
     if (move.selfBoost) {
+      // Contrary: reverse self-boosts
+      const contraryMult = user.ability === "Contrary" ? -1 : 1;
       for (const [stat, stages] of Object.entries(move.selfBoost)) {
         if (stat in user.boosts) {
           (user.boosts as Record<string, number>)[stat] = Math.max(-6, Math.min(6,
-            (user.boosts as Record<string, number>)[stat] + (stages as number)
+            (user.boosts as Record<string, number>)[stat] + (stages as number) * contraryMult
           ));
         }
       }
@@ -1646,6 +1673,13 @@ export function simulateBattle(
       if (action.mon.isFainted) continue;
       // Flinch check: Fake Out's flinch sets hasMoved = true, preventing action
       if (action.mon.hasMoved && !action.switchOut) continue;
+      
+      // Armor Tail: block priority moves targeting the side with Armor Tail
+      if (!action.switchOut && action.priority > 0) {
+        const targetSide = action.sideIndex === 1 ? state.active2 : state.active1;
+        const hasArmorTail = targetSide.some(p => p && !p.isFainted && p.ability === "Armor Tail");
+        if (hasArmorTail) continue; // Priority move blocked
+      }
       
       // Handle switch-out actions
       if (action.switchOut) {

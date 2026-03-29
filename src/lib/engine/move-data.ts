@@ -495,7 +495,7 @@ export const MOVE_DATA: Record<string, EngineMove> = {
   "Aura Sphere": {
     name: "Aura Sphere", type: "fighting", category: "special", basePower: 80,
     accuracy: 0, pp: 20, priority: 0, target: "normal",
-    flags: { pulse: true },
+    flags: { pulse: true, bullet: true },
   },
   "Bullet Punch": {
     name: "Bullet Punch", type: "steel", category: "physical", basePower: 40,

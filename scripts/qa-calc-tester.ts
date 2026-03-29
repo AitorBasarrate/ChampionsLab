@@ -519,6 +519,219 @@ console.log("\n🔬 TEST 14: USAGE_DATA Sets in Damage Calculator");
   console.log(`    → Tested ${calcTotal} damage calcs across all usage data`);
 }
 
+// ── TEST: Ability Implementations ─────────────────────────────────────
+
+console.log("\n🔬 TEST: Liquid Voice (Primarina)");
+{
+  // Liquid Voice turns sound moves into Water-type → Hyper Voice should be Water
+  const primarina = getPokemon("Primarina");
+  const incineroar = getPokemon("Incineroar");
+  const incinSet = getSet(incineroar);
+
+  const atkWithLV: DamageCalcPokemon = {
+    baseStats: primarina.baseStats,
+    sp: { hp: 0, attack: 0, defense: 0, spAtk: 32, spDef: 0, speed: 32 },
+    nature: "Modest" as NatureName,
+    types: primarina.types,
+    ability: "Liquid Voice",
+    item: "Choice Specs",
+  };
+  const atkNoLV: DamageCalcPokemon = { ...atkWithLV, ability: "Torrent" };
+  const defData: DamageCalcTarget = {
+    baseStats: incineroar.baseStats,
+    sp: incinSet.sp,
+    nature: incinSet.nature as NatureName,
+    types: incineroar.types, // Fire/Dark
+    ability: "Intimidate",
+    item: "Sitrus Berry",
+  };
+
+  const withLV = calculateDamage(atkWithLV, defData, "Hyper Voice", { isDoubles: true });
+  const withoutLV = calculateDamage(atkNoLV, defData, "Hyper Voice", { isDoubles: true });
+
+  // Liquid Voice → Water-type Hyper Voice hits Fire SE (2x). Normal Hyper Voice is neutral (1x).
+  assert(withLV.effectiveness === 2, `Liquid Voice Hyper Voice SE on Fire: ×${withLV.effectiveness} (expected ×2)`);
+  assert(withoutLV.effectiveness === 1, `Normal Hyper Voice neutral on Fire: ×${withoutLV.effectiveness} (expected ×1)`);
+  assert(withLV.damage[0] > withoutLV.damage[0], `Liquid Voice Hyper Voice does more: ${withLV.damage[0]} > ${withoutLV.damage[0]}`);
+  console.log(`    → With LV: ${withLV.percentHP[0].toFixed(1)}-${withLV.percentHP[1].toFixed(1)}% (SE) | Without: ${withoutLV.percentHP[0].toFixed(1)}-${withoutLV.percentHP[1].toFixed(1)}% (neutral)`);
+}
+
+console.log("\n🔬 TEST: Mega Launcher (Blastoise)");
+{
+  const blastoise = getPokemon("Blastoise");
+  const garchomp = getPokemon("Garchomp");
+  const garchSet = getSet(garchomp);
+
+  const atkML: DamageCalcPokemon = {
+    baseStats: blastoise.baseStats,
+    sp: { hp: 0, attack: 0, defense: 0, spAtk: 32, spDef: 0, speed: 32 },
+    nature: "Modest" as NatureName,
+    types: blastoise.types,
+    ability: "Mega Launcher",
+    item: "Life Orb",
+  };
+  const atkNoML: DamageCalcPokemon = { ...atkML, ability: "Torrent" };
+  const defData: DamageCalcTarget = {
+    baseStats: garchomp.baseStats,
+    sp: garchSet.sp,
+    nature: garchSet.nature as NatureName,
+    types: garchomp.types,
+    ability: garchSet.ability,
+    item: garchSet.item,
+  };
+
+  const withML = calculateDamage(atkML, defData, "Water Pulse", { isDoubles: true });
+  const withoutML = calculateDamage(atkNoML, defData, "Water Pulse", { isDoubles: true });
+
+  // Mega Launcher: +50% on pulse moves
+  assert(withML.damage[0] > withoutML.damage[0], `Mega Launcher boosts Water Pulse: ${withML.damage[0]} > ${withoutML.damage[0]}`);
+  const ratio = withML.damage[0] / withoutML.damage[0];
+  assert(ratio >= 1.4 && ratio <= 1.6, `~50% boost ratio: ${ratio.toFixed(2)} (expected ~1.5)`);
+  console.log(`    → With ML: ${withML.percentHP[0].toFixed(1)}-${withML.percentHP[1].toFixed(1)}% | Without: ${withoutML.percentHP[0].toFixed(1)}-${withoutML.percentHP[1].toFixed(1)}% (ratio ${ratio.toFixed(2)})`);
+}
+
+console.log("\n🔬 TEST: Bulletproof immunity");
+{
+  const user = getPokemon("Garchomp");
+  const usrSet = getSet(user);
+  const chesnaught = getPokemon("Chesnaught");
+
+  const atkData: DamageCalcPokemon = {
+    baseStats: user.baseStats,
+    sp: usrSet.sp,
+    nature: usrSet.nature as NatureName,
+    types: user.types,
+    ability: usrSet.ability,
+    item: usrSet.item,
+  };
+  const defBP: DamageCalcTarget = {
+    baseStats: chesnaught.baseStats,
+    sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 0, speed: 0 },
+    nature: "Impish" as NatureName,
+    types: chesnaught.types,
+    ability: "Bulletproof",
+    item: "Leftovers",
+  };
+
+  // Aura Sphere is a pulse/bullet move → should be blocked by Bulletproof
+  const result = calculateDamage(atkData, defBP, "Aura Sphere", { isDoubles: true });
+  assert(result.damage[0] === 0 && result.damage[1] === 0, `Bulletproof blocks Aura Sphere: ${result.damage[0]}-${result.damage[1]} (expected 0)`);
+  console.log(`    → Aura Sphere vs Bulletproof: ${result.damage[0]}-${result.damage[1]} damage`);
+}
+
+console.log("\n🔬 TEST: Scrappy (Normal/Fighting hits Ghost)");
+{
+  const kangaskhan = getPokemon("Kangaskhan");
+  const kangSet = getSet(kangaskhan);
+
+  // Find a Ghost type
+  const gengar = POKEMON_SEED.find(p => p.types.includes("ghost"));
+  if (gengar) {
+    const atkScrappy: DamageCalcPokemon = {
+      baseStats: kangaskhan.baseStats,
+      sp: kangSet.sp,
+      nature: kangSet.nature as NatureName,
+      types: kangaskhan.types,
+      ability: "Scrappy",
+      item: kangSet.item,
+    };
+    const atkNormal: DamageCalcPokemon = { ...atkScrappy, ability: "Early Bird" };
+    const defData: DamageCalcTarget = {
+      baseStats: gengar.baseStats,
+      sp: { hp: 0, attack: 0, defense: 0, spAtk: 32, spDef: 0, speed: 32 },
+      nature: "Timid" as NatureName,
+      types: gengar.types,
+      ability: "Cursed Body",
+      item: "Focus Sash",
+    };
+
+    // Use Body Slam - a Normal physical move in the engine
+    const scrappyResult = calculateDamage(atkScrappy, defData, "Body Slam", { isDoubles: true });
+    const normalResult = calculateDamage(atkNormal, defData, "Body Slam", { isDoubles: true });
+
+    assert(scrappyResult.damage[0] > 0, `Scrappy Body Slam hits Ghost: ${scrappyResult.damage[0]}`);
+    assert(normalResult.effectiveness === 0, `Normal Body Slam immune vs Ghost: ×${normalResult.effectiveness}`);
+    console.log(`    → Scrappy Body Slam vs ${gengar.name}: ${scrappyResult.percentHP[0].toFixed(1)}-${scrappyResult.percentHP[1].toFixed(1)}% | Normal: immune`);
+  }
+}
+
+console.log("\n🔬 TEST: Blaze/Overgrow/Torrent/Swarm (low HP boost)");
+{
+  const charizard = getPokemon("Charizard");
+  const charSet = getSet(charizard);
+  const defender = getPokemon("Garchomp");
+  const defSet = getSet(defender);
+
+  const atkFullHP: DamageCalcPokemon = {
+    baseStats: charizard.baseStats,
+    sp: charSet.sp,
+    nature: charSet.nature as NatureName,
+    types: charizard.types,
+    ability: "Blaze",
+    item: "Choice Specs",
+    currentHPPercent: 100,
+  };
+  const atkLowHP: DamageCalcPokemon = { ...atkFullHP, currentHPPercent: 30 };
+  const defData: DamageCalcTarget = {
+    baseStats: defender.baseStats,
+    sp: defSet.sp,
+    nature: defSet.nature as NatureName,
+    types: defender.types,
+    ability: defSet.ability,
+    item: defSet.item,
+  };
+
+  // Use Flamethrower - a fire special move guaranteed in the engine
+  const fullHP = calculateDamage(atkFullHP, defData, "Flamethrower", { isDoubles: true });
+  const lowHP = calculateDamage(atkLowHP, defData, "Flamethrower", { isDoubles: true });
+
+  assert(lowHP.damage[0] > fullHP.damage[0], `Blaze boosts at low HP: ${lowHP.damage[0]} > ${fullHP.damage[0]}`);
+  const ratio = lowHP.damage[0] / fullHP.damage[0];
+  assert(ratio >= 1.4 && ratio <= 1.6, `~50% boost ratio: ${ratio.toFixed(2)}`);
+  console.log(`    → Flamethrower: Full HP ${fullHP.percentHP[0].toFixed(1)}-${fullHP.percentHP[1].toFixed(1)}% | Low HP ${lowHP.percentHP[0].toFixed(1)}-${lowHP.percentHP[1].toFixed(1)}% (ratio ${ratio.toFixed(2)})`);
+}
+
+console.log("\n🔬 TEST: Strong Jaw (+50% bite moves)");
+{
+  // Tyrantrum has Strong Jaw
+  const tyrantrum = POKEMON_SEED.find(p => p.name === "Tyrantrum");
+  if (tyrantrum) {
+    const defender = getPokemon("Garchomp");
+    const defSet = getSet(defender);
+
+    const biteMove = tyrantrum.moves.find(m => m.name === "Crunch");
+    if (biteMove) {
+      const atkSJ: DamageCalcPokemon = {
+        baseStats: tyrantrum.baseStats,
+        sp: { hp: 0, attack: 32, defense: 0, spAtk: 0, spDef: 0, speed: 32 },
+        nature: "Adamant" as NatureName,
+        types: tyrantrum.types,
+        ability: "Strong Jaw",
+        item: "Life Orb",
+      };
+      const atkNoSJ: DamageCalcPokemon = { ...atkSJ, ability: "Rock Head" };
+      const defData: DamageCalcTarget = {
+        baseStats: defender.baseStats,
+        sp: defSet.sp,
+        nature: defSet.nature as NatureName,
+        types: defender.types,
+        ability: defSet.ability,
+        item: defSet.item,
+      };
+
+      const withSJ = calculateDamage(atkSJ, defData, biteMove.name, { isDoubles: true });
+      const withoutSJ = calculateDamage(atkNoSJ, defData, biteMove.name, { isDoubles: true });
+
+      assert(withSJ.damage[0] > withoutSJ.damage[0], `Strong Jaw boosts ${biteMove.name}: ${withSJ.damage[0]} > ${withoutSJ.damage[0]}`);
+      console.log(`    → ${biteMove.name} with SJ: ${withSJ.percentHP[0].toFixed(1)}-${withSJ.percentHP[1].toFixed(1)}% | Without: ${withoutSJ.percentHP[0].toFixed(1)}-${withoutSJ.percentHP[1].toFixed(1)}%`);
+    } else {
+      console.log("    → Tyrantrum missing bite move, skipping");
+    }
+  } else {
+    console.log("    → Tyrantrum not in roster, skipping");
+  }
+}
+
 // ── RESULTS ───────────────────────────────────────────────────────────
 
 console.log("\n" + "═".repeat(60));

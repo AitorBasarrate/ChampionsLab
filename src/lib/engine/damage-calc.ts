@@ -65,28 +65,41 @@ export function calculateDamage(
   moveName: string,
   options: DamageCalcOptions = {}
 ): DamageResult {
-  const move = getMove(moveName);
-  if (!move || move.category === "status") {
+  const moveOriginal = getMove(moveName);
+  if (!moveOriginal || moveOriginal.category === "status") {
     return {
       damage: [0, 0], percentHP: [0, 0], numHits: Infinity,
       isOHKO: false, is2HKO: false, effectiveness: 1, moveName,
     };
   }
 
+  // Liquid Voice: sound-based moves become Water-type
+  const move = attacker.ability === "Liquid Voice" && moveOriginal.flags.sound
+    ? { ...moveOriginal, type: "water" as PokemonType }
+    : moveOriginal;
+
+  // Permafrost Fist: punching moves become Ice-type
+  const moveEffective = attacker.ability === "Permafrost Fist" && move.flags.punch
+    ? { ...move, type: "ice" as PokemonType }
+    : move;
+
+  // Use the type-overridden move for all subsequent calculations
+  const moveCalc = moveEffective;
+
   const atkStats = calculateStats(attacker.baseStats, attacker.sp, attacker.nature);
   const defStats = calculateStats(defender.baseStats, defender.sp, defender.nature);
 
   // Determine attacking and defending stats
-  const isPhysical = move.category === "physical";
-  const useDefense = isPhysical && move.name !== "Psyshock"; // Psyshock targets Def with SpA
+  const isPhysical = moveCalc.category === "physical";
+  const useDefense = isPhysical && moveCalc.name !== "Psyshock"; // Psyshock targets Def with SpA
 
   let atkStat: number;
   let defStat: number;
 
-  if (move.name === "Body Press") {
+  if (moveCalc.name === "Body Press") {
     // Body Press uses Defense for attack
     atkStat = atkStats.defense;
-  } else if (move.name === "Foul Play") {
+  } else if (moveCalc.name === "Foul Play") {
     // Foul Play uses target's Attack
     atkStat = defStats.attack;
   } else {
@@ -111,11 +124,19 @@ export function calculateDamage(
     defStat = applyStatStage(defStat, defStages);
   }
 
+  // Bulletproof: immune to ball/bomb moves
+  if (defender.ability === "Bulletproof" && moveCalc.flags.bullet) {
+    return {
+      damage: [0, 0], percentHP: [0, 0], numHits: Infinity,
+      isOHKO: false, is2HKO: false, effectiveness: 0, moveName,
+    };
+  }
+
   // Base power
-  let bp = move.basePower;
+  let bp = moveCalc.basePower;
   if (bp === 0) {
     // Weight-based moves default to 80 BP (no weight data available)
-    if (move.name === "Grass Knot" || move.name === "Low Kick") {
+    if (moveCalc.name === "Grass Knot" || moveCalc.name === "Low Kick") {
       bp = 80;
     } else {
       // Fixed damage moves like Super Fang, Counter, etc.
@@ -128,18 +149,18 @@ export function calculateDamage(
   }
 
   // Eruption/Water Spout scaling
-  if (move.name === "Eruption" || move.name === "Water Spout") {
+  if (moveCalc.name === "Eruption" || moveCalc.name === "Water Spout") {
     const hpPct = (attacker.currentHPPercent ?? 100) / 100;
     bp = Math.max(1, Math.floor(150 * hpPct));
   }
 
   // Knock Off boost
-  if (move.name === "Knock Off" && defender.item) {
+  if (moveCalc.name === "Knock Off" && defender.item) {
     bp = Math.floor(bp * 1.5);
   }
 
   // Acrobatics boost (no item)
-  if (move.name === "Acrobatics" && !attacker.item) {
+  if (moveCalc.name === "Acrobatics" && !attacker.item) {
     bp *= 2;
   }
 
@@ -151,28 +172,40 @@ export function calculateDamage(
       bp = Math.floor(bp * 1.5);
     }
     // Sheer Force (moves with secondary effects)
-    if (attacker.ability === "Sheer Force" && move.secondary) {
+    if (attacker.ability === "Sheer Force" && moveCalc.secondary) {
       bp = Math.floor(bp * 1.3);
     }
     // Iron Fist
-    if (attacker.ability === "Iron Fist" && move.flags.punch) {
+    if (attacker.ability === "Iron Fist" && moveCalc.flags.punch) {
       bp = Math.floor(bp * 1.2);
     }
     // Reckless
-    if (attacker.ability === "Reckless" && move.flags.recoil) {
+    if (attacker.ability === "Reckless" && moveCalc.flags.recoil) {
       bp = Math.floor(bp * 1.2);
     }
     // Tough Claws
-    if (attacker.ability === "Tough Claws" && move.flags.contact) {
+    if (attacker.ability === "Tough Claws" && moveCalc.flags.contact) {
       atkStat = Math.floor(atkStat * 1.33);
     }
     // Sharpness
-    if (attacker.ability === "Sharpness" && move.flags.slicing) {
+    if (attacker.ability === "Sharpness" && moveCalc.flags.slicing) {
       bp = Math.floor(bp * 1.5);
+    }
+    // Mega Launcher: pulse/aura moves get 50% boost
+    if (attacker.ability === "Mega Launcher" && moveCalc.flags.pulse) {
+      bp = Math.floor(bp * 1.5);
+    }
+    // Strong Jaw: biting moves get 50% boost
+    if (attacker.ability === "Strong Jaw" && moveCalc.flags.bite) {
+      bp = Math.floor(bp * 1.5);
+    }
+    // Permafrost Fist: punch moves get 30% boost (type already changed above)
+    if (attacker.ability === "Permafrost Fist" && moveCalc.flags.punch) {
+      bp = Math.floor(bp * 1.3);
     }
     // Sand Force in sand
     if (attacker.ability === "Sand Force" && options.weather === "sand" &&
-        (move.type === "rock" || move.type === "ground" || move.type === "steel")) {
+        (moveCalc.type === "rock" || moveCalc.type === "ground" || moveCalc.type === "steel")) {
       bp = Math.floor(bp * 1.3);
     }
     // Solar Power in sun
@@ -183,35 +216,63 @@ export function calculateDamage(
     if (attacker.ability === "Guts" && attacker.isBurned) {
       atkStat = Math.floor(atkStat * 1.5);
     }
+    // Blaze/Overgrow/Torrent/Swarm: 50% boost at ≤1/3 HP
+    const hpPct = attacker.currentHPPercent ?? 100;
+    if (attacker.ability === "Blaze" && moveCalc.type === "fire" && hpPct <= 33.3) {
+      bp = Math.floor(bp * 1.5);
+    }
+    if (attacker.ability === "Overgrow" && moveCalc.type === "grass" && hpPct <= 33.3) {
+      bp = Math.floor(bp * 1.5);
+    }
+    if (attacker.ability === "Torrent" && moveCalc.type === "water" && hpPct <= 33.3) {
+      bp = Math.floor(bp * 1.5);
+    }
+    if (attacker.ability === "Swarm" && moveCalc.type === "bug" && hpPct <= 33.3) {
+      bp = Math.floor(bp * 1.5);
+    }
+    // Analytic: 30% boost if moving last (simplified: always assume moving last)
+    // In practice this is applied in battle-sim where turn order is known
   }
 
   // STAB (Same Type Attack Bonus)
-  const isStab = attacker.types.includes(move.type);
+  const isStab = attacker.types.includes(moveCalc.type);
   let stabMult = 1;
   if (isStab) {
     stabMult = attacker.ability === "Adaptability" ? 2 : 1.5;
   }
   // Protean/Libero gives STAB on everything (once per switch)
-  if (attacker.ability === "Protean") {
+  if (attacker.ability === "Protean" || attacker.ability === "Libero") {
     stabMult = 1.5;
   }
 
   // Type effectiveness
-  let effectiveness = getMatchup(move.type, defender.types);
+  let effectiveness = getMatchup(moveCalc.type, defender.types);
+
+  // Scrappy: Normal/Fighting moves hit Ghost types
+  if (attacker.ability === "Scrappy" && effectiveness === 0 &&
+      (moveCalc.type === "normal" || moveCalc.type === "fighting") &&
+      defender.types.includes("ghost")) {
+    effectiveness = 1;
+    // Recalculate without Ghost immunity
+    const nonGhostTypes = defender.types.filter(t => t !== "ghost");
+    if (nonGhostTypes.length > 0) {
+      effectiveness = getMatchup(moveCalc.type, nonGhostTypes);
+    }
+  }
 
   // Ability-based immunities
   const defAbility = getAbilityEffect(defender.ability);
-  if (defAbility?.typeImmunity === move.type) {
+  if (defAbility?.typeImmunity === moveCalc.type) {
     effectiveness = 0;
   }
 
   // Thick Fat halves Fire/Ice
-  if (defender.ability === "Thick Fat" && (move.type === "fire" || move.type === "ice")) {
+  if (defender.ability === "Thick Fat" && (moveCalc.type === "fire" || moveCalc.type === "ice")) {
     effectiveness *= 0.5;
   }
 
   // Freeze-Dry is super effective against Water
-  if (move.name === "Freeze-Dry" && defender.types.includes("water")) {
+  if (moveCalc.name === "Freeze-Dry" && defender.types.includes("water")) {
     effectiveness = defender.types.length === 1 ? 2 : effectiveness * 2;
   }
 
@@ -226,10 +287,10 @@ export function calculateDamage(
   // Mega Sol: all moves behave as if under harsh sunlight
   const effectiveWeather = attacker.ability === "Mega Sol" ? "sun" : options.weather;
   let weatherMult = 1;
-  if (effectiveWeather === "sun" && move.type === "fire") weatherMult = 1.5;
-  if (effectiveWeather === "sun" && move.type === "water") weatherMult = 0.5;
-  if (effectiveWeather === "rain" && move.type === "water") weatherMult = 1.5;
-  if (effectiveWeather === "rain" && move.type === "fire") weatherMult = 0.5;
+  if (effectiveWeather === "sun" && moveCalc.type === "fire") weatherMult = 1.5;
+  if (effectiveWeather === "sun" && moveCalc.type === "water") weatherMult = 0.5;
+  if (effectiveWeather === "rain" && moveCalc.type === "water") weatherMult = 1.5;
+  if (effectiveWeather === "rain" && moveCalc.type === "fire") weatherMult = 0.5;
 
   // Screen multipliers
   let screenMult = 1;
@@ -239,7 +300,7 @@ export function calculateDamage(
 
   // Spread reduction in doubles
   let spreadMult = 1;
-  if (options.isDoubles === true && isSpreadMove(move)) {
+  if (options.isDoubles === true && isSpreadMove(moveCalc)) {
     spreadMult = 0.75;
   }
 
@@ -254,7 +315,7 @@ export function calculateDamage(
 
   // Item damage multiplier
   const isSE = effectiveness >= 2;
-  const itemMult = getItemDamageMultiplier(attacker.item, move.type, move.category, isSE);
+  const itemMult = getItemDamageMultiplier(attacker.item, moveCalc.type, moveCalc.category, isSE);
 
   // Helping Hand
   const helpingHandMult = options.helpingHand ? 1.5 : 1;

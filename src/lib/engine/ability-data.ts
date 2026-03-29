@@ -523,6 +523,26 @@ export const ABILITY_DATA: Record<string, AbilityEffect> = {
     description: "Transforms from Zero Form to Hero Form upon switching out and back in.",
     vgcRelevance: 8,
   },
+  "Liquid Voice": {
+    name: "Liquid Voice", category: "offensive",
+    description: "Sound-based moves become Water-type.",
+    vgcRelevance: 8,
+  },
+  "Armor Tail": {
+    name: "Armor Tail", category: "defensive",
+    description: "Opponents cannot use priority moves against this Pokémon's side.",
+    vgcRelevance: 9,
+  },
+  "Strong Jaw": {
+    name: "Strong Jaw", category: "offensive",
+    description: "Biting moves deal 50% more damage.",
+    vgcRelevance: 7,
+  },
+  "Wind Rider": {
+    name: "Wind Rider", category: "immunity",
+    description: "Immune to wind moves. Attack rises by 1 stage when hit by wind or Tailwind is set.",
+    vgcRelevance: 7,
+  },
 };
 
 /** Lookup ability effect */
