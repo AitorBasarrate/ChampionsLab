@@ -70,6 +70,25 @@ export default function AboutPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Alpha Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5 border border-amber-200/80 dark:border-amber-400/20"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-500/20">
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Alpha Release - Free & Open Source</p>
+            <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">
+              This project is in active development. Things may break or change. It&apos;s 100% free, open source (MIT), and community-driven.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -104,7 +123,7 @@ export default function AboutPage() {
         className="space-y-8"
       >
         {/* Mission */}
-        <div className="glass rounded-2xl p-6 border border-rose-200/60 bg-gradient-to-br from-rose-50/40 to-pink-50/40">
+        <div className="glass rounded-2xl p-6 border border-rose-200/60 dark:border-rose-400/20 bg-gradient-to-br from-rose-50/40 to-pink-50/40 dark:from-rose-500/10 dark:to-pink-500/5">
           <div className="flex items-center gap-3 mb-4">
             <Sparkles className="w-5 h-5 text-rose-500" />
             <h2 className="text-lg font-bold">Why We Built This</h2>
@@ -126,26 +145,31 @@ export default function AboutPage() {
         </div>
 
         {/* Key Facts */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="glass rounded-2xl p-5 border border-gray-200/60 text-center">
-            <Code className="w-6 h-6 text-violet-500 mx-auto mb-2" />
-            <p className="text-2xl font-extrabold text-violet-700">Open Source</p>
-            <p className="text-xs text-muted-foreground mt-1">Code is publicly available</p>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="glass rounded-2xl p-5 border border-amber-200/60 dark:border-amber-400/20 text-center">
+            <AlertCircle className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+            <p className="text-2xl font-extrabold text-amber-700 dark:text-amber-400">Alpha</p>
+            <p className="text-xs text-muted-foreground mt-1">In active development</p>
           </div>
-          <div className="glass rounded-2xl p-5 border border-gray-200/60 text-center">
+          <div className="glass rounded-2xl p-5 border border-gray-200/60 dark:border-gray-200/10 text-center">
+            <Code className="w-6 h-6 text-violet-500 mx-auto mb-2" />
+            <p className="text-2xl font-extrabold text-violet-700 dark:text-violet-400">Open Source</p>
+            <p className="text-xs text-muted-foreground mt-1">MIT License, fully public</p>
+          </div>
+          <div className="glass rounded-2xl p-5 border border-gray-200/60 dark:border-gray-200/10 text-center">
             <Heart className="w-6 h-6 text-rose-500 mx-auto mb-2 fill-rose-500" />
-            <p className="text-2xl font-extrabold text-rose-700">100% Free</p>
+            <p className="text-2xl font-extrabold text-rose-700 dark:text-rose-400">100% Free</p>
             <p className="text-xs text-muted-foreground mt-1">No ads, no paywalls, forever</p>
           </div>
-          <div className="glass rounded-2xl p-5 border border-gray-200/60 text-center">
+          <div className="glass rounded-2xl p-5 border border-gray-200/60 dark:border-gray-200/10 text-center">
             <Users className="w-6 h-6 text-cyan-500 mx-auto mb-2" />
-            <p className="text-2xl font-extrabold text-cyan-700">Community</p>
+            <p className="text-2xl font-extrabold text-cyan-700 dark:text-cyan-400">Community</p>
             <p className="text-xs text-muted-foreground mt-1">Built by fans, for fans</p>
           </div>
         </div>
 
         {/* Credits */}
-        <div className="glass rounded-2xl p-6 border border-violet-200/60 bg-gradient-to-br from-violet-50/40 to-indigo-50/40">
+        <div className="glass rounded-2xl p-6 border border-violet-200/60 dark:border-violet-400/20 bg-gradient-to-br from-violet-50/40 to-indigo-50/40 dark:from-violet-500/10 dark:to-indigo-500/5">
           <div className="flex items-center gap-3 mb-4">
             <Users className="w-5 h-5 text-violet-500" />
             <h2 className="text-lg font-bold">Credits & Thanks</h2>
@@ -171,7 +195,7 @@ export default function AboutPage() {
         </div>
 
         {/* Contribute */}
-        <div className="glass rounded-2xl p-6 border border-emerald-200/60 bg-gradient-to-br from-emerald-50/40 to-cyan-50/40">
+        <div className="glass rounded-2xl p-6 border border-emerald-200/60 dark:border-emerald-400/20 bg-gradient-to-br from-emerald-50/40 to-cyan-50/40 dark:from-emerald-500/10 dark:to-cyan-500/5">
           <div className="flex items-center gap-3 mb-4">
             <Code2 className="w-5 h-5 text-emerald-600" />
             <h2 className="text-lg font-bold">Want to Help?</h2>

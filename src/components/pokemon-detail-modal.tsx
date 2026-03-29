@@ -154,20 +154,20 @@ function PresetPill({ set, index }: { set: CommonSet; index: number }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 left-0 top-full mt-2 w-72 p-4 bg-white rounded-xl shadow-xl shadow-black/10 border border-gray-100"
+            className="absolute z-50 left-0 top-full mt-2 w-72 p-4 bg-white dark:bg-[#1a2340] rounded-xl shadow-xl shadow-black/10 border border-gray-100 dark:border-gray-200/10"
           >
             <div className="flex items-center gap-2 mb-2.5">
               <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", style.bg)}>
                 <Icon className={cn("w-3.5 h-3.5", style.color)} />
               </div>
-              <span className="text-sm font-bold text-gray-900">{set.name}</span>
+              <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{set.name}</span>
             </div>
-            <p className="text-xs text-gray-500 leading-relaxed mb-3">{set.nature} · {set.ability} · {set.item}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">{set.nature} · {set.ability} · {set.item}</p>
             <div className="grid grid-cols-3 gap-1.5">
               {STAT_KEYS.map((key, i) => (
-                <div key={key} className="flex items-center justify-between px-2 py-1 rounded-md bg-gray-50">
+                <div key={key} className="flex items-center justify-between px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-200/5">
                   <span className="text-[10px] text-gray-400">{STAT_NAMES[i].replace("Sp. ", "Sp")}</span>
-                  <span className={cn("text-[10px] font-bold", set.sp[key] > 0 ? "text-gray-800" : "text-gray-300")}>
+                  <span className={cn("text-[10px] font-bold", set.sp[key] > 0 ? "text-gray-800 dark:text-gray-200" : "text-gray-300 dark:text-gray-600")}>
                     {set.sp[key]}
                   </span>
                 </div>
@@ -326,8 +326,8 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                         className={cn(
                           "px-4 py-1.5 text-sm font-medium rounded-xl transition-all shadow-sm",
                           activeForm === 0
-                              ? "bg-gray-100 text-foreground border border-gray-300 shadow-gray-200/60"
-                              : "text-muted-foreground hover:text-foreground hover:bg-gray-50 border border-transparent"
+                              ? "bg-gray-100 dark:bg-gray-200/10 text-foreground border border-gray-300 dark:border-gray-200/20 shadow-gray-200/60"
+                              : "text-muted-foreground hover:text-foreground hover:bg-gray-50 dark:hover:bg-gray-200/10 border border-transparent"
                         )}
                       >
                         Base
@@ -339,8 +339,8 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                           className={cn(
                             "px-4 py-1.5 text-sm font-medium rounded-xl transition-all flex items-center gap-1.5 shadow-sm",
                             activeForm === i + 1
-                              ? "bg-gradient-to-r from-pink-100 to-violet-100 text-foreground border border-pink-300 shadow-pink-200/60"
-                              : "text-muted-foreground hover:text-foreground hover:bg-pink-50/50 border border-transparent"
+                              ? "bg-gradient-to-r from-pink-100 to-violet-100 dark:from-pink-500/20 dark:to-violet-500/20 text-foreground border border-pink-300 dark:border-pink-400/20 shadow-pink-200/60"
+                              : "text-muted-foreground hover:text-foreground hover:bg-pink-50/50 dark:hover:bg-pink-500/10 border border-transparent"
                           )}
                         >
                           {form.isMega && <Sparkles className="w-4 h-4 text-pink-500" />}
@@ -362,8 +362,8 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                   className={cn(
                     "relative px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg capitalize transition-colors tracking-tight whitespace-nowrap",
                     activeTab === tab
-                      ? "text-gray-900"
-                      : "text-gray-400 hover:text-gray-600"
+                      ? "text-gray-900 dark:text-gray-100"
+                      : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   )}
                 >
                   {activeTab === tab && (
@@ -391,26 +391,26 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                   >
                     {/* Tier, Recruitment & Usage quick stats */}
                     <div className="grid grid-cols-3 gap-3">
-                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/80">
+                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-200/5 dark:to-transparent border border-gray-200/80 dark:border-gray-200/10">
                         <div className="flex items-center gap-2 mb-1">
                           <Trophy className="w-3.5 h-3.5 text-amber-500" />
                           <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Tier</span>
                         </div>
                         <p className="text-2xl font-bold tracking-tight" style={{ color: primaryColor }}>{pokemon.tier ?? "-"}</p>
                       </div>
-                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/80">
+                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-200/5 dark:to-transparent border border-gray-200/80 dark:border-gray-200/10">
                         <div className="flex items-center gap-2 mb-1">
                           <Coins className="w-3.5 h-3.5 text-amber-500" />
                           <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Recruit</span>
                         </div>
-                        <p className="text-2xl font-bold tracking-tight text-gray-800">{pokemon.recruitmentCost != null ? pokemon.recruitmentCost : "-"} <span className="text-xs font-medium text-gray-400">VP</span></p>
+                        <p className="text-2xl font-bold tracking-tight text-gray-800 dark:text-gray-200">{pokemon.recruitmentCost != null ? pokemon.recruitmentCost : "-"} <span className="text-xs font-medium text-gray-400">VP</span></p>
                       </div>
-                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/80">
+                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-200/5 dark:to-transparent border border-gray-200/80 dark:border-gray-200/10">
                         <div className="flex items-center gap-2 mb-1">
                           <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
                           <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Usage</span>
                         </div>
-                        <p className="text-2xl font-bold tracking-tight text-gray-800">{pokemon.usageRate != null ? pokemon.usageRate : "-"} <span className="text-xs font-medium text-gray-400">%</span></p>
+                        <p className="text-2xl font-bold tracking-tight text-gray-800 dark:text-gray-200">{pokemon.usageRate != null ? pokemon.usageRate : "-"} <span className="text-xs font-medium text-gray-400">%</span></p>
                       </div>
                     </div>
 
@@ -418,14 +418,14 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Base Stats</h3>
-                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">BST <span className="text-gray-700 ml-1">{bst}</span></span>
+                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">BST <span className="text-gray-700 dark:text-gray-300 ml-1">{bst}</span></span>
                       </div>
 
                       <div className="space-y-3">
                         {STAT_KEYS.map((key, i) => (
                           <div key={key} className="flex items-center gap-3">
                             <span className="text-[11px] text-gray-400 w-14 text-right font-semibold tracking-tight">{STAT_NAMES[i]}</span>
-                            <span className="text-sm w-8 text-right text-gray-800 font-bold tabular-nums">{displayStats[key]}</span>
+                            <span className="text-sm w-8 text-right text-gray-800 dark:text-gray-200 font-bold tabular-nums">{displayStats[key]}</span>
                             <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-200/10 rounded-full overflow-hidden">
                               <motion.div
                                 className="h-full rounded-full"
@@ -441,17 +441,17 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                     </div>
 
                     {/* Stat Point System */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-violet-50/80 to-indigo-50/50 border border-violet-200/60">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-violet-50/80 to-indigo-50/50 dark:from-violet-500/10 dark:to-indigo-500/5 border border-violet-200/60 dark:border-violet-400/20">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center">
-                          <Zap className="w-3.5 h-3.5 text-violet-600" />
+                        <div className="w-6 h-6 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
+                          <Zap className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />
                         </div>
-                        <h4 className="text-xs font-bold text-violet-700 uppercase tracking-widest">Stat Points</h4>
+                        <h4 className="text-xs font-bold text-violet-700 dark:text-violet-400 uppercase tracking-widest">Stat Points</h4>
                       </div>
-                      <p className="text-[13px] text-gray-600 leading-relaxed mb-3">
-                        Champions replaces IVs and EVs with a simple <span className="font-bold text-gray-800">Stat Point</span> system. 
-                        Distribute <span className="font-bold text-violet-700">66 total points</span> across any stats, 
-                        up to <span className="font-bold text-violet-700">32 per stat</span>. 
+                      <p className="text-[13px] text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
+                        Champions replaces IVs and EVs with a simple <span className="font-bold text-gray-800 dark:text-gray-200">Stat Point</span> system. 
+                        Distribute <span className="font-bold text-violet-700 dark:text-violet-400">66 total points</span> across any stats, 
+                        up to <span className="font-bold text-violet-700 dark:text-violet-400">32 per stat</span>. 
                         Each point adds ~1 stat at Level 50.
                       </p>
                       <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Suggested Builds - hover for details</p>
@@ -463,15 +463,15 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                     </div>
 
                     {/* HOME compatibility */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-br from-cyan-50/80 to-sky-50/50 border border-cyan-200/60">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-cyan-50/80 to-sky-50/50 dark:from-cyan-500/10 dark:to-sky-500/5 border border-cyan-200/60 dark:border-cyan-400/20">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 rounded-lg bg-cyan-100 flex items-center justify-center">
-                          <svg className="w-3.5 h-3.5 text-cyan-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="w-6 h-6 rounded-lg bg-cyan-100 dark:bg-cyan-500/20 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                             <polyline points="9 22 9 12 15 12 15 22" />
                           </svg>
                         </div>
-                        <h4 className="text-xs font-bold text-cyan-700 uppercase tracking-widest">Pokémon HOME</h4>
+                        <h4 className="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest">Pokémon HOME</h4>
                       </div>
                       {pokemon.homeCompatible ? (
                         <div>
@@ -536,9 +536,9 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                             </span>
                             <span className={cn(
                               "px-1.5 py-0.5 text-[9px] font-bold uppercase rounded",
-                              move.category === "physical" && "bg-red-100 text-red-700",
-                              move.category === "special" && "bg-blue-100 text-blue-700",
-                              move.category === "status" && "bg-gray-100 text-gray-600"
+                              move.category === "physical" && "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400",
+                              move.category === "special" && "bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400",
+                              move.category === "status" && "bg-gray-100 dark:bg-gray-200/10 text-gray-600 dark:text-gray-400"
                             )}>
                               {move.category}
                             </span>
@@ -548,7 +548,7 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                           </p>
                         </div>
                         <div className="text-right flex-shrink-0 space-y-0.5">
-                          <div className="text-xs tabular-nums font-semibold text-gray-700">
+                          <div className="text-xs tabular-nums font-semibold text-gray-700 dark:text-gray-300">
                             {move.power ?? "-"} <span className="text-gray-400 font-medium">PWR</span>
                           </div>
                           <div className="text-[10px] text-gray-400 tabular-nums font-medium">
@@ -575,23 +575,23 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                         className={cn(
                           "p-4 rounded-2xl border transition-colors",
                           ability.isChampions
-                            ? "bg-gradient-to-br from-amber-50/80 to-orange-50/50 border-amber-200/80"
+                            ? "bg-gradient-to-br from-amber-50/80 to-orange-50/50 dark:from-amber-500/10 dark:to-orange-500/5 border-amber-200/80 dark:border-amber-400/20"
                             : ability.isHidden
-                              ? "bg-gradient-to-br from-amber-50/80 to-orange-50/50 border-amber-200/80"
-                              : "bg-gradient-to-br from-gray-50 to-gray-100/30 border-gray-200/80"
+                              ? "bg-gradient-to-br from-amber-50/80 to-orange-50/50 dark:from-amber-500/10 dark:to-orange-500/5 border-amber-200/80 dark:border-amber-400/20"
+                              : "bg-gradient-to-br from-gray-50 to-gray-100/30 dark:from-gray-200/5 dark:to-transparent border-gray-200/80 dark:border-gray-200/10"
                         )}
                       >
                         <div className="flex items-center gap-2 mb-2">
                           <div className={cn(
                             "w-7 h-7 rounded-lg flex items-center justify-center",
-                            ability.isChampions ? "bg-amber-100" : ability.isHidden ? "bg-amber-100" : "bg-gray-100"
+                            ability.isChampions ? "bg-amber-100 dark:bg-amber-500/20" : ability.isHidden ? "bg-amber-100 dark:bg-amber-500/20" : "bg-gray-100 dark:bg-gray-200/10"
                           )}>
                             <Sparkles className={cn(
                               "w-3.5 h-3.5",
                               ability.isChampions ? "text-amber-600" : ability.isHidden ? "text-amber-600" : "text-gray-500"
                             )} />
                           </div>
-                          <span className="text-sm font-bold tracking-tight text-gray-900">{ability.name}</span>
+                          <span className="text-sm font-bold tracking-tight text-gray-900 dark:text-gray-100">{ability.name}</span>
                           {ability.isChampions && (
                             <span className="px-2 py-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 rounded-lg border border-amber-300" title="This ability has not been officially revealed yet - it is a speculative guess for Champions Lab.">
                               SPECULATIVE
@@ -614,12 +614,12 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                           <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Base Form Abilities</h4>
                         </div>
                         {pokemon.abilities.map((ability) => (
-                          <div key={ability.name} className="p-4 rounded-2xl bg-gray-50/50 border border-gray-200/60 opacity-70">
+                          <div key={ability.name} className="p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-200/5 border border-gray-200/60 dark:border-gray-200/10 opacity-70">
                             <div className="flex items-center gap-2 mb-2">
-                              <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-200/10 flex items-center justify-center">
                                 <Sparkles className="w-3.5 h-3.5 text-gray-400" />
                               </div>
-                              <span className="text-sm font-bold tracking-tight text-gray-600">{ability.name}</span>
+                              <span className="text-sm font-bold tracking-tight text-gray-600 dark:text-gray-400">{ability.name}</span>
                               {ability.isHidden && (
                                 <span className="px-2 py-0.5 text-[9px] font-bold bg-amber-100 text-amber-600 rounded-lg border border-amber-200">
                                   HIDDEN

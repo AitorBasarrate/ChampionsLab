@@ -5,7 +5,13 @@
 <h1 align="center">Champions Lab</h1>
 
 <p align="center">
-  <strong>A free competitive companion for Pokémon Champions 2026 - built with love by fans, for fans</strong>
+  <strong>A free, open-source competitive companion for Pokemon Champions 2026 - built with love by fans, for fans</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Alpha-orange?style=for-the-badge" alt="Alpha" />
+  <img src="https://img.shields.io/badge/Price-Free_Forever-brightgreen?style=for-the-badge" alt="Free Forever" />
+  <img src="https://img.shields.io/badge/Open_Source-MIT-blue?style=for-the-badge" alt="Open Source" />
 </p>
 
 <p align="center">
@@ -21,24 +27,25 @@
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?logo=tailwindcss" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License" />
-  <img src="https://img.shields.io/badge/Price-Free_Forever-brightgreen" alt="Free Forever" />
 </p>
 
 ---
 
+> **⚠️ This project is in ALPHA.** Things may break, data may change, and features are being actively developed. We welcome bug reports and feedback!
+
 ## ❤️ Why Champions Lab?
 
-This project started the way the best things do - late at night, talking about Pokémon.
+This project started the way the best things do - late at night, talking about Pokemon.
 
-We're just fans. We grew up trading cards on the playground, losing to our friends' legendary teams, and eventually falling in love with competitive VGC. When Pokémon Champions 2026 was announced, we knew we wanted to build something for the community - not for profit, not for clout, just because we genuinely love this game and the people who play it.
+We're just fans. We grew up trading cards on the playground, losing to our friends' legendary teams, and eventually falling in love with competitive VGC. When Pokemon Champions 2026 was announced, we knew we wanted to build something for the community - not for profit, not for clout, just because we genuinely love this game and the people who play it.
 
-**Champions Lab is and will always be 100% free.** There are zero ads on the website. No paywalls. No premium tiers. No tracking. No "sign up to unlock." Nothing. Every single feature - the Pokédex, the Team Builder, the 2,000,000-battle simulation engine, the Meta dashboard, PokéSchool - is completely open to everyone.
+**Champions Lab is and will always be 100% free and open source.** There are zero ads on the website. No paywalls. No premium tiers. No "sign up to unlock." Nothing. Every single feature - the Pokedex, the Team Builder, the 2,000,000-battle simulation engine, the Meta dashboard, PokeSchool - is completely open to everyone.
 
-The code is fully open source. You can read every line, fork it, improve it, break it, fix it, learn from it. If you're a developer, a designer, a data nerd, or just someone who spotted a typo - **come build with us on [GitHub](https://github.com/Andrew21P/ChampionsLab)**. Every contribution matters, and we'll never forget the people who helped make this real.
+The code is fully open source under the MIT license. You can read every line, fork it, improve it, break it, fix it, learn from it. If you're a developer, a designer, a data nerd, or just someone who spotted a typo - **come build with us on [GitHub](https://github.com/Andrew21P/ChampionsLab)**. Every contribution matters, and we'll never forget the people who helped make this real.
 
 If you want to support the project financially, you can donate through the website - but honestly, just using Champions Lab, sharing it with a friend, or telling someone "hey, check this out before your next tournament" means the world to us.
 
-Thank you for being here. Thank you for caring about competitive Pokémon. Let's make something great together.
+Thank you for being here. Thank you for caring about competitive Pokemon. Let's make something great together.
 
 > **Play it now at [championslab.xyz](https://championslab.xyz)**
 
