@@ -130,6 +130,7 @@ export function LastUpdated({ page }: { page: keyof typeof CHANGELOGS }) {
   const [open, setOpen] = useState(false);
   const data = CHANGELOGS[page];
   if (!data) return null;
+  const latestDate = data.entries[0]?.date ?? "29/03/2026";
 
   return (
     <>
@@ -138,7 +139,7 @@ export function LastUpdated({ page }: { page: keyof typeof CHANGELOGS }) {
         className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 hover:border-emerald-300 dark:hover:border-emerald-500/30 transition-all group"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-        Last updated 29/03/2026
+        Last updated {latestDate}
         <ArrowUpRight className="w-3 h-3 text-emerald-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
       </button>
 
