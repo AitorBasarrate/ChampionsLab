@@ -108,6 +108,15 @@ export function calculateDamage(
 
   defStat = useDefense ? defStats.defense : defStats.spDef;
 
+  // Snow: +50% Defense for Ice types
+  if (options.weather === "snow" && defender.types.includes("ice") && useDefense) {
+    defStat = Math.floor(defStat * 1.5);
+  }
+  // Sand: +50% SpDef for Rock types
+  if (options.weather === "sand" && defender.types.includes("rock") && !useDefense) {
+    defStat = Math.floor(defStat * 1.5);
+  }
+
   // Apply stat stages
   const atkStages = isPhysical ? (attacker.atkStages ?? 0) : (attacker.spAtkStages ?? 0);
   const defStages = useDefense ? (defender.defStages ?? 0) : (defender.spDefStages ?? 0);

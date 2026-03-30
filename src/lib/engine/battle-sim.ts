@@ -1450,8 +1450,10 @@ function executeMove(
       continue; // Move is fully absorbed
     }
     
-    // Accuracy check
-    if (move.accuracy > 0 && Math.random() * 100 > move.accuracy) continue;
+    // Accuracy check (weather bypass: Blizzard in snow, Thunder/Hurricane in rain)
+    const weatherBypass = (move.name === "Blizzard" && state.field.weather === "snow")
+      || ((move.name === "Thunder" || move.name === "Hurricane") && state.field.weather === "rain");
+    if (!weatherBypass && move.accuracy > 0 && Math.random() * 100 > move.accuracy) continue;
     
     // Focus Sash precheck
     const hadFocusSash = t.item === "Focus Sash" && !t.itemConsumed && t.currentHP === t.maxHP;
@@ -1529,6 +1531,11 @@ function executeMove(
     // Prism Armor: reduce super-effective damage by 25%
     if (t.ability === "Prism Armor" && result.effectiveness >= 2) {
       damage = Math.floor(damage * 0.75);
+    }
+    
+    // Multiscale / Shadow Shield: halve damage at full HP
+    if ((t.ability === "Multiscale" || t.ability === "Shadow Shield") && t.currentHP === t.maxHP) {
+      damage = Math.floor(damage * 0.5);
     }
     
     // Drill Force through Protect: only 25% damage

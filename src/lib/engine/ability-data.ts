@@ -271,6 +271,16 @@ export const ABILITY_DATA: Record<string, AbilityEffect> = {
     description: "Cannot flinch. Also blocks Intimidate.",
     vgcRelevance: 7,
   },
+  "Multiscale": {
+    name: "Multiscale", category: "defensive",
+    description: "Halves damage taken when HP is full.",
+    vgcRelevance: 9,
+  },
+  "Shadow Shield": {
+    name: "Shadow Shield", category: "defensive",
+    description: "Halves damage taken when HP is full.",
+    vgcRelevance: 9,
+  },
   "Oblivious": {
     name: "Oblivious", category: "defensive",
     description: "Cannot be infatuated or taunted. Blocks Intimidate.",
