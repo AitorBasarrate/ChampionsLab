@@ -39,6 +39,9 @@ yarn-error.log*
 # shared team storage
 /data
 
+# agent context (local only)
+AGENT-CONTEXT.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
