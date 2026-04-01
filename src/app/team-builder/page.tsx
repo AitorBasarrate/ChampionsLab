@@ -590,6 +590,7 @@ export default function TeamBuilderPage() {
     while (newSlots.length < 6) newSlots.push(createEmptySlot());
     setSlots(newSlots);
     setTeamName(team.name);
+    setCurrentTeamId(undefined);
     setSelectedSlotIndex(0);
   };
 
@@ -641,6 +642,7 @@ export default function TeamBuilderPage() {
     while (newSlots.length < 6) newSlots.push(createEmptySlot());
     setSlots(newSlots);
     setTeamName(meta.name);
+    setCurrentTeamId(undefined);
     setSelectedSlotIndex(0);
   };
 
@@ -930,6 +932,7 @@ export default function TeamBuilderPage() {
     if (newSlots.length === 0) { setImportError("Could not match any Pokémon names. Make sure it's in Pokepaste/Showdown format."); return; }
     while (newSlots.length < 6) newSlots.push(createEmptySlot());
     setSlots(newSlots);
+    setCurrentTeamId(undefined);
     setSelectedSlotIndex(0);
     setShowImport(false);
     setImportText("");
