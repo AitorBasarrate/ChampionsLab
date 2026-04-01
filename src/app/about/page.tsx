@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import {
   Heart, Code, Users, Mail, Send, ImagePlus, X, CheckCircle2,
-  AlertCircle, Loader2, Code2, Globe, Sparkles, Coffee,
+  AlertCircle, Loader2, Code2, Globe, Sparkles, Coffee, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
@@ -87,6 +87,35 @@ export default function AboutPage() {
             </p>
           </div>
         </div>
+      </motion.div>
+
+      {/* Discord Community */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="mb-6"
+      >
+        <a
+          href="https://discord.gg/jFbxQde8"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackEvent("discord_click", "about")}
+          className="flex items-center gap-4 p-4 rounded-2xl bg-[#5865F2]/10 border border-[#5865F2]/20 hover:bg-[#5865F2]/15 hover:border-[#5865F2]/30 transition-all group"
+        >
+          <div className="p-2.5 rounded-xl bg-[#5865F2] shadow-lg shadow-[#5865F2]/25 group-hover:shadow-[#5865F2]/40 transition-shadow">
+            <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[#5865F2] dark:text-[#7289DA]">Join our Discord Community</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Report bugs, suggest features, discuss the meta, and connect with other trainers
+            </p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-[#5865F2]/50 group-hover:text-[#5865F2] transition-colors shrink-0" />
+        </a>
       </motion.div>
 
       {/* Header */}

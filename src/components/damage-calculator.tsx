@@ -372,6 +372,7 @@ export default function DamageCalculator() {
           isBurned={attacker.isBurned}
           currentHP={attacker.currentHP}
           onHPChange={(hp) => setAttacker(prev => ({ ...prev, currentHP: hp }))}
+          preferUp={allMoveResults.length === 0}
         />
 
         {/* ── CENTER: SWAP + RESULTS ────────────────────────────────── */}
@@ -430,6 +431,7 @@ export default function DamageCalculator() {
           onSPUpdate={updateDefenderSP}
           onStageChange={(stat, val) => setDefender(prev => ({ ...prev, stages: { ...prev.stages, [stat]: val } }))}
           showDefStages
+          preferUp={allMoveResults.length === 0}
         />
       </div>
 
@@ -610,7 +612,7 @@ export default function DamageCalculator() {
 function PokemonPanel({
   label, slot, stats, color, onPickerOpen, onSetUpdate, onSPUpdate,
   onStageChange, showAtkStages, showDefStages, onBurnToggle, isBurned,
-  currentHP, onHPChange,
+  currentHP, onHPChange, preferUp,
 }: {
   label: string;
   slot: PokemonSlot;
@@ -626,6 +628,7 @@ function PokemonPanel({
   isBurned?: boolean;
   currentHP?: number;
   onHPChange?: (hp: number) => void;
+  preferUp?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const p = slot.pokemon;
@@ -705,15 +708,20 @@ function PokemonPanel({
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="text-[10px] font-semibold uppercase text-muted-foreground block mb-1">Nature</label>
-              <select
+              <SearchSelect
                 value={set.nature}
-                onChange={(e) => onSetUpdate({ nature: e.target.value })}
-                className="w-full px-2 py-1.5 rounded-lg glass border border-gray-200 text-[11px] bg-transparent focus:outline-none"
-              >
-                {ALL_NATURES.map(n => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
+                onChange={(v) => onSetUpdate({ nature: v })}
+                placeholder="Nature…"
+                preferUp={preferUp}
+                options={ALL_NATURES.map(n => {
+                  const nd = getNatureDisplay(n);
+                  return {
+                    value: n,
+                    label: n,
+                    sub: nd.plus ? `+${nd.plus} / −${nd.minus}` : "Neutral",
+                  };
+                })}
+              />
               {natureDisplay.plus && (
                 <p className="text-[9px] text-muted-foreground mt-0.5">
                   <span className="text-green-600">+{natureDisplay.plus}</span>
@@ -728,7 +736,21 @@ function PokemonPanel({
                 value={set.ability}
                 onChange={(v) => onSetUpdate({ ability: v })}
                 placeholder="Ability…"
-                options={p.abilities.map(a => ({ value: a.name, label: a.name, sub: a.description }))}
+                preferUp={preferUp}
+                options={(() => {
+                  const abilities = [...p.abilities];
+                  // Include mega form abilities so mega sets resolve correctly
+                  if (p.hasMega && p.forms) {
+                    for (const form of p.forms) {
+                      if (form.isMega && form.abilities) {
+                        for (const a of form.abilities) {
+                          if (!abilities.some(ab => ab.name === a.name)) abilities.push(a);
+                        }
+                      }
+                    }
+                  }
+                  return abilities.map(a => ({ value: a.name, label: a.name, sub: a.description }));
+                })()}
               />
             </div>
             <div>
@@ -737,14 +759,16 @@ function PokemonPanel({
                 value={set.item}
                 onChange={(v) => onSetUpdate({ item: v })}
                 placeholder="Item…"
+                preferUp={preferUp}
                 options={[
                   set.item,
+                  ...usageSets.map(s => s.item),
                   "Life Orb","Choice Band","Choice Specs","Choice Scarf","Focus Sash",
                   "Assault Vest","Sitrus Berry","Leftovers","Rocky Helmet","Eviolite",
                   "Clear Amulet","Covert Cloak","Safety Goggles","Lum Berry","Wide Lens",
                   "Expert Belt","Muscle Band","Wise Glasses","Scope Lens","Weakness Policy",
-                  "Booster Energy","Loaded Dice","Protective Pads",
-                ].filter((v, i, a) => a.indexOf(v) === i).map(item => ({ value: item, label: item }))}
+                  "Booster Energy","Loaded Dice","Protective Pads","Light Clay",
+                ].filter((v, i, a) => v && a.indexOf(v) === i).map(item => ({ value: item, label: item }))}
               />
             </div>
           </div>
@@ -765,6 +789,7 @@ function PokemonPanel({
                       onSetUpdate({ moves: newMoves });
                     }}
                     placeholder="Move…"
+                    preferUp={preferUp}
                     triggerBadge={move ? { text: move.type.slice(0, 3).toUpperCase(), color: TYPE_COLORS[move.type] } : null}
                     options={p.moves.map(m => ({
                       value: m.name,

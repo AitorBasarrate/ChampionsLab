@@ -100,6 +100,9 @@ const CHANGELOGS: Record<string, { description: string; entries: ChangelogEntry[
           "Added Shed Tail move to battle engine (creates substitute + switches out)",
           "Added 19 competitive moves to engine: Breaking Swipe, Torch Song, Spirit Break, Icicle Crash, and more",
           "Dragonize, Aerilate, Pixilate, Refrigerate, Galvanize now work in damage calculator",
+          "Fixed dropdown scroll bug: scrolling inside dropdown no longer closes it",
+          "Damage calc dropdowns open upward by default, downward when results section is visible",
+          "Mega stones now appear in item dropdown for all Mega-capable Pokémon",
         ],
       },
       {
@@ -170,6 +173,10 @@ const CHANGELOGS: Record<string, { description: string; entries: ChangelogEntry[
           "Added Shed Tail to Orthworm's movepool and battle engine",
           "All competitive set moves now correctly available in team builder",
           "Damage calculator dropdowns upgraded with search/filter (moves, items, abilities)",
+          "Fixed dropdown scroll bug: scrolling inside options no longer closes it",
+          "Dropdowns open upward by default, switch to downward when results section appears",
+          "Mega stones (Slowbronite, Alakazite, etc.) now listed in damage calc item dropdown",
+          "Added Light Clay and usage-data items to item selector",
         ],
       },
       {
