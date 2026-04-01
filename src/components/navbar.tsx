@@ -7,13 +7,11 @@ import {
   Swords,
   Grid3X3,
   Users,
-  Menu,
-  X,
   TrendingUp,
   GraduationCap,
   Heart,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 
@@ -28,11 +26,12 @@ const NAV_ITEMS = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const checkboxRef = useRef<HTMLInputElement>(null);
 
-  // Close mobile nav on route change
+  // Close mobile nav on route change (progressive enhancement)
   useEffect(() => {
-    if (checkboxRef.current) checkboxRef.current.checked = false;
+    if (window.location.hash === "#mobile-nav-open") {
+      history.replaceState(null, "", window.location.pathname);
+    }
   }, [pathname]);
 
   return (
@@ -95,24 +94,33 @@ export function Navbar() {
               </a>
             </nav>
 
-            {/* Mobile hamburger — native checkbox+label, works even when JS main thread is blocked */}
-            <input type="checkbox" id="nav-toggle" ref={checkboxRef} aria-hidden="true" tabIndex={-1} />
-            <label
-              htmlFor="nav-toggle"
+            {/* Mobile hamburger — hash link, handled by browser navigation layer, zero JS */}
+            <a
+              href="#mobile-nav-open"
               id="nav-hamburger"
-              className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg touch-manipulation cursor-pointer"
-              aria-label="Toggle navigation menu"
-              role="button"
+              className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg touch-manipulation"
+              aria-label="Open navigation menu"
             >
-              <Menu className="w-6 h-6 icon-menu" />
-              <X className="w-6 h-6 icon-x" />
-            </label>
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </a>
           </div>
         </div>
 
-        {/* Mobile Nav — always rendered, visibility controlled by CSS html.nav-open */}
-        <div id="mobile-nav" className="md:hidden border-t border-gray-200/60">
-          <nav className="px-4 py-3 space-y-1">
+        {/* Mobile Nav — shown via CSS :target when URL hash = #mobile-nav-open */}
+        <nav id="mobile-nav-open" className="mobile-nav-panel md:hidden border-t border-gray-200/60">
+          <div className="px-4 py-3 space-y-1">
+            {/* Close button */}
+            <a
+              href="#close"
+              className="flex items-center justify-end py-1 text-muted-foreground"
+              aria-label="Close navigation menu"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </a>
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -142,8 +150,8 @@ export function Navbar() {
               <Heart className="w-5 h-5 fill-white" />
               Support Us
             </a>
-          </nav>
-        </div>
+          </div>
+        </nav>
       </header>
 
       {/* Spacer for fixed navbar */}
