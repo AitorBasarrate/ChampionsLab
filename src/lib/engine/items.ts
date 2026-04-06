@@ -332,6 +332,33 @@ export const ITEMS: Record<string, ItemEffect> = {
     berryHealThreshold: 25,
     berryHealAmount: 33,
   },
+  "Fairy Feather": {
+    name: "Fairy Feather",
+    description: "Boosts Fairy-type moves by 20%.",
+    typeDamageBoost: { type: "fairy", multiplier: 1.2 },
+  },
+  "Eject Pack": {
+    name: "Eject Pack",
+    description: "Forces the holder to switch out when any of its stats are lowered. Single use.",
+  },
+  "Eject Button": {
+    name: "Eject Button",
+    description: "Forces the holder to switch out when hit by an attack. Single use.",
+  },
+  "Room Service": {
+    name: "Room Service",
+    description: "Lowers Speed by one stage when Trick Room is set. Single use.",
+    statBoost: { speed: -1 },
+  },
+  "Lagging Tail": {
+    name: "Lagging Tail",
+    description: "Forces the holder to move last in its priority bracket.",
+  },
+  "Iron Ball": {
+    name: "Iron Ball",
+    description: "Halves Speed and grounds Flying-type holders. Removes Ground immunity.",
+    speedMultiplier: 0.5,
+  },
 };
 
 /** Get item damage multiplier for a move */
