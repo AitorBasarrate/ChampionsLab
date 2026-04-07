@@ -234,7 +234,6 @@ export function EventsCalendar({ events, todayISO }: { events: VGCEvent[]; today
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
         className="flex items-start justify-between gap-4 flex-wrap"
       >
         <div>
@@ -259,9 +258,8 @@ export function EventsCalendar({ events, todayISO }: { events: VGCEvent[]; today
 
       {/* Tier filters */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         className="space-y-2"
       >
         <div className="flex gap-2 flex-wrap">
@@ -286,7 +284,6 @@ export function EventsCalendar({ events, todayISO }: { events: VGCEvent[]; today
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
         className="flex gap-x-5 gap-y-1 flex-wrap"
       >
         {TIER_FILTERS.map(t => (
