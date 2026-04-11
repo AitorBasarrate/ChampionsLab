@@ -1587,6 +1587,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
         {"name":"Attract","type":"normal","category":"status","power":null,"accuracy":100,"pp":15,"description":"If the target is of the opposite gender to the user, it becomes infatuated with the user and will sometimes be unable to use its moves."},
         {"name":"Bite","type":"dark","category":"physical","power":60,"accuracy":100,"pp":25,"description":"The target is bitten with viciously sharp fangs. This may also make the target flinch."},
         {"name":"Body Slam","type":"normal","category":"physical","power":85,"accuracy":100,"pp":15,"description":"The user attacks by dropping onto the target with its full body weight. This may also leave the target with paralysis."},
+        {"name":"Brutal Swing","type":"dark","category":"physical","power":60,"accuracy":100,"pp":20,"description":"The user swings its body around violently to inflict damage on everything in its vicinity."},
         {"name":"Charge","type":"electric","category":"status","power":null,"accuracy":null,"pp":20,"description":"The user becomes charged, boosting the power of the next Electric-type move it uses. This also boosts the user's Sp. Def stat."},
         {"name":"Charge Beam","type":"electric","category":"special","power":50,"accuracy":90,"pp":10,"description":"The user attacks the target with an electric charge. The residual electricity may also boost the user's Sp. Atk stat."},
         {"name":"Crunch","type":"dark","category":"physical","power":80,"accuracy":100,"pp":15,"description":"The user crunches up the target with sharp fangs. This may also lower the target's Defense stat."},
@@ -11786,7 +11787,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
             "isChampions": false
           }
         ],
-        "isMega": true
+        "isMega": true,
+        "hidden": true
       }
     ],
     "hasMega": true,
@@ -13567,7 +13569,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
             "isChampions": false
           }
         ],
-        "isMega": true
+        "isMega": true,
+        "hidden": true
       }
     ],
     "hasMega": true,
@@ -13753,7 +13756,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
             "isChampions": false
           }
         ],
-        "isMega": true
+        "isMega": true,
+        "hidden": true
       }
     ],
     "hasMega": true,
@@ -18463,7 +18467,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
   },
   {
     "id": 678,
-    "name": "Meowstic",
+    "name": "Meowstic-M",
     "dexNumber": 678,
     "types": [
       "psychic"
@@ -18556,6 +18560,137 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       ],
     "sprite": "/sprites/678.png",
     "officialArt": "/sprites/678.png",
+    "generation": 6,
+    "forms": [
+      {
+        "name": "Mega Meowstic",
+        "sprite": "/sprites/oa-10314.png",
+        "types": [
+          "psychic"
+        ],
+        "baseStats": {
+          "hp": 74,
+          "attack": 48,
+          "defense": 76,
+          "spAtk": 143,
+          "spDef": 101,
+          "speed": 124
+        },
+        "abilities": [
+          {
+            "name": "Trace",
+            "description": "When it enters a battle, the Pokémon copies an opposing Pokémon's Ability.",
+            "isChampions": false
+          }
+        ],
+        "isMega": true
+      }
+    ],
+    "hasMega": true,
+    "recruitmentCost": null,
+    "homeCompatible": true,
+    "homeSource": [
+      "Scarlet/Violet",
+      "Legends Z-A",
+      "Sword/Shield",
+      "Pokémon GO"
+    ],
+    "season": 1,
+    "tier": "B",
+    "usageRate": 3.6
+  },
+  {
+    "id": 10678,
+    "name": "Meowstic-F",
+    "dexNumber": 678,
+    "types": [
+      "psychic"
+    ],
+    "baseStats": {
+      "hp": 74,
+      "attack": 48,
+      "defense": 76,
+      "spAtk": 83,
+      "spDef": 81,
+      "speed": 104
+    },
+    "abilities": [
+      {
+        "name": "Keen Eye",
+        "description": "Prevents accuracy from being lowered.",
+        "isHidden": false
+      },
+      {
+        "name": "Infiltrator",
+        "description": "Passes through the opposing Pokémon's barrier, substitute, and the like and strikes.",
+        "isHidden": false
+      },
+      {
+        "name": "Competitive",
+        "description": "Boosts the Sp. Atk stat sharply when a stat is lowered.",
+        "isHidden": true
+      }
+    ],
+    "moves": [
+        {"name":"Alluring Voice","type":"fairy","category":"special","power":80,"accuracy":100,"pp":10,"description":"The user attacks the target using its angelic voice. This also confuses the target if its stats have been boosted during the turn."},
+        {"name":"Baton Pass","type":"normal","category":"status","power":null,"accuracy":null,"pp":40,"description":"The user switches places with a party Pokémon in waiting and passes along any stat changes."},
+        {"name":"Calm Mind","type":"psychic","category":"status","power":null,"accuracy":null,"pp":20,"description":"The user quietly focuses its mind and calms its spirit to boost its Sp. Atk and Sp. Def stats."},
+        {"name":"Charge Beam","type":"electric","category":"special","power":50,"accuracy":90,"pp":10,"description":"The user attacks the target with an electric charge. The residual electricity may also boost the user's Sp. Atk stat."},
+        {"name":"Charm","type":"fairy","category":"status","power":null,"accuracy":100,"pp":20,"description":"The user gazes at the target rather charmingly, making it less wary. This harshly lowers the target's Attack stat."},
+        {"name":"Covet","type":"normal","category":"physical","power":60,"accuracy":100,"pp":25,"description":"The user endearingly approaches the target, then steals the target's held item."},
+        {"name":"Dark Pulse","type":"dark","category":"special","power":80,"accuracy":100,"pp":15,"description":"The user releases a horrible aura imbued with ill intent. This may also make the target flinch."},
+        {"name":"Dig","type":"ground","category":"physical","power":80,"accuracy":100,"pp":10,"description":"The user burrows into the ground on the first turn, then attacks on the next turn."},
+        {"name":"Endure","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user endures any attack with at least 1 HP. This move's chance of failing rises if used in succession."},
+        {"name":"Energy Ball","type":"grass","category":"special","power":90,"accuracy":100,"pp":10,"description":"The user draws power from nature and fires it at the target. This may also lower the target's Sp. Def stat."},
+        {"name":"Expanding Force","type":"psychic","category":"special","power":80,"accuracy":100,"pp":10,"description":"The user attacks the target with its psychic power. When the ground is Psychic Terrain, this move's power is boosted and it damages all opposing Pokémon."},
+        {"name":"Extrasensory","type":"psychic","category":"special","power":80,"accuracy":100,"pp":20,"description":"The user attacks with an odd, unseeable power. This may also make the target flinch."},
+        {"name":"Facade","type":"normal","category":"physical","power":70,"accuracy":100,"pp":20,"description":"This move's power is doubled if the user is poisoned, burned, or paralyzed."},
+        {"name":"Fake Out","type":"normal","category":"physical","power":40,"accuracy":100,"pp":10,"description":"This attack hits first and makes the target flinch. It works only on the first turn each time the user enters battle."},
+        {"name":"Fake Tears","type":"dark","category":"status","power":null,"accuracy":100,"pp":20,"description":"The user feigns crying to fluster the target. This harshly lowers the target's Sp. Def stat."},
+        {"name":"Future Sight","type":"psychic","category":"special","power":120,"accuracy":100,"pp":10,"description":"Two turns after this move is used, a hunk of psychic energy attacks the target."},
+        {"name":"Giga Impact","type":"normal","category":"physical","power":150,"accuracy":90,"pp":5,"description":"The user charges at the target using every bit of its power. The user can't move on the next turn."},
+        {"name":"Gravity","type":"psychic","category":"status","power":null,"accuracy":null,"pp":5,"description":"Enables Flying types or Pokémon with the Levitate Ability to be hit by Ground-type moves for five turns. Moves that involve flying can't be used."},
+        {"name":"Helping Hand","type":"normal","category":"status","power":null,"accuracy":null,"pp":20,"description":"The user assists an ally by boosting the power of that ally's attack."},
+        {"name":"Hyper Beam","type":"normal","category":"special","power":150,"accuracy":90,"pp":5,"description":"The target is attacked with a powerful beam. The user can't move on the next turn."},
+        {"name":"Iron Tail","type":"steel","category":"physical","power":100,"accuracy":75,"pp":15,"description":"The target is slammed with a steel-hard tail. This may also lower the target's Defense stat."},
+        {"name":"Light Screen","type":"psychic","category":"status","power":null,"accuracy":null,"pp":30,"description":"A wondrous wall of light is put up to reduce damage from special moves for five turns."},
+        {"name":"Magic Room","type":"psychic","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user creates a bizarre area in which Pokémon's held items lose their effects for five turns."},
+        {"name":"Nasty Plot","type":"dark","category":"status","power":null,"accuracy":null,"pp":20,"description":"The user stimulates its brain by thinking bad thoughts. This sharply boosts the user's Sp. Atk stat."},
+        {"name":"Payback","type":"dark","category":"physical","power":50,"accuracy":100,"pp":10,"description":"The user stores power, then attacks. This move's power is doubled if the user moves after the target."},
+        {"name":"Play Rough","type":"fairy","category":"physical","power":90,"accuracy":90,"pp":10,"description":"The user attacks by playing rough with the target. This may also lower the target's Attack stat."},
+        {"name":"Protect","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"This move enables the user to protect itself from all attacks. Its chance of failing rises if it is used in succession."},
+        {"name":"Psych Up","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user hypnotizes itself into copying any stat change made by the target."},
+        {"name":"Psychic","type":"psychic","category":"special","power":90,"accuracy":100,"pp":10,"description":"The target is hit with a strong telekinetic force to inflict damage. This may also lower the target's Sp. Def stat."},
+        {"name":"Psychic Noise","type":"psychic","category":"special","power":75,"accuracy":100,"pp":10,"description":"The user attacks the target with unpleasant sound waves. For two turns, the target is prevented from recovering HP through moves, Abilities, or held items."},
+        {"name":"Psychic Terrain","type":"psychic","category":"status","power":null,"accuracy":null,"pp":10,"description":"This protects Pokémon on the ground from priority moves and powers up Psychic-type moves for five turns."},
+        {"name":"Psyshock","type":"psychic","category":"special","power":80,"accuracy":100,"pp":10,"description":"The user materializes an odd psychic wave to attack the target. This move deals physical damage."},
+        {"name":"Rain Dance","type":"water","category":"status","power":null,"accuracy":null,"pp":5,"description":"The user summons a heavy rain that falls for five turns, powering up Water-type attacks. The rain also lowers the power of Fire-type attacks."},
+        {"name":"Reflect","type":"psychic","category":"status","power":null,"accuracy":null,"pp":20,"description":"A wondrous wall of light is put up to reduce damage from physical moves for five turns."},
+        {"name":"Rest","type":"psychic","category":"status","power":null,"accuracy":null,"pp":5,"description":"The user goes to sleep for two turns. This fully restores the user's HP and cures any status conditions."},
+        {"name":"Role Play","type":"psychic","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user mimics the target completely, copying the target's Ability."},
+        {"name":"Round","type":"normal","category":"special","power":60,"accuracy":100,"pp":15,"description":"The user attacks the target with a song. If others use this move, they will act immediately after the initial user, and the power of their Rounds will be boosted."},
+        {"name":"Safeguard","type":"normal","category":"status","power":null,"accuracy":null,"pp":25,"description":"The user creates a protective field that prevents status conditions for five turns."},
+        {"name":"Shadow Ball","type":"ghost","category":"special","power":80,"accuracy":100,"pp":15,"description":"The user attacks by hurling a shadowy blob at the target. This may also lower the target's Sp. Def stat."},
+        {"name":"Skill Swap","type":"psychic","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user employs its psychic power to exchange Abilities with the target."},
+        {"name":"Sleep Talk","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user randomly uses one of the moves it knows. This move can only be used while the user is asleep."},
+        {"name":"Snore","type":"normal","category":"special","power":50,"accuracy":100,"pp":15,"description":"This attack can be used only if the user is asleep. The harsh noise may also make the target flinch."},
+        {"name":"Stored Power","type":"psychic","category":"special","power":20,"accuracy":100,"pp":10,"description":"The user attacks the target with stored power. The more the user's stats are boosted, the greater the move's power."},
+        {"name":"Substitute","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user creates a substitute for itself using some of its own HP. The substitute serves as the user's decoy."},
+        {"name":"Sucker Punch","type":"dark","category":"physical","power":70,"accuracy":100,"pp":5,"description":"This move enables the user to attack first. This move fails if the target is not readying an attack."},
+        {"name":"Sunny Day","type":"fire","category":"status","power":null,"accuracy":null,"pp":5,"description":"The user intensifies the sun for five turns, powering up Fire-type attacks. The sunlight also lowers the power of Water-type attacks."},
+        {"name":"Tail Slap","type":"normal","category":"physical","power":25,"accuracy":85,"pp":10,"description":"The user attacks by striking the target with its hard tail. This move hits two to five times in a row."},
+        {"name":"Thunder Wave","type":"electric","category":"status","power":null,"accuracy":90,"pp":20,"description":"The user launches a weak jolt of electricity that paralyzes the target."},
+        {"name":"Thunderbolt","type":"electric","category":"special","power":90,"accuracy":100,"pp":15,"description":"The user attacks the target with a strong electric blast. This may also leave the target with paralysis."},
+        {"name":"Tickle","type":"normal","category":"status","power":null,"accuracy":100,"pp":20,"description":"The user tickles the target into laughing, lowering its Attack and Defense stats."},
+        {"name":"Trailblaze","type":"grass","category":"physical","power":50,"accuracy":100,"pp":20,"description":"The user attacks suddenly as if leaping out from tall grass. The user's nimble footwork boosts its Speed stat."},
+        {"name":"Trick","type":"psychic","category":"status","power":null,"accuracy":100,"pp":10,"description":"The user catches the target off guard and swaps the target's held item with its own."},
+        {"name":"Trick Room","type":"psychic","category":"status","power":null,"accuracy":null,"pp":5,"description":"The user creates a bizarre area in which slower Pokémon get to move first for five turns."},
+        {"name":"Wonder Room","type":"psychic","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user creates a bizarre area in which Pokémon's Defense and Sp. Def stats are swapped for five turns."},
+        {"name":"Yawn","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user lets loose a huge yawn that lulls the target into falling asleep on the next turn."},
+        {"name":"Zen Headbutt","type":"psychic","category":"physical","power":80,"accuracy":90,"pp":15,"description":"The user focuses its willpower to its head and attacks the target. This may also make the target flinch."}
+      ],
+    "sprite": "/sprites/10678.png",
+    "officialArt": "/sprites/10678.png",
     "generation": 6,
     "forms": [
       {

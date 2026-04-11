@@ -82,6 +82,8 @@ function resolveMegaForCalc(p: ChampionsPokemon, set: CommonSet): {
   baseStats: ChampionsPokemon["baseStats"];
   types: PokemonType[];
   ability: string;
+  sprite?: string;
+  name?: string;
 } {
   if (p.hasMega && p.forms && isMegaStoneItem(set.item)) {
     // Match X/Y/Z mega stone to the correct form
@@ -98,12 +100,38 @@ function resolveMegaForCalc(p: ChampionsPokemon, set: CommonSet): {
         baseStats: megaForm.baseStats,
         types: [...megaForm.types] as PokemonType[],
         ability: megaForm.abilities[0]?.name ?? set.ability,
+        sprite: megaForm.sprite,
+        name: megaForm.name,
       };
     }
   }
+  // Palafin: Zero to Hero — damage calc assumes Hero Form (post-switch)
+  if (p.name === "Palafin" && set.ability === "Zero To Hero") {
+    return {
+      baseStats: { hp: 100, attack: 160, defense: 97, spAtk: 106, spDef: 87, speed: 100 },
+      types: [...p.types] as PokemonType[],
+      ability: set.ability,
+    };
+  }
+  // Aegislash: Stance Change — use Blade Form stats for attacking calcs
+  if (p.name === "Aegislash" && set.ability === "Stance Change") {
+    return {
+      baseStats: { hp: 60, attack: 140, defense: 50, spAtk: 140, spDef: 50, speed: 60 },
+      types: [...p.types] as PokemonType[],
+      ability: set.ability,
+    };
+  }
   return { baseStats: p.baseStats, types: [...p.types] as PokemonType[], ability: set.ability };
 }
-
+/** Resolve form for defending (Aegislash stays in Shield Form) */
+function resolveDefenderForCalc(p: ChampionsPokemon, set: CommonSet): ReturnType<typeof resolveMegaForCalc> {
+  const resolved = resolveMegaForCalc(p, set);
+  // Aegislash as defender uses Shield Form (high Def/SpDef) — override Blade stats
+  if (p.name === "Aegislash" && set.ability === "Stance Change") {
+    return { ...resolved, baseStats: p.baseStats };
+  }
+  return resolved;
+}
 function getDefaultSet(p: ChampionsPokemon): CommonSet {
   const usage = USAGE_DATA[p.id];
   if (usage && usage.length > 0) return usage[0];
@@ -165,7 +193,7 @@ export default function DamageCalculator() {
 
   const defenderStats = useMemo(() => {
     if (!defender.pokemon || !defender.set) return null;
-    const resolved = resolveMegaForCalc(defender.pokemon, defender.set);
+    const resolved = resolveDefenderForCalc(defender.pokemon, defender.set);
     return calculateStats(resolved.baseStats, defender.set.sp, defender.set.nature as NatureName);
   }, [defender.pokemon, defender.set]);
 
@@ -177,7 +205,7 @@ export default function DamageCalculator() {
       lightScreen, reflect, auroraVeil, friendGuard,
     };
     const atkResolved = resolveMegaForCalc(attacker.pokemon, attacker.set);
-    const defResolved = resolveMegaForCalc(defender.pokemon, defender.set);
+    const defResolved = resolveDefenderForCalc(defender.pokemon, defender.set);
     const atkData: DamageCalcPokemon = {
       baseStats: atkResolved.baseStats,
       sp: attacker.set.sp,
@@ -454,6 +482,7 @@ export default function DamageCalculator() {
           showDefStages
           preferUp={allMoveResults.length === 0}
           weather={weather}
+          isDefender
         />
       </div>
 
@@ -655,7 +684,7 @@ export default function DamageCalculator() {
 function PokemonPanel({
   label, slot, stats, color, onPickerOpen, onSetUpdate, onSPUpdate,
   onStageChange, showAtkStages, showDefStages, onBurnToggle, isBurned,
-  currentHP, onHPChange, preferUp, weather,
+  currentHP, onHPChange, preferUp, weather, isDefender,
 }: {
   label: string;
   slot: PokemonSlot;
@@ -673,6 +702,7 @@ function PokemonPanel({
   onHPChange?: (hp: number) => void;
   preferUp?: boolean;
   weather?: DamageCalcOptions["weather"];
+  isDefender?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const p = slot.pokemon;
@@ -684,8 +714,8 @@ function PokemonPanel({
   const usageSets = p ? (USAGE_DATA[p.id] ?? []) : [];
   const totalSP = set ? Object.values(set.sp).reduce((a, b) => a + b, 0) : 0;
   const natureDisplay = set ? getNatureDisplay(set.nature) : { plus: null, minus: null };
-  // Resolve mega form stats for display
-  const resolvedStats = p && set ? resolveMegaForCalc(p, set) : null;
+  // Resolve mega form stats for display (Aegislash: Blade for attacker, Shield for defender)
+  const resolvedStats = p && set ? (isDefender ? resolveDefenderForCalc(p, set) : resolveMegaForCalc(p, set)) : null;
 
   return (
     <div className={cn("glass rounded-2xl border overflow-hidden", borderColor)}>
@@ -694,9 +724,9 @@ function PokemonPanel({
         <p className={cn("text-[10px] font-bold uppercase tracking-widest mb-2", headerText)}>{label}</p>
         {p ? (
           <div className="flex items-center gap-3">
-            <Image src={p.sprite} alt={p.name} width={56} height={56} unoptimized />
+            <Image src={resolvedStats?.sprite ?? p.sprite} alt={resolvedStats?.name ?? p.name} width={56} height={56} unoptimized />
             <div className="flex-1 min-w-0">
-              <p className="text-lg font-bold truncate">{p.name}</p>
+              <p className="text-lg font-bold truncate">{resolvedStats?.name ?? p.name}</p>
               <div className="flex gap-1 mt-1">
                 {(resolvedStats?.types ?? p.types).map(t => (
                   <span

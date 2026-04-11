@@ -246,7 +246,7 @@ function detectMegaForms(pokemon: ChampionsPokemon[], sets: CommonSet[]): (strin
     const p = pokemon[i];
     if (!p || !p.hasMega || !p.forms) return null;
     if (!isMegaItem(s.item)) return null;
-    const megaForms = p.forms.filter(f => f.isMega);
+    const megaForms = p.forms.filter(f => f.isMega && !f.hidden);
     if (megaForms.length <= 1) return megaForms[0]?.name ?? null;
     // Multi-form: match by item suffix (X, Y, Z)
     if (s.item.endsWith(" X")) return megaForms.find(f => f.name.endsWith(" X"))?.name ?? megaForms[0].name;
@@ -366,7 +366,7 @@ function buildTeamPool(): TeamEntry[] {
     if (!allMegaSets || allMegaSets.length === 0) continue;
 
     // Group mega sets by form (X, Y, Z, or default)
-    const megaForms = mp.forms!.filter(f => f.isMega);
+    const megaForms = mp.forms!.filter(f => f.isMega && !f.hidden);
     for (const form of megaForms) {
       // Match sets to this form by item suffix
       let formSets = allMegaSets;

@@ -9,7 +9,8 @@ import { getTeamsForPokemon } from "@/lib/winning-teams";
 import { POKEMON_SEED } from "@/lib/pokemon-data";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
-import { X, Sparkles, Zap, Trophy, Coins, Star, Shield, Sword, Target, Gauge, Timer, TrendingUp, Users, Wrench, BarChart3 } from "lucide-react";
+import { getDefensiveProfile, getMatchup, getAllTypes } from "@/lib/engine/type-chart";
+import { X, Sparkles, Zap, Trophy, Star, Shield, Sword, Target, Gauge, Timer, TrendingUp, Users, Wrench, BarChart3 } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
 import { deflateRaw } from "pako";
 import { SIM_POKEMON, SIM_TOTAL_BATTLES } from "@/lib/simulation-data";
@@ -22,7 +23,7 @@ interface PokemonDetailModalProps {
 function getMemberSprite(member: WinningTeamMember): string {
   const pkm = POKEMON_SEED.find(p => p.id === member.pokemonId);
   if (member.isMega) {
-    const megaForms = pkm?.forms?.filter(f => f.isMega) ?? [];
+    const megaForms = pkm?.forms?.filter(f => f.isMega && !f.hidden) ?? [];
     const megaForm = megaForms[member.megaFormIndex ?? 0];
     if (megaForm) return megaForm.sprite;
   }
@@ -32,7 +33,7 @@ function getMemberSprite(member: WinningTeamMember): string {
 function getMemberDisplayName(member: WinningTeamMember): string {
   if (member.isMega) {
     const pkm = POKEMON_SEED.find(p => p.id === member.pokemonId);
-    const megaForms = pkm?.forms?.filter(f => f.isMega) ?? [];
+    const megaForms = pkm?.forms?.filter(f => f.isMega && !f.hidden) ?? [];
     const megaForm = megaForms[member.megaFormIndex ?? 0];
     if (megaForm) return megaForm.name;
   }
@@ -59,7 +60,7 @@ function buildTeamBuilderUrl(team: WinningTeam): string {
           mgi = m.megaFormIndex;
         } else if (bestSet) {
           const pkm = POKEMON_SEED.find(p => p.id === m.pokemonId);
-          const megaForms = pkm?.forms?.filter(f => f.isMega) ?? [];
+          const megaForms = pkm?.forms?.filter(f => f.isMega && !f.hidden) ?? [];
           const idx = megaForms.findIndex(f => f.abilities.some(a => a.name === bestSet.ability));
           mgi = idx >= 0 ? idx : 0;
         }
@@ -203,14 +204,33 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
     setSpriteError(false);
   };
 
-  if (!pokemon) return null;
-
-  const currentForm = activeForm > 0 && pokemon.forms ? pokemon.forms[activeForm - 1] : null;
-  const displayTypes = currentForm ? currentForm.types : pokemon.types;
-  const displayStats = currentForm ? currentForm.baseStats : pokemon.baseStats;
-  const displayAbilities = currentForm ? currentForm.abilities : pokemon.abilities;
+  const visibleForms = pokemon?.forms?.filter(f => !f.hidden) ?? [];
+  const currentForm = pokemon && activeForm > 0 ? visibleForms[activeForm - 1] ?? null : null;
+  const displayTypes = currentForm ? currentForm.types : (pokemon?.types ?? []);
+  const displayStats = currentForm ? currentForm.baseStats : (pokemon?.baseStats ?? { hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed: 0 });
+  const displayAbilities = currentForm ? currentForm.abilities : (pokemon?.abilities ?? []);
   const primaryColor = TYPE_COLORS[displayTypes[0]];
   const bst = Object.values(displayStats).reduce((a, b) => a + b, 0);
+
+  const defensiveProfile = useMemo(() => getDefensiveProfile(displayTypes), [displayTypes]);
+
+  const offensiveCoverageData = useMemo(() => {
+    if (!pokemon) return [];
+    const moveTypes = [...new Set(pokemon.moves.filter(m => m.category !== "status").map(m => m.type))];
+    const allTypes = getAllTypes();
+    const result: { type: PokemonType; best: number }[] = [];
+    for (const def of allTypes) {
+      let best = 0;
+      for (const mt of moveTypes) {
+        const eff = getMatchup(mt, [def]);
+        if (eff > best) best = eff;
+      }
+      result.push({ type: def as PokemonType, best });
+    }
+    return result;
+  }, [pokemon?.moves]);
+
+  if (!pokemon) return null;
 
   return (
     <AnimatePresence>
@@ -319,7 +339,7 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                   </div>
 
                   {/* Form selector */}
-                  {pokemon.forms && pokemon.forms.length > 0 && (
+                  {visibleForms.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleFormChange(0)}
@@ -332,7 +352,7 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                       >
                         Base
                       </button>
-                      {pokemon.forms.map((form, i) => (
+                      {visibleForms.map((form, i) => (
                         <button
                           key={form.name}
                           onClick={() => handleFormChange(i + 1)}
@@ -389,28 +409,17 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                     exit={{ opacity: 0, x: 20 }}
                     className="space-y-5"
                   >
-                    {/* Tier, Recruitment & Usage quick stats */}
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-200/5 dark:to-transparent border border-gray-200/80 dark:border-gray-200/10">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Tier</span>
-                        </div>
-                        <p className="text-2xl font-bold tracking-tight" style={{ color: primaryColor }}>{pokemon.tier ?? "-"}</p>
+                    {/* Tier & Usage quick stats */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="px-3 py-2 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-200/5 dark:to-transparent border border-gray-200/80 dark:border-gray-200/10 flex items-center gap-2.5">
+                        <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Tier</span>
+                        <p className="ml-auto text-base font-bold tracking-tight" style={{ color: primaryColor }}>{pokemon.tier ?? "-"}</p>
                       </div>
-                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-200/5 dark:to-transparent border border-gray-200/80 dark:border-gray-200/10">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Coins className="w-3.5 h-3.5 text-amber-500" />
-                          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Recruit</span>
-                        </div>
-                        <p className="text-2xl font-bold tracking-tight text-gray-800">{pokemon.recruitmentCost != null ? pokemon.recruitmentCost : "-"} <span className="text-xs font-medium text-gray-400">VP</span></p>
-                      </div>
-                      <div className="p-3.5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-200/5 dark:to-transparent border border-gray-200/80 dark:border-gray-200/10">
-                        <div className="flex items-center gap-2 mb-1">
-                          <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-                          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Usage</span>
-                        </div>
-                        <p className="text-2xl font-bold tracking-tight text-gray-800">{pokemon.usageRate != null ? pokemon.usageRate : "-"} <span className="text-xs font-medium text-gray-400">%</span></p>
+                      <div className="px-3 py-2 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-200/5 dark:to-transparent border border-gray-200/80 dark:border-gray-200/10 flex items-center gap-2.5">
+                        <TrendingUp className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Usage</span>
+                        <p className="ml-auto text-base font-bold tracking-tight text-gray-800">{pokemon.usageRate != null ? pokemon.usageRate : "-"} <span className="text-[10px] font-medium text-gray-400">%</span></p>
                       </div>
                     </div>
 
@@ -434,6 +443,36 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                             </div>
                           </div>
                         ))}
+                      </div>
+                    </div>
+
+                    {/* Defensive Type Chart */}
+                    <div>
+                      <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Type Defenses</h3>
+                      <div className="grid grid-cols-6 sm:grid-cols-9 gap-1.5">
+                        {getAllTypes().map((type) => {
+                          const mult = getMatchup(type as PokemonType, displayTypes);
+                          let label = "";
+                          let bg = "bg-gray-50 dark:bg-gray-200/5";
+                          let textColor = "text-gray-300 dark:text-gray-600";
+                          if (mult === 0) { label = "0"; bg = "bg-gray-900 dark:bg-gray-900"; textColor = "text-gray-400"; }
+                          else if (mult === 0.25) { label = "¼"; bg = "bg-emerald-100 dark:bg-emerald-500/20"; textColor = "text-emerald-700 dark:text-emerald-400"; }
+                          else if (mult === 0.5) { label = "½"; bg = "bg-emerald-50 dark:bg-emerald-500/10"; textColor = "text-emerald-600 dark:text-emerald-400"; }
+                          else if (mult === 1) { label = ""; }
+                          else if (mult === 2) { label = "2×"; bg = "bg-red-50 dark:bg-red-500/10"; textColor = "text-red-600 dark:text-red-400"; }
+                          else if (mult === 4) { label = "4×"; bg = "bg-red-100 dark:bg-red-500/20"; textColor = "text-red-700 dark:text-red-300"; }
+                          return (
+                            <div key={type} className={cn("flex flex-col items-center gap-0.5 py-1.5 rounded-lg", bg)}>
+                              <span
+                                className="w-full text-center text-[8px] font-bold uppercase text-white/90 rounded px-1 py-0.5 leading-none"
+                                style={{ backgroundColor: TYPE_COLORS[type as PokemonType] }}
+                              >
+                                {type.slice(0, 3)}
+                              </span>
+                              <span className={cn("text-[11px] font-bold", textColor)}>{label}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -510,6 +549,34 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                     exit={{ opacity: 0, x: 20 }}
                     className="space-y-2"
                   >
+                    {/* Offensive Type Coverage */}
+                    <div className="mb-4">
+                      <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Type Coverage</h3>
+                      <div className="grid grid-cols-6 sm:grid-cols-9 gap-1.5">
+                        {offensiveCoverageData.map(({ type, best }) => {
+                          let label = "";
+                          let bg = "bg-gray-50 dark:bg-gray-200/5";
+                          let textColor = "text-gray-300 dark:text-gray-600";
+                          if (best >= 2) { label = "2×"; bg = "bg-emerald-50 dark:bg-emerald-500/10"; textColor = "text-emerald-600 dark:text-emerald-400"; }
+                          else if (best === 1) { label = "1×"; textColor = "text-gray-400 dark:text-gray-500"; }
+                          else if (best > 0 && best < 1) { label = "½"; bg = "bg-red-50 dark:bg-red-500/10"; textColor = "text-red-500 dark:text-red-400"; }
+                          else { label = "—"; textColor = "text-gray-300 dark:text-gray-600"; }
+                          return (
+                            <div key={type} className={cn("flex flex-col items-center gap-0.5 py-1.5 rounded-lg", bg)}>
+                              <span
+                                className="w-full text-center text-[8px] font-bold uppercase text-white/90 rounded px-1 py-0.5 leading-none"
+                                style={{ backgroundColor: TYPE_COLORS[type] }}
+                              >
+                                {type.slice(0, 3)}
+                              </span>
+                              <span className={cn("text-[11px] font-bold", textColor)}>{label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-2">Best effectiveness your moves can achieve against each type</p>
+                    </div>
+
                     <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">
                       Learnable Moves · {pokemon.moves.length}
                     </h3>
@@ -540,7 +607,7 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                               {move.category}
                             </span>
                           </div>
-                          <p className="text-[11px] text-gray-400 mt-0.5 truncate group-hover/move:whitespace-normal leading-relaxed">
+                          <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
                             {move.description}
                           </p>
                         </div>

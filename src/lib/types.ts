@@ -47,6 +47,7 @@ export interface PokemonForm {
   baseStats: BaseStats;
   abilities: Ability[];
   isMega?: boolean;
+  hidden?: boolean;
 }
 
 export interface ChampionsPokemon {

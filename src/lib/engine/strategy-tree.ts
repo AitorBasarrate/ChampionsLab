@@ -248,6 +248,15 @@ function nextId(): string {
   return `n${++nodeCounter}`;
 }
 
+/** Recursively check if any node in a tree contains a string in its label */
+function treeContains(nodes: StrategyNode[], text: string): boolean {
+  for (const n of nodes) {
+    if (n.label.includes(text)) return true;
+    if (n.children.length > 0 && treeContains(n.children, text)) return true;
+  }
+  return false;
+}
+
 // ── MAIN GENERATOR ──────────────────────────────────────────────────────────
 
 export function generateStrategyTree(
@@ -585,195 +594,247 @@ function buildTurn1Actions(
   const oppHasRedirection = opp1.hasRedirection || opp2.hasRedirection;
   const oppRedirector = opp1.hasRedirection ? opp1 : opp2.hasRedirection ? opp2 : null;
 
+  /** Helper: get partner's ideal Turn 1 action */
+  function getPartnerPlay(partner: AnalyzedMon, foeTarget: AnalyzedMon): StrategyNode {
+    if (tailwindUser && tailwindUser === partner) {
+      return { id: nextId(), type: "action", label: `${partner.pokemon.name}: Tailwind`, detail: "Double your side's speed for 4 turns", pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], moveType: "flying", severity: "good", children: [] };
+    }
+    if (trUser && trUser === partner) {
+      return { id: nextId(), type: "action", label: `${partner.pokemon.name}: Trick Room`, detail: "Reverse speed for 5 turns — your slow mons move first", pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], moveType: "psychic", severity: "good", children: [] };
+    }
+    if (redirector && redirector === partner) {
+      const redirectMove = partner.moves.find(m => m.role === "redirection")!;
+      return { id: nextId(), type: "action", label: `${partner.pokemon.name}: ${redirectMove.name}`, detail: "Redirect attacks to protect partner", pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], moveType: "normal", severity: "good", children: [] };
+    }
+    if (setupUser && setupUser === partner) {
+      const setupMove = partner.moves.find(m => m.role === "setup")!;
+      return { id: nextId(), type: "action", label: `${partner.pokemon.name}: ${setupMove.name}`, detail: "Boost while partner covers", pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], moveType: "normal", severity: "good", children: [] };
+    }
+    const bestAtk = getBestAttack(partner, foeTarget);
+    if (bestAtk) {
+      return { id: nextId(), type: "action", label: `${partner.pokemon.name}: ${bestAtk.name} → ${isSpreadMove(bestAtk.data) ? "both foes" : foeTarget.pokemon.name}`, detail: `${bestAtk.effectiveness >= 2 ? "Super effective! " : ""}${bestAtk.data.basePower} BP ${bestAtk.data.type}-type`, pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], moveType: bestAtk.data.type, severity: bestAtk.effectiveness >= 2 ? "good" : "neutral", children: [] };
+    }
+    return { id: nextId(), type: "action", label: `${partner.pokemon.name}: attacks`, pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], severity: "neutral", children: [] };
+  }
+
+  /** Helper: get attack node for a mon */
+  function getAttackNode(mon: AnalyzedMon): StrategyNode {
+    const target = findBestTarget(mon, opp1, opp2);
+    const bestAtk = getBestAttack(mon, target);
+    if (bestAtk) {
+      const spread = isSpreadMove(bestAtk.data);
+      return { id: nextId(), type: "action", label: `${mon.pokemon.name}: ${bestAtk.name} → ${spread ? "both foes" : target.pokemon.name}`, detail: `${bestAtk.effectiveness >= 2 ? "Super effective! " : ""}${bestAtk.data.basePower} BP ${bestAtk.data.type}-type`, pokemon: [mon.pokemon.name], sprites: [mon.pokemon.sprite], moveType: bestAtk.data.type, severity: bestAtk.effectiveness >= 2 ? "good" : "neutral", children: [] };
+    }
+    return { id: nextId(), type: "action", label: `${mon.pokemon.name}: attacks`, pokemon: [mon.pokemon.name], sprites: [mon.pokemon.sprite], severity: "neutral", children: [] };
+  }
+
   // ── FAKE OUT BRANCH ──
   if (fakeOutUser) {
     const { target, reason } = pickFakeOutTarget(fakeOutUser, nonFakeOutLead, opp1, opp2);
-    const fakeOutNode: StrategyNode = {
-      id: nextId(),
-      type: "action",
-      label: `${fakeOutUser.pokemon.name}: Fake Out → ${target.pokemon.name}`,
-      detail: `Flinch to ${reason} (priority +3, always goes first)`,
-      pokemon: [fakeOutUser.pokemon.name],
-      sprites: [fakeOutUser.pokemon.sprite],
-      moveType: "normal",
-      severity: "good",
-      children: [],
-    };
+    const nonFlinched = target === opp1 ? opp2 : opp1;
+    const partnerIsSetup = tailwindUser === nonFakeOutLead || trUser === nonFakeOutLead ||
+      redirector === nonFakeOutLead || setupUser === nonFakeOutLead;
 
-    // What enemy Fake Out user does if applicable
-    if (oppHasFakeOut && oppFakeOutUser) {
-      fakeOutNode.children.push({
+    // Does opponent have Fake Out that threatens our partner's setup?
+    if (oppHasFakeOut && oppFakeOutUser && partnerIsSetup) {
+      const setupMoveName = tailwindUser === nonFakeOutLead ? "Tailwind"
+        : trUser === nonFakeOutLead ? "Trick Room"
+        : redirector === nonFakeOutLead ? nonFakeOutLead.moves.find(m => m.role === "redirection")!.name
+        : nonFakeOutLead.moves.find(m => m.role === "setup")!.name;
+
+      // Decision gate: opponent can Fake Out our setup mon
+      const gateNode: StrategyNode = {
         id: nextId(),
         type: "decision",
-        label: `Opponent Fake Out → ?`,
-        detail: `${oppFakeOutUser.pokemon.name} may Fake Out ${nonFakeOutLead.pokemon.name}`,
-        severity: "bad",
-        branchLabel: "Watch out",
-        children: [{
-          id: nextId(),
-          type: "action",
-          label: nonFakeOutLead.hasProtect
-            ? `${nonFakeOutLead.pokemon.name}: Protect (blocks Fake Out)`
-            : `${nonFakeOutLead.pokemon.name} may be flinched`,
-          severity: nonFakeOutLead.hasProtect ? "good" : "bad",
-          children: [],
-        }],
-      });
-    }
-
-    actions.push(fakeOutNode);
-
-    // Partner action
-    if (tailwindUser && tailwindUser === nonFakeOutLead) {
-      actions.push({
-        id: nextId(),
-        type: "action",
-        label: `${nonFakeOutLead.pokemon.name}: Tailwind`,
-        detail: "Double your side's speed for 4 turns",
-        pokemon: [nonFakeOutLead.pokemon.name],
-        sprites: [nonFakeOutLead.pokemon.sprite],
-        moveType: "flying",
-        severity: "good",
+        label: `${oppFakeOutUser.pokemon.name} threatens Fake Out → ${nonFakeOutLead.pokemon.name}`,
+        detail: `May block your ${setupMoveName} — choose your play`,
+        severity: "neutral",
         children: [],
-      });
-    } else if (trUser && trUser === nonFakeOutLead) {
-      actions.push({
+      };
+
+      // Branch A: Ideal play → assume opponent doesn't target partner (or we read it)
+      const idealBranch: StrategyNode = {
         id: nextId(),
         type: "action",
-        label: `${nonFakeOutLead.pokemon.name}: Trick Room`,
-        detail: "Reverse speed for 5 turns — your slow mons move first",
-        pokemon: [nonFakeOutLead.pokemon.name],
-        sprites: [nonFakeOutLead.pokemon.sprite],
-        moveType: "psychic",
-        severity: "good",
-        children: [],
-      });
-    } else if (redirector && redirector === nonFakeOutLead) {
-      const redirectMove = nonFakeOutLead.moves.find(m => m.role === "redirection")!;
-      actions.push({
-        id: nextId(),
-        type: "action",
-        label: `${nonFakeOutLead.pokemon.name}: ${redirectMove.name}`,
-        detail: "Redirect attacks to protect partner",
-        pokemon: [nonFakeOutLead.pokemon.name],
-        sprites: [nonFakeOutLead.pokemon.sprite],
+        label: `${fakeOutUser.pokemon.name}: Fake Out → ${target.pokemon.name}`,
+        detail: `Flinch to ${reason} — partner sets up freely`,
+        pokemon: [fakeOutUser.pokemon.name],
+        sprites: [fakeOutUser.pokemon.sprite],
         moveType: "normal",
         severity: "good",
-        children: [],
-      });
-    } else if (setupUser && setupUser === nonFakeOutLead) {
-      const setupMove = nonFakeOutLead.moves.find(m => m.role === "setup")!;
-      actions.push({
-        id: nextId(),
-        type: "action",
-        label: `${nonFakeOutLead.pokemon.name}: ${setupMove.name}`,
-        detail: "Boost while partner covers with Fake Out",
-        pokemon: [nonFakeOutLead.pokemon.name],
-        sprites: [nonFakeOutLead.pokemon.sprite],
-        moveType: "normal",
-        severity: "good",
-        children: [],
-      });
-    } else {
-      // Partner attacks the non-flinched target
-      const other = target === opp1 ? opp2 : opp1;
-      const bestAtk = getBestAttack(nonFakeOutLead, other);
-      if (bestAtk) {
-        actions.push({
+        branchLabel: "Ideal play",
+        children: [getPartnerPlay(nonFakeOutLead, nonFlinched)],
+      };
+      gateNode.children.push(idealBranch);
+
+      // Branch B: Safe play → Protect partner, delay setup
+      if (nonFakeOutLead.hasProtect) {
+        const safeBranch: StrategyNode = {
           id: nextId(),
           type: "action",
-          label: `${nonFakeOutLead.pokemon.name}: ${bestAtk.name} → ${other.pokemon.name}`,
-          detail: `${bestAtk.effectiveness >= 2 ? "Super effective! " : ""}${bestAtk.data.basePower} BP ${bestAtk.data.type}-type`,
-          pokemon: [nonFakeOutLead.pokemon.name],
-          sprites: [nonFakeOutLead.pokemon.sprite],
-          moveType: bestAtk.data.type,
-          severity: bestAtk.effectiveness >= 2 ? "good" : "neutral",
+          label: `${fakeOutUser.pokemon.name}: Fake Out → ${target.pokemon.name}`,
+          detail: `Partner Protects to block Fake Out — ${setupMoveName} delayed to Turn 2`,
+          pokemon: [fakeOutUser.pokemon.name],
+          sprites: [fakeOutUser.pokemon.sprite],
+          moveType: "normal",
+          severity: "neutral",
+          branchLabel: "Safe play",
+          children: [{
+            id: nextId(),
+            type: "action",
+            label: `${nonFakeOutLead.pokemon.name}: Protect`,
+            detail: `Block opponent's Fake Out — set up ${setupMoveName} next turn`,
+            pokemon: [nonFakeOutLead.pokemon.name],
+            sprites: [nonFakeOutLead.pokemon.sprite],
+            severity: "neutral",
+            children: [],
+          }],
+        };
+        gateNode.children.push(safeBranch);
+      } else {
+        const riskBranch: StrategyNode = {
+          id: nextId(),
+          type: "action",
+          label: `${nonFakeOutLead.pokemon.name} gets flinched`,
+          detail: `No Protect — ${setupMoveName} delayed to Turn 2. ${fakeOutUser.pokemon.name} still flinches ${target.pokemon.name}.`,
+          severity: "bad",
+          branchLabel: "If flinched",
           children: [],
-        });
+        };
+        gateNode.children.push(riskBranch);
       }
+
+      actions.push(gateNode);
+    } else {
+      // No opponent Fake Out threat to partner → single clear plan
+      const fakeOutNode: StrategyNode = {
+        id: nextId(),
+        type: "action",
+        label: `${fakeOutUser.pokemon.name}: Fake Out → ${target.pokemon.name}`,
+        detail: `Flinch to ${reason} (priority +3, always goes first)`,
+        pokemon: [fakeOutUser.pokemon.name],
+        sprites: [fakeOutUser.pokemon.sprite],
+        moveType: "normal",
+        severity: "good",
+        children: [],
+      };
+      actions.push(fakeOutNode);
+      actions.push(getPartnerPlay(nonFakeOutLead, nonFlinched));
     }
   }
   // ── NO FAKE OUT: SPEED CONTROL + ATTACK ──
   else if (tailwindUser || trUser) {
     const speedUser = tailwindUser ?? trUser!;
     const attacker = speedUser === lead1 ? lead2 : lead1;
-    const isSpeedMove = tailwindUser ? "Tailwind" : "Trick Room";
+    const speedMoveName = tailwindUser ? "Tailwind" : "Trick Room";
     const moveType: PokemonType = tailwindUser ? "flying" : "psychic";
+    const attackNode = getAttackNode(attacker);
 
-    actions.push({
-      id: nextId(),
-      type: "action",
-      label: `${speedUser.pokemon.name}: ${isSpeedMove}`,
-      detail: tailwindUser ? "Double speed for 4 turns" : "Reverse speed for 5 turns",
-      pokemon: [speedUser.pokemon.name],
-      sprites: [speedUser.pokemon.sprite],
-      moveType,
-      severity: "good",
-      children: [],
-    });
-
-    // If opponent might block with Fake Out
     if (oppHasFakeOut && oppFakeOutUser) {
-      const flinchTarget = speedUser; // They'd want to stop our setup
-      actions.push({
+      // Decision gate: opponent Fake Out contests our speed control
+      const gateNode: StrategyNode = {
         id: nextId(),
         type: "decision",
-        label: `Opponent Fake Out → ${speedUser.pokemon.name}?`,
-        detail: `${oppFakeOutUser.pokemon.name} may flinch your setup`,
-        severity: "bad",
-        branchLabel: "Risk",
-        children: [
-          {
-            id: nextId(),
-            type: "action",
-            label: speedUser.hasProtect
-              ? `Protect ${speedUser.pokemon.name} turn 1, set up turn 2`
-              : `${speedUser.pokemon.name} gets flinched — set up turn 2 instead`,
-            severity: speedUser.hasProtect ? "neutral" : "bad",
-            children: [],
-          },
-        ],
-      });
-    }
+        label: `${oppFakeOutUser.pokemon.name} may Fake Out ${speedUser.pokemon.name}`,
+        detail: `Threatens to block your ${speedMoveName}`,
+        severity: "neutral",
+        children: [],
+      };
 
-    // Opponent has Trick Room and we're using Tailwind (or vice versa)
-    if (tailwindUser && oppHasTR && oppTRUser) {
-      actions.push({
+      // Branch A: Speed control goes up (opponent targets attacker or doesn't FO)
+      gateNode.children.push({
         id: nextId(),
-        type: "decision",
-        label: `${oppTRUser.pokemon.name} sets Trick Room?`,
-        detail: "Opponent reverses speed — Tailwind becomes useless under TR",
-        severity: "bad",
-        branchLabel: "Counter-play",
-        children: [
-          {
-            id: nextId(),
-            type: "action",
-            label: `Focus fire ${oppTRUser.pokemon.name} to prevent TR`,
-            detail: "KO the TR setter before it moves (it has -7 priority)",
-            severity: "good",
-            children: [],
-          },
-        ],
+        type: "action",
+        label: `${speedUser.pokemon.name}: ${speedMoveName}`,
+        detail: tailwindUser ? "Double speed for 4 turns" : "Reverse speed for 5 turns",
+        pokemon: [speedUser.pokemon.name],
+        sprites: [speedUser.pokemon.sprite],
+        moveType,
+        severity: "good",
+        branchLabel: `${speedMoveName} goes up`,
+        children: [{ ...attackNode, id: nextId() }],
       });
-    }
 
-    // Attacker action
-    const primaryTarget = threatScore(opp1, attacker) >= threatScore(opp2, attacker) ? opp1 : opp2;
-    const bestAtk = getBestAttack(attacker, primaryTarget);
-    if (bestAtk) {
-      const spreadNote = bestAtk.data && isSpreadMove(bestAtk.data) ? " (hits both)" : "";
+      // Branch B: Protect or get flinched
+      if (speedUser.hasProtect) {
+        gateNode.children.push({
+          id: nextId(),
+          type: "action",
+          label: `${speedUser.pokemon.name}: Protect`,
+          detail: `Block Fake Out — set ${speedMoveName} Turn 2`,
+          pokemon: [speedUser.pokemon.name],
+          sprites: [speedUser.pokemon.sprite],
+          severity: "neutral",
+          branchLabel: "Protect first",
+          children: [{ ...attackNode, id: nextId() }],
+        });
+      } else {
+        gateNode.children.push({
+          id: nextId(),
+          type: "action",
+          label: `${speedUser.pokemon.name} gets flinched`,
+          detail: `${speedMoveName} delayed to Turn 2`,
+          severity: "bad",
+          branchLabel: "If flinched",
+          children: [{ ...attackNode, id: nextId() }],
+        });
+      }
+
+      actions.push(gateNode);
+    } else if (tailwindUser && oppHasTR && oppTRUser) {
+      // Speed control + opponent counter-TR threat
       actions.push({
         id: nextId(),
         type: "action",
-        label: `${attacker.pokemon.name}: ${bestAtk.name} → ${isSpreadMove(bestAtk.data) ? "both foes" : primaryTarget.pokemon.name}${spreadNote}`,
-        detail: `${bestAtk.effectiveness >= 2 ? "Super effective! " : ""}${bestAtk.data.basePower} BP ${bestAtk.data.type}-type`,
-        pokemon: [attacker.pokemon.name],
-        sprites: [attacker.pokemon.sprite],
-        moveType: bestAtk.data.type,
-        severity: bestAtk.effectiveness >= 2 ? "good" : "neutral",
+        label: `${speedUser.pokemon.name}: Tailwind`,
+        detail: "Double speed for 4 turns",
+        pokemon: [speedUser.pokemon.name],
+        sprites: [speedUser.pokemon.sprite],
+        moveType,
+        severity: "good",
         children: [],
       });
+
+      // Attacker action with decision about TR counter
+      const gateNode: StrategyNode = {
+        id: nextId(),
+        type: "decision",
+        label: `${oppTRUser.pokemon.name} may set Trick Room`,
+        detail: "Counters Tailwind by reversing speed",
+        severity: "neutral",
+        children: [
+          {
+            id: nextId(),
+            type: "action",
+            label: `${attacker.pokemon.name}: Focus ${oppTRUser.pokemon.name}`,
+            detail: "KO the TR setter before it moves (-7 priority)",
+            severity: "good",
+            branchLabel: "Prevent TR",
+            children: [],
+          },
+          {
+            ...attackNode,
+            id: nextId(),
+            branchLabel: "Press damage",
+            detail: `Ignore TR threat — deal maximum damage. Counter-TR later if needed.`,
+          },
+        ],
+      };
+      actions.push(gateNode);
+    } else {
+      // No threats → single clear plan
+      actions.push({
+        id: nextId(),
+        type: "action",
+        label: `${speedUser.pokemon.name}: ${speedMoveName}`,
+        detail: tailwindUser ? "Double speed for 4 turns" : "Reverse speed for 5 turns",
+        pokemon: [speedUser.pokemon.name],
+        sprites: [speedUser.pokemon.sprite],
+        moveType,
+        severity: "good",
+        children: [],
+      });
+      actions.push(attackNode);
     }
   }
   // ── REDIRECTION + ATTACK ──
@@ -793,7 +854,7 @@ function buildTurn1Actions(
       children: [],
     });
 
-    // Partner goes into offense or setup
+    // Partner: setup or attack
     if (setupUser && setupUser === attacker) {
       const setupMove = attacker.moves.find(m => m.role === "setup")!;
       actions.push({
@@ -808,7 +869,6 @@ function buildTurn1Actions(
         children: [],
       });
     } else {
-      // Attack the bigger threat
       const primaryTarget = threatScore(opp1, attacker) >= threatScore(opp2, attacker) ? opp1 : opp2;
       const bestAtk = getBestAttack(attacker, primaryTarget);
       if (bestAtk) {
@@ -830,11 +890,8 @@ function buildTurn1Actions(
   else {
     const target1 = findBestTarget(lead1, opp1, opp2);
     const target2 = findBestTarget(lead2, opp1, opp2);
-
     const bestAtk1 = getBestAttack(lead1, target1);
     const bestAtk2 = getBestAttack(lead2, target2);
-
-    // Try to focus fire if possible
     const shouldFocus = target1 === target2;
 
     if (bestAtk1) {
@@ -867,7 +924,6 @@ function buildTurn1Actions(
       });
     }
 
-    // Warn if we're slower with no speed control
     if (!weFaster) {
       actions.push({
         id: nextId(),
@@ -880,7 +936,7 @@ function buildTurn1Actions(
     }
   }
 
-  // Handle opponent redirection
+  // Handle opponent redirection warning (applies across all branches)
   if (oppHasRedirection && oppRedirector) {
     const redirectedMoves = actions.filter(a =>
       a.type === "action" && a.label.includes("→") && !a.label.includes("both foes")
@@ -888,18 +944,11 @@ function buildTurn1Actions(
     if (redirectedMoves.length > 0) {
       actions.push({
         id: nextId(),
-        type: "decision",
-        label: `Warning: ${oppRedirector.pokemon.name} redirects attacks`,
-        detail: `Single-target moves get pulled to ${oppRedirector.pokemon.name}. Use spread moves or KO the redirector first.`,
+        type: "field-state",
+        label: `⚠ ${oppRedirector.pokemon.name} redirects single-target attacks`,
+        detail: `Use spread moves or KO ${oppRedirector.pokemon.name} first`,
         severity: "bad",
-        branchLabel: "Caution",
-        children: [{
-          id: nextId(),
-          type: "action",
-          label: `Switch target to ${oppRedirector.pokemon.name} or use spread attacks`,
-          severity: "neutral",
-          children: [],
-        }],
+        children: [],
       });
     }
   }
@@ -918,101 +967,223 @@ function buildTurn2Actions(
 ): StrategyNode[] {
   const actions: StrategyNode[] = [];
 
-  const usedFakeOut = turn1Actions.some(a => a.label.includes("Fake Out"));
-  const setTailwind = turn1Actions.some(a => a.label.includes("Tailwind"));
-  const setTrickRoom = turn1Actions.some(a => a.label.includes("Trick Room"));
-  const hasSpeedControl = setTailwind || setTrickRoom;
+  const usedFakeOut = treeContains(turn1Actions, "Fake Out");
+  const planHasTailwind = treeContains(turn1Actions, "Tailwind");
+  const planHasTrickRoom = treeContains(turn1Actions, "Trick Room");
+  const setupMaybeDelayed = treeContains(turn1Actions, "Safe play") ||
+    treeContains(turn1Actions, "Protect first") ||
+    treeContains(turn1Actions, "If flinched");
+  const hasSpeedControl = planHasTailwind || planHasTrickRoom;
 
   // ── POST-FAKE OUT: NOW ATTACK/SETUP ──
   if (usedFakeOut) {
     const fakeOutUser = lead1.hasFakeOut ? lead1 : lead2;
     const partner = fakeOutUser === lead1 ? lead2 : lead1;
 
-    // Fake Out user now does their main job
-    if (fakeOutUser.hasTailwind && !setTailwind) {
-      actions.push({
+    if (setupMaybeDelayed && (partner.hasTailwind || partner.hasTrickRoom)) {
+      // Partner may have Protected instead of setting up on Turn 1
+      const setupMove = partner.hasTailwind ? "Tailwind" : "Trick Room";
+      const sMoveType: PokemonType = partner.hasTailwind ? "flying" : "psychic";
+
+      const foTarget = findBestTarget(fakeOutUser, opp1, opp2);
+      const foBestAtk = getBestAttack(fakeOutUser, foTarget);
+      const partnerTarget = findBestTarget(partner, opp1, opp2);
+      const partnerBestAtk = getBestAttack(partner, partnerTarget);
+
+      const gateNode: StrategyNode = {
+        id: nextId(),
+        type: "decision",
+        label: `Did ${partner.pokemon.name} set ${setupMove} Turn 1?`,
+        detail: "Depends on which Turn 1 branch was taken",
+        severity: "neutral",
+        children: [],
+      };
+
+      // Branch: Setup went up → both attack
+      gateNode.children.push({
         id: nextId(),
         type: "action",
-        label: `${fakeOutUser.pokemon.name}: Tailwind`,
-        detail: "Set speed after turn 1 disruption",
+        label: `Both attack under ${setupMove}`,
+        detail: `${fakeOutUser.pokemon.name}: ${foBestAtk?.name ?? "attacks"} + ${partner.pokemon.name}: ${partnerBestAtk?.name ?? "attacks"}`,
         severity: "good",
-        moveType: "flying",
+        branchLabel: "Setup went up",
         children: [],
       });
-    } else if (fakeOutUser.hasTrickRoom && !setTrickRoom) {
-      actions.push({
+
+      // Branch: Setup delayed → partner sets up now, FO user covers
+      const coverChildren: StrategyNode[] = [];
+      if (foBestAtk) {
+        coverChildren.push({
+          id: nextId(),
+          type: "action",
+          label: `${fakeOutUser.pokemon.name}: ${foBestAtk.name} → ${isSpreadMove(foBestAtk.data) ? "both foes" : foTarget.pokemon.name}`,
+          detail: "Cover while partner sets up",
+          severity: "neutral",
+          moveType: foBestAtk.data.type,
+          children: [],
+        });
+      }
+      gateNode.children.push({
         id: nextId(),
         type: "action",
-        label: `${fakeOutUser.pokemon.name}: Trick Room`,
-        detail: "Set speed after turn 1 disruption",
+        label: `${partner.pokemon.name}: ${setupMove}`,
+        detail: `Delayed from Turn 1 — set up now`,
         severity: "good",
-        moveType: "psychic",
-        children: [],
+        branchLabel: "Setup delayed",
+        moveType: sMoveType,
+        children: coverChildren,
       });
+
+      actions.push(gateNode);
     } else {
-      const target = findBestTarget(fakeOutUser, opp1, opp2);
-      const bestAtk = getBestAttack(fakeOutUser, target);
-      if (bestAtk) {
-        const spread = isSpreadMove(bestAtk.data);
+      // No delayed setup — Fake Out user now does their main job
+      if (fakeOutUser.hasTailwind && !planHasTailwind) {
         actions.push({
           id: nextId(),
           type: "action",
-          label: `${fakeOutUser.pokemon.name}: ${bestAtk.name} → ${spread ? "both foes" : target.pokemon.name}`,
-          detail: `Fake Out used — switch to offense`,
+          label: `${fakeOutUser.pokemon.name}: Tailwind`,
+          detail: "Set speed after turn 1 disruption",
+          severity: "good",
+          moveType: "flying",
+          children: [],
+        });
+      } else if (fakeOutUser.hasTrickRoom && !planHasTrickRoom) {
+        actions.push({
+          id: nextId(),
+          type: "action",
+          label: `${fakeOutUser.pokemon.name}: Trick Room`,
+          detail: "Set speed after turn 1 disruption",
+          severity: "good",
+          moveType: "psychic",
+          children: [],
+        });
+      } else {
+        const target = findBestTarget(fakeOutUser, opp1, opp2);
+        const bestAtk = getBestAttack(fakeOutUser, target);
+        if (bestAtk) {
+          const spread = isSpreadMove(bestAtk.data);
+          actions.push({
+            id: nextId(),
+            type: "action",
+            label: `${fakeOutUser.pokemon.name}: ${bestAtk.name} → ${spread ? "both foes" : target.pokemon.name}`,
+            detail: `Fake Out used — switch to offense`,
+            severity: "neutral",
+            moveType: bestAtk.data.type,
+            children: [],
+          });
+        }
+      }
+
+      // Partner continues attacking
+      const target2 = findBestTarget(partner, opp1, opp2);
+      const bestAtk2 = getBestAttack(partner, target2);
+      if (bestAtk2) {
+        const spread = isSpreadMove(bestAtk2.data);
+        actions.push({
+          id: nextId(),
+          type: "action",
+          label: `${partner.pokemon.name}: ${bestAtk2.name} → ${spread ? "both foes" : target2.pokemon.name}`,
+          detail: `Continue pressing advantage`,
           severity: "neutral",
-          moveType: bestAtk.data.type,
+          moveType: bestAtk2.data.type,
           children: [],
         });
       }
     }
-
-    // Partner continues attacking
-    const target2 = findBestTarget(partner, opp1, opp2);
-    const bestAtk2 = getBestAttack(partner, target2);
-    if (bestAtk2) {
-      const spread = isSpreadMove(bestAtk2.data);
-      actions.push({
-        id: nextId(),
-        type: "action",
-        label: `${partner.pokemon.name}: ${bestAtk2.name} → ${spread ? "both foes" : target2.pokemon.name}`,
-        detail: `Continue pressing advantage`,
-        severity: "neutral",
-        moveType: bestAtk2.data.type,
-        children: [],
-      });
-    }
   }
   // ── POST-SETUP: SWEEP ──
   else if (hasSpeedControl) {
-    // Both leads now go into full attack mode under speed control
-    const target1 = findBestTarget(lead1, opp1, opp2);
-    const target2 = findBestTarget(lead2, opp1, opp2);
-    const bestAtk1 = getBestAttack(lead1, target1);
-    const bestAtk2 = getBestAttack(lead2, target2);
+    const speedUser = (lead1.hasTailwind || lead1.hasTrickRoom) ? lead1 : lead2;
+    const attacker = speedUser === lead1 ? lead2 : lead1;
 
-    if (bestAtk1) {
-      const spread = isSpreadMove(bestAtk1.data);
-      actions.push({
+    if (setupMaybeDelayed) {
+      // Speed control mon may have Protected; handle both cases
+      const setupMove = planHasTailwind ? "Tailwind" : "Trick Room";
+      const sMoveType: PokemonType = planHasTailwind ? "flying" : "psychic";
+      const attackerTarget = findBestTarget(attacker, opp1, opp2);
+      const attackerBestAtk = getBestAttack(attacker, attackerTarget);
+      const speedTarget = findBestTarget(speedUser, opp1, opp2);
+      const speedBestAtk = getBestAttack(speedUser, speedTarget);
+
+      const gateNode: StrategyNode = {
+        id: nextId(),
+        type: "decision",
+        label: `Did ${setupMove} go up Turn 1?`,
+        detail: "Depends on whether opponent Faked Out",
+        severity: "neutral",
+        children: [],
+      };
+
+      // Branch: setup went up → full offense
+      const offenseDetails: string[] = [];
+      if (speedBestAtk) offenseDetails.push(`${speedUser.pokemon.name}: ${speedBestAtk.name}`);
+      if (attackerBestAtk) offenseDetails.push(`${attacker.pokemon.name}: ${attackerBestAtk.name}`);
+      gateNode.children.push({
         id: nextId(),
         type: "action",
-        label: `${lead1.pokemon.name}: ${bestAtk1.name} → ${spread ? "both foes" : target1.pokemon.name}`,
-        detail: `${hasSpeedControl ? "You outspeed — " : ""}full offense`,
-        severity: bestAtk1.effectiveness >= 2 ? "good" : "neutral",
-        moveType: bestAtk1.data.type,
+        label: `Both attack — you outspeed`,
+        detail: offenseDetails.join(" + ") || "Full offense",
+        severity: "good",
+        branchLabel: "Setup went up",
         children: [],
       });
-    }
-    if (bestAtk2) {
-      const spread = isSpreadMove(bestAtk2.data);
-      actions.push({
+
+      // Branch: setup delayed → do it now
+      const coverChildren: StrategyNode[] = [];
+      if (attackerBestAtk) {
+        coverChildren.push({
+          id: nextId(),
+          type: "action",
+          label: `${attacker.pokemon.name}: ${attackerBestAtk.name} → ${isSpreadMove(attackerBestAtk.data) ? "both foes" : attackerTarget.pokemon.name}`,
+          detail: "Cover while partner sets up",
+          severity: "neutral",
+          moveType: attackerBestAtk.data.type,
+          children: [],
+        });
+      }
+      gateNode.children.push({
         id: nextId(),
         type: "action",
-        label: `${lead2.pokemon.name}: ${bestAtk2.name} → ${spread ? "both foes" : target2.pokemon.name}`,
-        detail: `Press advantage under ${setTailwind ? "Tailwind" : "Trick Room"}`,
-        severity: bestAtk2.effectiveness >= 2 ? "good" : "neutral",
-        moveType: bestAtk2.data.type,
-        children: [],
+        label: `${speedUser.pokemon.name}: ${setupMove}`,
+        detail: `Delayed from Turn 1 — set up now`,
+        severity: "good",
+        branchLabel: "Setup delayed",
+        moveType: sMoveType,
+        children: coverChildren,
       });
+
+      actions.push(gateNode);
+    } else {
+      // Both leads now go into full attack mode under speed control
+      const target1 = findBestTarget(lead1, opp1, opp2);
+      const target2 = findBestTarget(lead2, opp1, opp2);
+      const bestAtk1 = getBestAttack(lead1, target1);
+      const bestAtk2 = getBestAttack(lead2, target2);
+
+      if (bestAtk1) {
+        const spread = isSpreadMove(bestAtk1.data);
+        actions.push({
+          id: nextId(),
+          type: "action",
+          label: `${lead1.pokemon.name}: ${bestAtk1.name} → ${spread ? "both foes" : target1.pokemon.name}`,
+          detail: `You outspeed — full offense`,
+          severity: bestAtk1.effectiveness >= 2 ? "good" : "neutral",
+          moveType: bestAtk1.data.type,
+          children: [],
+        });
+      }
+      if (bestAtk2) {
+        const spread = isSpreadMove(bestAtk2.data);
+        actions.push({
+          id: nextId(),
+          type: "action",
+          label: `${lead2.pokemon.name}: ${bestAtk2.name} → ${spread ? "both foes" : target2.pokemon.name}`,
+          detail: `Press advantage under ${planHasTailwind ? "Tailwind" : "Trick Room"}`,
+          severity: bestAtk2.effectiveness >= 2 ? "good" : "neutral",
+          moveType: bestAtk2.data.type,
+          children: [],
+        });
+      }
     }
   }
   // ── GENERAL TURN 2 ──
@@ -1072,7 +1243,7 @@ function buildTurn2Actions(
 
   // If either lead has a setup move they haven't used
   const setupLeads = [lead1, lead2].filter(l =>
-    l.hasSetup && !turn1Actions.some(a => a.label.includes(l.pokemon.name) && l.moves.some(m => m.role === "setup" && a.label.includes(m.name)))
+    l.hasSetup && !l.moves.some(m => m.role === "setup" && treeContains(turn1Actions, m.name))
   );
   if (setupLeads.length > 0 && hasSpeedControl) {
     const s = setupLeads[0];

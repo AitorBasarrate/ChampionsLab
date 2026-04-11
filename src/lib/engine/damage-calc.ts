@@ -247,6 +247,10 @@ export function calculateDamage(
         (moveCalc.type === "rock" || moveCalc.type === "ground" || moveCalc.type === "steel")) {
       bp = Math.floor(bp * 1.3);
     }
+    // Fairy Aura: Fairy-type moves deal 33% more damage
+    if (attacker.ability === "Fairy Aura" && moveCalc.type === "fairy") {
+      bp = Math.floor(bp * 1.33);
+    }
     // Solar Power in sun
     if (attacker.ability === "Solar Power" && options.weather === "sun" && !isPhysical) {
       atkStat = Math.floor(atkStat * 1.5);

@@ -512,12 +512,19 @@ export const USAGE_DATA: Record<number, CommonSet[]> = {
     { name: "Will-O-Wisp", nature: "Jolly", ability: "Gale Wings", item: "Sitrus Berry", moves: ["Brave Bird", "Will-O-Wisp", "Tailwind", "Protect"], sp: { hp: 20, attack: 14, defense: 0, spAtk: 0, spDef: 0, speed: 32 } },
   ],
 
-  // Meowstic (id: 678)
+  // Meowstic-M (id: 678)
   678: [
     { name: "Prankster Support", nature: "Bold", ability: "Prankster", item: "Light Clay", moves: ["Light Screen", "Reflect", "Fake Out", "Protect"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
     { name: "Thunder Wave", nature: "Calm", ability: "Prankster", item: "Sitrus Berry", moves: ["Psychic", "Thunder Wave", "Helping Hand", "Protect"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 0, spDef: 32, speed: 0 } },
-    { name: "Offensive", nature: "Timid", ability: "Competitive", item: "Life Orb", moves: ["Psychic", "Shadow Ball", "Thunderbolt", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
     { name: "Yawn Disruptor", nature: "Bold", ability: "Prankster", item: "Mental Herb", moves: ["Yawn", "Psychic", "Helping Hand", "Protect"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
+    { name: "Mega Mind", nature: "Timid", ability: "Mind Over Matter", item: "Meowsticite", moves: ["Psychic", "Shadow Ball", "Thunder Wave", "Protect"], sp: { hp: 4, attack: 0, defense: 0, spAtk: 30, spDef: 0, speed: 32 } },
+  ],
+
+  // Meowstic-F (id: 10678)
+  10678: [
+    { name: "Competitive Attacker", nature: "Timid", ability: "Competitive", item: "Life Orb", moves: ["Psychic", "Shadow Ball", "Thunderbolt", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
+    { name: "Nasty Plot Sweeper", nature: "Timid", ability: "Competitive", item: "Focus Sash", moves: ["Nasty Plot", "Expanding Force", "Shadow Ball", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
+    { name: "Future Sight Support", nature: "Bold", ability: "Competitive", item: "Sitrus Berry", moves: ["Future Sight", "Fake Out", "Helping Hand", "Protect"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
     { name: "Mega Mind", nature: "Timid", ability: "Mind Over Matter", item: "Meowsticite", moves: ["Psychic", "Shadow Ball", "Thunder Wave", "Protect"], sp: { hp: 4, attack: 0, defense: 0, spAtk: 30, spDef: 0, speed: 32 } },
   ],
 

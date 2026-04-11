@@ -1076,6 +1076,13 @@ export const MOVE_DATA: Record<string, EngineMove> = {
     flags: { selfFaint: true },
     effect: "Hits all adjacent Pokemon. User faints after use.",
   },
+  "Light of Ruin": {
+    name: "Light of Ruin", type: "fairy", category: "special", basePower: 140,
+    accuracy: 90, pp: 5, priority: 0, target: "normal",
+    flags: { recoil: true },
+    recoil: [1, 2],
+    effect: "User takes 1/2 of the damage dealt as recoil.",
+  },
 
   // ── STATUS / SUPPORT ──────────────────────────────────────────────────────
   "Protect": {

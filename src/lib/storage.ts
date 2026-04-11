@@ -105,7 +105,7 @@ export function deserializeTeam(saved: SavedTeamSlot[]): TeamSlot[] {
     // Auto-detect megaFormIndex from item/ability if not stored
     let megaFormIndex = s.megaFormIndex;
     if (s.isMega && megaFormIndex === undefined && pokemon) {
-      const megaForms = pokemon.forms?.filter(f => f.isMega) ?? [];
+      const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
       if (s.ability) {
         const idx = megaForms.findIndex(f => f.abilities.some(a => a.name === s.ability));
         megaFormIndex = idx >= 0 ? idx : 0;

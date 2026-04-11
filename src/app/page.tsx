@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { motion } from "@/lib/motion";
 import Image from "next/image";
 import { LastUpdated } from "@/components/last-updated";
-import { Search, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Search, SlidersHorizontal, Sparkles, ChevronDown } from "lucide-react";
 import { getPokemonBySeason } from "@/lib/pokemon-data";
 import { PokemonType, ChampionsPokemon } from "@/lib/types";
 import { PokemonCard } from "@/components/pokemon-card";
@@ -29,7 +29,20 @@ const TYPE_COLORS_MAP: Record<PokemonType, string> = {
   steel: "#b8b8d0", fairy: "#ee99ac",
 };
 
-type SortOption = "name" | "dex" | "tier";
+type SortOption = "name" | "dex" | "tier" | "hp" | "attack" | "defense" | "spAtk" | "spDef" | "speed" | "bst";
+
+type StatKey = "hp" | "attack" | "defense" | "spAtk" | "spDef" | "speed";
+const STAT_KEYS: { key: StatKey; label: string; color: string }[] = [
+  { key: "hp", label: "HP", color: "#ff5959" },
+  { key: "attack", label: "Atk", color: "#f5ac78" },
+  { key: "defense", label: "Def", color: "#fae078" },
+  { key: "spAtk", label: "SpA", color: "#9db7f5" },
+  { key: "spDef", label: "SpD", color: "#a7db8d" },
+  { key: "speed", label: "Spe", color: "#fa92b2" },
+];
+const EMPTY_STAT_FILTERS = { hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed: 0, bst: 0 };
+type StatFilters = typeof EMPTY_STAT_FILTERS;
+function getBST(p: ChampionsPokemon) { return p.baseStats.hp + p.baseStats.attack + p.baseStats.defense + p.baseStats.spAtk + p.baseStats.spDef + p.baseStats.speed; }
 
 export default function HomePage() {
   const [activeSeason, setActiveSeason] = useState(1);
@@ -39,6 +52,7 @@ export default function HomePage() {
   const [showMegaOnly, setShowMegaOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("dex");
+  const [statFilters, setStatFilters] = useState<StatFilters>({ ...EMPTY_STAT_FILTERS });
   const [selectedPokemon, setSelectedPokemon] = useState<ChampionsPokemon | null>(null);
 
   // Pokémon Champions release countdown — April 8, 2026 12:00 JST (03:00 UTC)
@@ -74,7 +88,13 @@ export default function HomePage() {
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.dexNumber.toString().includes(q) ||
-          p.types.some((t) => t.includes(q))
+          p.types.some((t) => t.includes(q)) ||
+          p.abilities.some((a) => a.name.toLowerCase().includes(q)) ||
+          p.moves.some((m) => m.name.toLowerCase().includes(q)) ||
+          (p.forms?.some((f) =>
+            f.name.toLowerCase().includes(q) ||
+            f.abilities.some((a) => a.name.toLowerCase().includes(q))
+          ) ?? false)
       );
     }
 
@@ -92,6 +112,16 @@ export default function HomePage() {
       results = results.filter((p) => p.hasMega);
     }
 
+    // Stat filters
+    for (const sk of STAT_KEYS) {
+      if (statFilters[sk.key] > 0) {
+        results = results.filter((p) => p.baseStats[sk.key] >= statFilters[sk.key]);
+      }
+    }
+    if (statFilters.bst > 0) {
+      results = results.filter((p) => getBST(p) >= statFilters.bst);
+    }
+
     results = [...results].sort((a, b) => {
       switch (sortBy) {
         case "name": return a.name.localeCompare(b.name);
@@ -100,12 +130,19 @@ export default function HomePage() {
           const tierOrder = { S: 0, A: 1, B: 2, C: 3, D: 4 };
           return (tierOrder[a.tier ?? "D"] ?? 5) - (tierOrder[b.tier ?? "D"] ?? 5);
         }
+        case "hp": return b.baseStats.hp - a.baseStats.hp;
+        case "attack": return b.baseStats.attack - a.baseStats.attack;
+        case "defense": return b.baseStats.defense - a.baseStats.defense;
+        case "spAtk": return b.baseStats.spAtk - a.baseStats.spAtk;
+        case "spDef": return b.baseStats.spDef - a.baseStats.spDef;
+        case "speed": return b.baseStats.speed - a.baseStats.speed;
+        case "bst": return getBST(b) - getBST(a);
         default: return 0;
       }
     });
 
     return results;
-  }, [activeSeason, searchQuery, selectedTypes, selectedGens, showMegaOnly, sortBy]);
+  }, [activeSeason, searchQuery, selectedTypes, selectedGens, showMegaOnly, sortBy, statFilters]);
 
   const toggleType = (type: PokemonType) => {
     trackEvent("filter_type", "pokedex", type);
@@ -288,7 +325,7 @@ export default function HomePage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search Pokémon by name, type, or dex number..."
+              placeholder="Search by name, type, dex #, move, or ability..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-gray-200 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100 text-sm placeholder:text-gray-400 transition-all shadow-sm"
@@ -318,6 +355,13 @@ export default function HomePage() {
             <option value="tier">Tier</option>
             <option value="name">Name</option>
             <option value="dex">Dex #</option>
+            <option value="hp">HP</option>
+            <option value="attack">Attack</option>
+            <option value="defense">Defense</option>
+            <option value="spAtk">Sp.Atk</option>
+            <option value="spDef">Sp.Def</option>
+            <option value="speed">Speed</option>
+            <option value="bst">BST</option>
           </select>
         </div>
 
@@ -340,12 +384,16 @@ export default function HomePage() {
                       "px-3 py-1.5 text-[11px] font-bold uppercase rounded-lg transition-all tracking-wider",
                       selectedTypes.includes(type)
                         ? "text-white shadow-lg"
-                        : "text-white/60 hover:text-white"
+                        : "hover:opacity-90"
                     )}
                     style={{
                       backgroundColor: selectedTypes.includes(type)
                         ? `${TYPE_COLORS_MAP[type]}CC`
-                        : `${TYPE_COLORS_MAP[type]}33`,
+                        : `${TYPE_COLORS_MAP[type]}30`,
+                      color: selectedTypes.includes(type)
+                        ? "#fff"
+                        : TYPE_COLORS_MAP[type],
+                      border: `1.5px solid ${selectedTypes.includes(type) ? TYPE_COLORS_MAP[type] : `${TYPE_COLORS_MAP[type]}55`}`,
                     }}
                   >
                     {type}
@@ -389,6 +437,75 @@ export default function HomePage() {
                 <Sparkles className="w-3.5 h-3.5" />
                 Mega Only
               </button>
+            </div>
+
+            {/* Base Stat Filters */}
+            <div>
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-violet-500" />
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Base Stats</h4>
+                  {Object.values(statFilters).some(v => v > 0) && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400">
+                      {Object.values(statFilters).filter(v => v > 0).length} active
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => setStatFilters({ ...EMPTY_STAT_FILTERS })}
+                  className={cn(
+                    "text-[10px] font-semibold transition-colors",
+                    Object.values(statFilters).some(v => v > 0)
+                      ? "text-violet-500 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+                      : "text-transparent pointer-events-none"
+                  )}
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+                {STAT_KEYS.map(({ key, label, color }) => (
+                  <div key={key} className="flex items-center gap-2.5">
+                    <span className="text-[11px] font-bold w-8 text-right" style={{ color }}>{label}</span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={255}
+                      step={5}
+                      value={statFilters[key]}
+                      onChange={(e) => setStatFilters(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                      className="flex-1 h-1.5 cursor-pointer"
+                      style={{ accentColor: color }}
+                    />
+                    <span className={cn(
+                      "text-[11px] font-mono w-9 tabular-nums text-right transition-colors",
+                      statFilters[key] > 0 ? "font-bold" : "text-gray-400 dark:text-gray-500"
+                    )} style={statFilters[key] > 0 ? { color } : undefined}>
+                      {statFilters[key] > 0 ? `≥${statFilters[key]}` : "—"}
+                    </span>
+                  </div>
+                ))}
+                {/* BST row */}
+                <div className="flex items-center gap-2.5">
+                  <span className="text-[11px] font-bold w-8 text-right text-gray-500">BST</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={800}
+                    step={10}
+                    value={statFilters.bst}
+                    onChange={(e) => setStatFilters(prev => ({ ...prev, bst: Number(e.target.value) }))}
+                    className="flex-1 h-1.5 cursor-pointer"
+                    style={{ accentColor: "#888" }}
+                  />
+                  <span className={cn(
+                    "text-[11px] font-mono w-9 tabular-nums text-right transition-colors",
+                    statFilters.bst > 0 ? "font-bold text-gray-600 dark:text-gray-300" : "text-gray-400 dark:text-gray-500"
+                  )}>
+                    {statFilters.bst > 0 ? `≥${statFilters.bst}` : "—"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>

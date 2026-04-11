@@ -999,7 +999,10 @@ function aiChooseAction(
     }
     
     // Tactical switching: evaluate matchup quality
-    if (switchScore < 0) {
+    // Skip switching logic for very low HP mons — they're already doomed,
+    // better to let them attack and get value before going down (Focus Sash, Endure, etc.)
+    const hpPercent = mon.currentHP / mon.maxHP * 100;
+    if (switchScore < 0 && hpPercent > 15) {
       const oppSide: 1 | 2 = sideIndex === 1 ? 2 : 1;
       let maxIncomingDmg = 0;
       for (const opp of opponents) {
@@ -1082,7 +1085,7 @@ function createInitialField(): FieldState {
   };
 }
 
-function applySwitch(state: BattleState, sideIndex: 1 | 2, slot: 0 | 1): void {
+function applySwitch(state: BattleState, sideIndex: 1 | 2, slot: 0 | 1, excludeFromBench?: BattlePokemon[]): void {
   const team = sideIndex === 1 ? state.team1 : state.team2;
   const active = sideIndex === 1 ? state.active1 : state.active2;
   const opponents = sideIndex === 1 ? state.active2 : state.active1;
@@ -1097,11 +1100,22 @@ function applySwitch(state: BattleState, sideIndex: 1 | 2, slot: 0 | 1): void {
   if (leaving && leaving.isAlive && !leaving.isFainted && leaving.ability === "Zero to Hero") {
     leaving.hasSwitchedOut = true;
   }
+  // Revert Imposter transform on switch-out (Ditto reverts to original form)
+  if (leaving && leaving.isTransformed && leaving.originalAbility === "Imposter") {
+    leaving.isTransformed = false;
+    leaving.ability = "Imposter";
+    leaving.types = leaving.originalTypes ?? leaving.types;
+    leaving.effectiveBaseStats = leaving.originalBaseStats ?? leaving.effectiveBaseStats;
+    leaving.stats = leaving.originalStats ?? leaving.stats;
+    leaving.set = { ...leaving.set, ability: "Imposter" };
+  }
 
-  // Find benched alive Pokémon
+  // Find benched alive Pokémon — exclude mons that just switched out this turn
+  const excluded = excludeFromBench ?? [];
   const bench = team.filter(p =>
     p.isAlive && !p.isFainted &&
-    p !== active[0] && p !== active[1]
+    p !== active[0] && p !== active[1] &&
+    !excluded.includes(p)
   );
   
   if (bench.length > 0) {
@@ -1261,52 +1275,83 @@ function isIntimidateBlocked(mon: BattlePokemon): boolean {
   return ["Inner Focus", "Clear Body", "White Smoke", "Full Metal Body", "Hyper Cutter", "Oblivious", "Own Tempo", "Scrappy", "Mirror Armor", "Guard Dog"].includes(mon.ability);
 }
 
-function applyEndOfTurn(state: BattleState): void {
+function applyEndOfTurn(state: BattleState): string[] {
+  const events: string[] = [];
+  
   // Decrement field effects
   if (state.field.weatherTurns > 0) {
     state.field.weatherTurns--;
-    if (state.field.weatherTurns === 0) state.field.weather = null;
+    if (state.field.weatherTurns === 0) {
+      const weatherNames: Record<string, string> = { sun: "harsh sunlight", rain: "rain", sand: "sandstorm", snow: "snow", hail: "hail" };
+      events.push(`The ${weatherNames[state.field.weather!] ?? state.field.weather} subsided!`);
+      state.field.weather = null;
+    }
   }
   if (state.field.trickRoomTurns > 0) {
     state.field.trickRoomTurns--;
-    if (state.field.trickRoomTurns === 0) state.field.trickRoom = false;
+    if (state.field.trickRoomTurns === 0) {
+      events.push("Trick Room wore off! Normal speed order restored.");
+      state.field.trickRoom = false;
+    }
   }
   if (state.field.terrainTurns > 0) {
     state.field.terrainTurns--;
-    if (state.field.terrainTurns === 0) state.field.terrain = null;
+    if (state.field.terrainTurns === 0) {
+      events.push(`The ${state.field.terrain} terrain faded!`);
+      state.field.terrain = null;
+    }
   }
   
   const sides = [
-    { side: state.field.side1, active: state.active1 },
-    { side: state.field.side2, active: state.active2 },
+    { side: state.field.side1, active: state.active1, label: "Your" },
+    { side: state.field.side2, active: state.active2, label: "Opponent's" },
   ];
   
-  for (const { side, active } of sides) {
-    if (side.tailwind > 0) side.tailwind--;
-    if (side.reflect > 0) side.reflect--;
-    if (side.lightScreen > 0) side.lightScreen--;
-    if (side.auroraVeil > 0) side.auroraVeil--;
+  for (const { side, active, label } of sides) {
+    if (side.tailwind > 0) {
+      side.tailwind--;
+      if (side.tailwind === 0) events.push(`${label} Tailwind petered out!`);
+    }
+    if (side.reflect > 0) {
+      side.reflect--;
+      if (side.reflect === 0) events.push(`${label} Reflect wore off!`);
+    }
+    if (side.lightScreen > 0) {
+      side.lightScreen--;
+      if (side.lightScreen === 0) events.push(`${label} Light Screen wore off!`);
+    }
+    if (side.auroraVeil > 0) {
+      side.auroraVeil--;
+      if (side.auroraVeil === 0) events.push(`${label} Aurora Veil wore off!`);
+    }
     
     // Status damage (Magic Guard immune to indirect damage)
     for (const mon of active) {
       if (!mon || mon.isFainted) continue;
       
       if (mon.status === "burn" && mon.ability !== "Magic Guard") {
-        mon.currentHP -= Math.floor(mon.maxHP / 16);
+        const dmg = Math.floor(mon.maxHP / 16);
+        mon.currentHP -= dmg;
+        events.push(`${mon.pokemon.name} was hurt by its burn! (${Math.round((dmg / mon.maxHP) * 100)}%)`);
       }
       if (mon.status === "poison" && mon.ability !== "Magic Guard") {
-        mon.currentHP -= Math.floor(mon.maxHP / 8);
+        const dmg = Math.floor(mon.maxHP / 8);
+        mon.currentHP -= dmg;
+        events.push(`${mon.pokemon.name} was hurt by poison! (${Math.round((dmg / mon.maxHP) * 100)}%)`);
       }
       
       // Leftovers
-      if (mon.item === "Leftovers") {
+      if (mon.item === "Leftovers" && mon.currentHP < mon.maxHP) {
         mon.currentHP = Math.min(mon.maxHP, mon.currentHP + Math.floor(mon.maxHP / 16));
+        events.push(`${mon.pokemon.name} restored HP with Leftovers!`);
       }
       
       // Lum Berry: cure any status condition
       if (mon.item === "Lum Berry" && !mon.itemConsumed && mon.status) {
+        const curedStatus = mon.status;
         mon.status = null;
         mon.itemConsumed = true;
+        events.push(`${mon.pokemon.name}'s Lum Berry cured its ${curedStatus}!`);
       }
       
       // Sand damage
@@ -1316,14 +1361,17 @@ function applyEndOfTurn(state: BattleState): void {
             mon.ability !== "Sand Rush" && mon.ability !== "Sand Veil" &&
             mon.ability !== "Magic Guard" && mon.ability !== "Overcoat" &&
             mon.ability !== "Sky High") {
-          mon.currentHP -= Math.floor(mon.maxHP / 16);
+          const dmg = Math.floor(mon.maxHP / 16);
+          mon.currentHP -= dmg;
+          events.push(`${mon.pokemon.name} was buffeted by the sandstorm! (${Math.round((dmg / mon.maxHP) * 100)}%)`);
         }
       }
       
       // Grassy Terrain healing (grounded mons heal 1/16 per turn)
       if (state.field.terrain === "grassy" && mon.ability !== "Levitate" &&
-          !mon.types.includes("flying") && mon.ability !== "Sky High") {
+          !mon.types.includes("flying") && mon.ability !== "Sky High" && mon.currentHP < mon.maxHP) {
         mon.currentHP = Math.min(mon.maxHP, mon.currentHP + Math.floor(mon.maxHP / 16));
+        events.push(`${mon.pokemon.name} restored HP from Grassy Terrain!`);
       }
       
       // Check faint
@@ -1331,9 +1379,11 @@ function applyEndOfTurn(state: BattleState): void {
         mon.currentHP = 0;
         mon.isAlive = false;
         mon.isFainted = true;
+        events.push(`${mon.pokemon.name} fainted!`);
       }
     }
   }
+  return events;
 }
 
 function executeMove(
@@ -1821,22 +1871,39 @@ function smartPick4(
 ): number[] {
   if (pokemon.length <= 4) return Array.from({ length: pokemon.length }, (_, i) => i);
   
-  // Score each pokemon's value against the opposing team
-  const scores: { idx: number; score: number; isLead: boolean; hasFakeOut: boolean; hasSpeedControl: boolean }[] = [];
+  const n = pokemon.length;
   
-  for (let i = 0; i < pokemon.length; i++) {
+  // ── Individual scores vs opponent team ──
+  const indivScores: number[] = [];
+  const meta: { hasFakeOut: boolean; hasSpeedControl: boolean; isLead: boolean; isMega: boolean; weather: string | null; weatherMoves: string[]; types: string[] }[] = [];
+  
+  const weatherAbilityMap: Record<string, string> = {
+    "Drought": "sun", "Drizzle": "rain", "Sand Stream": "sand",
+    "Snow Warning": "snow", "Orichalcum Pulse": "sun", "Primordial Sea": "rain",
+    "Desolate Land": "sun",
+  };
+  const weatherMoveMap: Record<string, string> = {
+    "Rain Dance": "rain", "Sunny Day": "sun", "Sandstorm": "sand",
+    "Snowscape": "snow", "Hail": "snow",
+  };
+  // Which weathers benefit which types/abilities
+  const weatherBenefits: Record<string, { types: string[]; abilities: string[] }> = {
+    "rain":  { types: ["water"], abilities: ["Swift Swim", "Rain Dish", "Drizzle", "Primordial Sea"] },
+    "sun":   { types: ["fire", "grass"], abilities: ["Chlorophyll", "Solar Power", "Flower Gift", "Drought", "Orichalcum Pulse", "Desolate Land"] },
+    "sand":  { types: ["rock", "ground", "steel"], abilities: ["Sand Rush", "Sand Force", "Sand Stream"] },
+    "snow":  { types: ["ice"], abilities: ["Slush Rush", "Ice Body", "Snow Warning"] },
+  };
+
+  for (let i = 0; i < n; i++) {
     const p = pokemon[i];
     const s = sets[i];
-    let score = 50; // Base value
+    let score = 50;
     
-    // Type coverage vs opponent team
     for (const opp of oppPokemon) {
-      // Offensive coverage
       for (const pType of p.types) {
         const eff = getMatchup(pType, opp.types);
         if (eff > 1) score += 6;
       }
-      // Defensive resilience
       for (const oType of opp.types) {
         const eff = getMatchup(oType, p.types);
         if (eff < 1) score += 3;
@@ -1845,33 +1912,116 @@ function smartPick4(
     
     const hasFakeOut = s.moves.includes("Fake Out");
     const hasSpeedControl = s.moves.includes("Tailwind") || s.moves.includes("Trick Room");
-    const isWeather = ["Drought", "Drizzle", "Sand Stream", "Snow Warning"].includes(s.ability);
+    const abilityWeather = weatherAbilityMap[s.ability] ?? null;
     const isIntimidate = s.ability === "Intimidate";
+    const wMoves = s.moves.filter(m => weatherMoveMap[m]).map(m => weatherMoveMap[m]);
     
-    // VGC lead qualities
     if (hasFakeOut) score += 15;
     if (hasSpeedControl) score += 12;
-    if (isWeather) score += 18;
+    if (abilityWeather) score += 18;
     if (isIntimidate) score += 10;
-    
-    // Mega stones are often brought
     if (isMegaStoneItem(s.item)) score += 10;
     
-    scores.push({ idx: i, score, isLead: hasFakeOut || hasSpeedControl || isWeather, hasFakeOut, hasSpeedControl });
+    indivScores.push(score);
+    meta.push({
+      hasFakeOut, hasSpeedControl,
+      isLead: hasFakeOut || hasSpeedControl || !!abilityWeather,
+      isMega: isMegaStoneItem(s.item),
+      weather: abilityWeather,
+      weatherMoves: wMoves,
+      types: [...p.types],
+    });
   }
   
-  // Sort by score and take top 4
-  scores.sort((a, b) => b.score - a.score);
-  const selected = scores.slice(0, 4);
+  // ── Evaluate pairwise synergy ──
+  function pairSynergy(a: number, b: number): number {
+    let syn = 0;
+    const mA = meta[a], mB = meta[b], sA = sets[a], sB = sets[b];
+    
+    // Weather synergy: A sets weather (ability or move) that benefits B, and vice versa
+    const weathersA = [mA.weather, ...mA.weatherMoves].filter(Boolean) as string[];
+    const weathersB = [mB.weather, ...mB.weatherMoves].filter(Boolean) as string[];
+    
+    for (const w of weathersA) {
+      const ben = weatherBenefits[w];
+      if (!ben) continue;
+      if (mB.types.some(t => ben.types.includes(t))) syn += 12;
+      if (ben.abilities.includes(sB.ability)) syn += 15;
+    }
+    for (const w of weathersB) {
+      const ben = weatherBenefits[w];
+      if (!ben) continue;
+      if (mA.types.some(t => ben.types.includes(t))) syn += 12;
+      if (ben.abilities.includes(sA.ability)) syn += 15;
+    }
+    
+    // Fake Out + setup/mega partner
+    if (mA.hasFakeOut && (mB.isMega || sB.moves.some(m => ["Swords Dance", "Calm Mind", "Dragon Dance", "Nasty Plot", "Quiver Dance"].includes(m)))) syn += 10;
+    if (mB.hasFakeOut && (mA.isMega || sA.moves.some(m => ["Swords Dance", "Calm Mind", "Dragon Dance", "Nasty Plot", "Quiver Dance"].includes(m)))) syn += 10;
+    
+    // Redirect + sweeper
+    const redirectMoves = ["Follow Me", "Rage Powder"];
+    if (sA.moves.some(m => redirectMoves.includes(m)) && mB.isMega) syn += 12;
+    if (sB.moves.some(m => redirectMoves.includes(m)) && mA.isMega) syn += 12;
+    
+    // Speed control + slow partner
+    if (mA.hasSpeedControl && sB.moves.includes("Trick Room")) syn -= 10; // conflicting speed control
+    
+    return syn;
+  }
+  
+  // ── Enumerate all C(n,4) combos and pick the best ──
+  let bestCombo: number[] = [];
+  let bestTotal = -Infinity;
+  
+  for (let a = 0; a < n - 3; a++) {
+    for (let b = a + 1; b < n - 2; b++) {
+      for (let c = b + 1; c < n - 1; c++) {
+        for (let d = c + 1; d < n; d++) {
+          const combo = [a, b, c, d];
+          
+          // Constraint: at most one mega
+          const megas = combo.filter(i => meta[i].isMega);
+          if (megas.length > 1) {
+            // Keep the highest-scored mega, penalize the rest
+            megas.sort((x, y) => indivScores[y] - indivScores[x]);
+            // Still allow the combo but with reduced score for wasted mega slot
+          }
+          
+          // Constraint: no conflicting weather abilities
+          const weathers = combo.map(i => meta[i].weather).filter(Boolean) as string[];
+          const uniqueWeathers = new Set(weathers);
+          if (uniqueWeathers.size > 1) continue; // skip conflicting weather setters
+          
+          // Sum individual scores + all pair synergies
+          let total = combo.reduce((sum, i) => sum + indivScores[i], 0);
+          for (let x = 0; x < 4; x++) {
+            for (let y = x + 1; y < 4; y++) {
+              total += pairSynergy(combo[x], combo[y]);
+            }
+          }
+          
+          // Penalty for duplicate mega holders (only one can evolve)
+          if (megas.length > 1) total -= 20 * (megas.length - 1);
+          
+          if (total > bestTotal) {
+            bestTotal = total;
+            bestCombo = combo;
+          }
+        }
+      }
+    }
+  }
   
   // Order: leads first (Fake Out > Speed Control > Weather > others)
-  selected.sort((a, b) => {
-    const aLead = (a.hasFakeOut ? 4 : 0) + (a.hasSpeedControl ? 3 : 0) + (a.isLead ? 2 : 0);
-    const bLead = (b.hasFakeOut ? 4 : 0) + (b.hasSpeedControl ? 3 : 0) + (b.isLead ? 2 : 0);
-    return bLead - aLead; // Leads first
+  bestCombo.sort((a, b) => {
+    const mA = meta[a], mB = meta[b];
+    const aLead = (mA.hasFakeOut ? 4 : 0) + (mA.hasSpeedControl ? 3 : 0) + (mA.isLead ? 2 : 0);
+    const bLead = (mB.hasFakeOut ? 4 : 0) + (mB.hasSpeedControl ? 3 : 0) + (mB.isLead ? 2 : 0);
+    return bLead - aLead;
   });
   
-  return selected.map(s => s.idx);
+  return bestCombo;
 }
 
 /** Run a single simulated battle between two teams */
@@ -1933,12 +2083,12 @@ export function simulateBattle(
       }
     }
   }
-  // Intimidate on entry
+  // Intimidate on entry (skip Imposter-transformed mons — Imposter already consumed entry trigger)
   for (let s = 0; s < 2; s++) {
     const active = s === 0 ? state.active1 : state.active2;
     const opponents = s === 0 ? state.active2 : state.active1;
     for (const mon of active) {
-      if (mon?.ability === "Intimidate") {
+      if (mon?.ability === "Intimidate" && !mon.isTransformed) {
         for (const opp of opponents) {
           if (!opp) continue;
           if (opp.ability === "Mirror Armor") {
@@ -2035,6 +2185,57 @@ export function simulateBattle(
         }
       }
     }
+
+    // ── SPREAD MOVE ALLY COORDINATION ────────────────────────────────────
+    // If one ally is using an allAdjacent move (Earthquake, Sludge Wave, Surf)
+    // that would KO or heavily damage the partner, and the bench has a mon
+    // immune/resistant to that type → switch the partner out preemptively.
+    for (const side of [1, 2] as const) {
+      const sideActions = actions.filter(a => a.sideIndex === side);
+      if (sideActions.length !== 2) continue;
+      const team = side === 1 ? state.team1 : state.team2;
+      const active = side === 1 ? state.active1 : state.active2;
+
+      for (let i = 0; i < 2; i++) {
+        const attacker = sideActions[i];
+        const partner = sideActions[1 - i];
+        if (attacker.switchOut || partner.switchOut) continue;
+        const move = getMove(attacker.moveName);
+        if (!move || move.target !== "allAdjacent") continue;
+
+        // Check if the ally has an ability that makes it immune (e.g., Levitate vs Earthquake)
+        const partnerImmunity = getTypeImmunity(partner.mon.ability);
+        if (partnerImmunity === move.type) continue; // Ally is already immune, no problem
+
+        // Estimate damage to ally
+        const eff = getMatchup(move.type as PokemonType, partner.mon.types);
+        if (eff === 0) continue; // Type-immune already
+        const allyHPPercent = partner.mon.currentHP / partner.mon.maxHP;
+        // Rough KO check: spread move (0.75×) with SE typing
+        const isLikelyKO = eff >= 2 || (eff >= 1 && allyHPPercent < 0.5);
+        const isHeavyDamage = eff >= 1 && allyHPPercent < 0.75;
+        if (!isLikelyKO && !isHeavyDamage) continue;
+
+        // Find a bench mon that's immune or resistant to the spread move type
+        const bench = team.filter(p =>
+          p.isAlive && !p.isFainted && p !== active[0] && p !== active[1]
+        );
+        const safeSwitch = bench.find(p => {
+          const typeEff = getMatchup(move.type as PokemonType, p.types);
+          if (typeEff === 0) return true; // Type immune
+          const abilityImm = getTypeImmunity(p.ability);
+          if (abilityImm === move.type) return true; // Ability immune
+          if (typeEff <= 0.5) return true; // Resists
+          return false;
+        });
+        if (safeSwitch) {
+          partner.moveName = "";
+          partner.targetSlot = -1;
+          partner.priority = 100;
+          partner.switchOut = true;
+        }
+      }
+    }
     
     // Sort by priority (desc), then speed (desc, or asc in Trick Room)
     actions.sort((a, b) => {
@@ -2088,6 +2289,7 @@ export function simulateBattle(
     });
     
     // Execute actions
+    const switchedOutThisTurn: BattlePokemon[] = [];
     for (const action of actions) {
       if (action.mon.isFainted) continue;
       // Flinch check: Fake Out's flinch sets hasMoved = true, preventing action
@@ -2105,7 +2307,8 @@ export function simulateBattle(
         const active = action.sideIndex === 1 ? state.active1 : state.active2;
         const slot = active.indexOf(action.mon) as 0 | 1;
         if (slot >= 0) {
-          applySwitch(state, action.sideIndex, slot);
+          switchedOutThisTurn.push(action.mon);
+          applySwitch(state, action.sideIndex, slot, switchedOutThisTurn);
         }
         continue;
       }
@@ -2268,12 +2471,12 @@ export function simulateBattleWithLog(
       }
     }
   }
-  // Intimidate on entry (after Imposter, so Ditto can Intimidate with copied ability)
+  // Intimidate on entry (skip Imposter-transformed mons — Imposter already consumed entry trigger)
   for (let s = 0; s < 2; s++) {
     const active = s === 0 ? state.active1 : state.active2;
     const opponents = s === 0 ? state.active2 : state.active1;
     for (const mon of active) {
-      if (mon?.ability === "Intimidate") {
+      if (mon?.ability === "Intimidate" && !mon.isTransformed) {
         for (const opp of opponents) {
           if (opp && opp.ability === "Mirror Armor") {
             mon.boosts.attack = Math.max(-6, mon.boosts.attack - 1);
@@ -2353,6 +2556,50 @@ export function simulateBattleWithLog(
       }
     }
 
+    // ── SPREAD MOVE ALLY COORDINATION ────────────────────────────────────
+    for (const side of [1, 2] as const) {
+      const sideActions = actions.filter(a => a.sideIndex === side);
+      if (sideActions.length !== 2) continue;
+      const team = side === 1 ? state.team1 : state.team2;
+      const active = side === 1 ? state.active1 : state.active2;
+
+      for (let i = 0; i < 2; i++) {
+        const attacker = sideActions[i];
+        const partner = sideActions[1 - i];
+        if (attacker.switchOut || partner.switchOut) continue;
+        const move = getMove(attacker.moveName);
+        if (!move || move.target !== "allAdjacent") continue;
+
+        const partnerImmunity = getTypeImmunity(partner.mon.ability);
+        if (partnerImmunity === move.type) continue;
+
+        const eff = getMatchup(move.type as PokemonType, partner.mon.types);
+        if (eff === 0) continue;
+        const allyHPPercent = partner.mon.currentHP / partner.mon.maxHP;
+        const isLikelyKO = eff >= 2 || (eff >= 1 && allyHPPercent < 0.5);
+        const isHeavyDamage = eff >= 1 && allyHPPercent < 0.75;
+        if (!isLikelyKO && !isHeavyDamage) continue;
+
+        const bench = team.filter(p =>
+          p.isAlive && !p.isFainted && p !== active[0] && p !== active[1]
+        );
+        const safeSwitch = bench.find(p => {
+          const typeEff = getMatchup(move.type as PokemonType, p.types);
+          if (typeEff === 0) return true;
+          const abilityImm = getTypeImmunity(p.ability);
+          if (abilityImm === move.type) return true;
+          if (typeEff <= 0.5) return true;
+          return false;
+        });
+        if (safeSwitch) {
+          partner.moveName = "";
+          partner.targetSlot = -1;
+          partner.priority = 100;
+          partner.switchOut = true;
+        }
+      }
+    }
+
     actions.sort((a, b) => {
       if (a.priority !== b.priority) return b.priority - a.priority;
       if (state.field.trickRoom) return a.speed - b.speed;
@@ -2377,16 +2624,31 @@ export function simulateBattleWithLog(
             state.field.terrain = newAbilityEffect.setsTerrain;
             state.field.terrainTurns = 5;
           }
+          turnEvents.push(`${action.mon.pokemon.name} Mega Evolved!`);
           if (action.mon.ability === "Intimidate") {
             for (const opp of megaOpponents) {
-              if (opp && opp.isAlive && !opp.isFainted && !isIntimidateBlocked(opp)) {
-                opp.boosts.attack = Math.max(-6, opp.boosts.attack - 1);
-                if (opp.ability === "Competitive") opp.boosts.spAtk = Math.min(6, opp.boosts.spAtk + 2);
-                if (opp.ability === "Defiant") opp.boosts.attack = Math.min(6, opp.boosts.attack + 2);
+              if (opp && opp.isAlive && !opp.isFainted) {
+                if (opp.ability === "Mirror Armor") {
+                  action.mon.boosts.attack = Math.max(-6, action.mon.boosts.attack - 1);
+                  turnEvents.push(`${opp.pokemon.name}'s Mirror Armor reflected ${action.mon.pokemon.name}'s Intimidate!`);
+                } else if (opp.ability === "Guard Dog") {
+                  opp.boosts.attack = Math.min(6, opp.boosts.attack + 1);
+                  turnEvents.push(`${opp.pokemon.name}'s Guard Dog raised its Attack from ${action.mon.pokemon.name}'s Intimidate!`);
+                } else if (!isIntimidateBlocked(opp)) {
+                  opp.boosts.attack = Math.max(-6, opp.boosts.attack - 1);
+                  turnEvents.push(`${action.mon.pokemon.name}'s Intimidate lowered ${opp.pokemon.name}'s Attack!`);
+                  if (opp.ability === "Competitive") {
+                    opp.boosts.spAtk = Math.min(6, opp.boosts.spAtk + 2);
+                    turnEvents.push(`${opp.pokemon.name}'s Competitive raised its Sp.Atk!`);
+                  }
+                  if (opp.ability === "Defiant") {
+                    opp.boosts.attack = Math.min(6, opp.boosts.attack + 2);
+                    turnEvents.push(`${opp.pokemon.name}'s Defiant raised its Attack!`);
+                  }
+                }
               }
             }
           }
-          turnEvents.push(`${action.mon.pokemon.name} Mega Evolved!`);
         }
       }
     }
@@ -2398,6 +2660,7 @@ export function simulateBattleWithLog(
       return b.speed - a.speed;
     });
 
+    const switchedOutThisTurnLogged: BattlePokemon[] = [];
     for (const action of actions) {
       if (action.mon.isFainted) continue;
       // Flinch check: Fake Out's flinch sets hasMoved = true, preventing action
@@ -2408,13 +2671,43 @@ export function simulateBattleWithLog(
       // Handle switch-out actions
       if (action.switchOut) {
         const active = action.sideIndex === 1 ? state.active1 : state.active2;
+        const switchOpponents = action.sideIndex === 1 ? state.active2 : state.active1;
         const slot = active.indexOf(action.mon) as 0 | 1;
         if (slot >= 0) {
           const prevName = action.mon.pokemon.name;
-          applySwitch(state, action.sideIndex, slot);
+          const oppBoostsBefore = switchOpponents.map(o => o ? o.boosts.attack : 0);
+          switchedOutThisTurnLogged.push(action.mon);
+          applySwitch(state, action.sideIndex, slot, switchedOutThisTurnLogged);
           const newMon = active[slot];
           if (newMon) {
             turnEvents.push(`${prevName} switched out! ${newMon.pokemon.name} was sent in!${newMon.hasTransformed ? " Palafin transformed into Hero Form!" : ""}`);
+            // Log Imposter transform first
+            if (newMon.isTransformed && newMon.originalAbility === "Imposter") {
+              const imposterTarget = switchOpponents.find(o => o && !o.isFainted);
+              if (imposterTarget) {
+                turnEvents.push(`${newMon.pokemon.name} transformed into ${imposterTarget.pokemon.name} using Imposter!`);
+              }
+            }
+            // Log Intimidate (skip Imposter-transformed)
+            if (newMon.ability === "Intimidate" && !newMon.isTransformed) {
+              for (let oi = 0; oi < switchOpponents.length; oi++) {
+                const opp = switchOpponents[oi];
+                if (!opp || opp.isFainted) continue;
+                if (opp.ability === "Mirror Armor") {
+                  turnEvents.push(`${opp.pokemon.name}'s Mirror Armor reflected ${newMon.pokemon.name}'s Intimidate!`);
+                } else if (opp.ability === "Guard Dog") {
+                  turnEvents.push(`${opp.pokemon.name}'s Guard Dog raised its Attack from ${newMon.pokemon.name}'s Intimidate!`);
+                } else if (!isIntimidateBlocked(opp) && opp.boosts.attack < oppBoostsBefore[oi]) {
+                  turnEvents.push(`${newMon.pokemon.name}'s Intimidate lowered ${opp.pokemon.name}'s Attack!`);
+                  if (opp.ability === "Competitive") {
+                    turnEvents.push(`${opp.pokemon.name}'s Competitive raised its Sp.Atk!`);
+                  }
+                  if (opp.ability === "Defiant") {
+                    turnEvents.push(`${opp.pokemon.name}'s Defiant raised its Attack!`);
+                  }
+                }
+              }
+            }
           }
         }
         continue;
@@ -2438,6 +2731,16 @@ export function simulateBattleWithLog(
       // Track status before move for status-move logging
       const statusBefore = new Map(logTargets.map(m => [m, m.status]));
       const userAtkBefore = action.mon.boosts.attack;
+
+      // Track field state before move for status move descriptions
+      const mySide = action.sideIndex === 1 ? state.field.side1 : state.field.side2;
+      const trickRoomBefore = state.field.trickRoom;
+      const tailwindBefore = mySide.tailwind;
+      const reflectBefore = mySide.reflect;
+      const lightScreenBefore = mySide.lightScreen;
+      const auroraVeilBefore = mySide.auroraVeil;
+      const weatherBefore = state.field.weather;
+      const terrainBefore = state.field.terrain;
 
       executeMove(action.mon, action.moveName, target, allies.filter((a): a is BattlePokemon => a !== null && a !== action.mon), opponents.filter((a): a is BattlePokemon => a !== null), state, action.sideIndex);
 
@@ -2481,6 +2784,30 @@ export function simulateBattleWithLog(
               turnEvents.push(`${action.mon.pokemon.name} used ${action.moveName} on ${target.pokemon.name} - no effect!`);
             } else {
               turnEvents.push(`${action.mon.pokemon.name} used ${action.moveName}!`);
+              // Add descriptive context for field-changing status moves
+              if (action.moveName === "Tailwind" && mySide.tailwind > tailwindBefore) {
+                turnEvents.push(`${action.sideIndex === 1 ? "Your" : "Opponent's"} team's Speed doubled for 4 turns!`);
+              }
+              if (action.moveName === "Trick Room" && state.field.trickRoom !== trickRoomBefore) {
+                turnEvents.push(state.field.trickRoom ? "Slower Pokémon now move first!" : "Normal speed order restored!");
+              }
+              if (action.moveName === "Light Screen" && mySide.lightScreen > lightScreenBefore) {
+                turnEvents.push(`Special damage reduced for ${action.sideIndex === 1 ? "your" : "opponent's"} side!`);
+              }
+              if (action.moveName === "Reflect" && mySide.reflect > reflectBefore) {
+                turnEvents.push(`Physical damage reduced for ${action.sideIndex === 1 ? "your" : "opponent's"} side!`);
+              }
+              if (action.moveName === "Aurora Veil" && mySide.auroraVeil > auroraVeilBefore) {
+                turnEvents.push(`All damage reduced for ${action.sideIndex === 1 ? "your" : "opponent's"} side!`);
+              }
+              if (state.field.weather && state.field.weather !== weatherBefore) {
+                const weatherDescriptions: Record<string, string> = { sun: "Harsh sunlight intensified!", rain: "It started to rain!", sand: "A sandstorm kicked up!", snow: "It started to snow!", hail: "It started to hail!" };
+                turnEvents.push(weatherDescriptions[state.field.weather] ?? `The weather changed to ${state.field.weather}!`);
+              }
+              if (state.field.terrain && state.field.terrain !== terrainBefore) {
+                const terrainDescriptions: Record<string, string> = { electric: "An electric current runs across the battlefield!", grassy: "Grass grew to cover the battlefield!", psychic: "The battlefield got weird!", misty: "Mist swirled around the battlefield!" };
+                turnEvents.push(terrainDescriptions[state.field.terrain] ?? `${state.field.terrain} terrain was set!`);
+              }
             }
           }
         }
@@ -2559,8 +2886,15 @@ export function simulateBattleWithLog(
           const switched = active[slot];
           if (switched && switched !== prev) {
             turnEvents.push(`${sideIndex === 1 ? "Your" : "Opponent's"} ${switched.pokemon.name} was sent in!`);
-            // Log Intimidate effects from the new mon
-            if (switched.ability === "Intimidate") {
+            // Log Imposter transform first (Imposter fires before Intimidate mechanically)
+            if (switched.isTransformed && switched.originalAbility === "Imposter") {
+              const transformedInto = opponents.find(o => o && !o.isFainted);
+              if (transformedInto) {
+                turnEvents.push(`${switched.pokemon.name} transformed into ${transformedInto.pokemon.name} using Imposter!`);
+              }
+            }
+            // Log Intimidate effects (skip Imposter-transformed mons)
+            if (switched.ability === "Intimidate" && !switched.isTransformed) {
               for (let oi = 0; oi < opponents.length; oi++) {
                 const opp = opponents[oi];
                 if (!opp || opp.isFainted) continue;
@@ -2579,19 +2913,19 @@ export function simulateBattleWithLog(
                 }
               }
             }
-            // Log Imposter transform from switch-in
-            if (switched.isTransformed && switched.originalAbility === "Imposter") {
-              const transformedInto = opponents.find(o => o && !o.isFainted);
-              if (transformedInto) {
-                turnEvents.push(`${switched.pokemon.name} transformed into ${transformedInto.pokemon.name} using Imposter!`);
-              }
+            // Log weather/terrain set by entry ability
+            const switchedAbility = getAbilityEffect(switched.ability);
+            if (switchedAbility?.setsWeather && state.field.weather === switchedAbility.setsWeather) {
+              const weatherDescriptions: Record<string, string> = { sun: "Harsh sunlight intensified!", rain: "It started to rain!", sand: "A sandstorm kicked up!", snow: "It started to snow!", hail: "It started to hail!" };
+              turnEvents.push(`${switched.pokemon.name}'s ${switched.ability}! ${weatherDescriptions[state.field.weather] ?? state.field.weather}`);
             }
           }
         }
       }
     }
 
-    applyEndOfTurn(state);
+    const endOfTurnEvents = applyEndOfTurn(state);
+    turnEvents.push(...endOfTurnEvents);
 
     for (const [sideIndex, active] of [[1, state.active1], [2, state.active2]] as [1 | 2, (BattlePokemon | null)[] & { length: 2 }][]) {
       for (let slot = 0; slot < 2; slot++) {

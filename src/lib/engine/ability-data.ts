@@ -159,6 +159,11 @@ export const ABILITY_DATA: Record<string, AbilityEffect> = {
   },
 
   // ── OFFENSIVE ABILITIES ────────────────────────────────────────────────────
+  "Fairy Aura": {
+    name: "Fairy Aura", category: "offensive",
+    description: "Powers up each Pokémon's Fairy-type moves by 33%.",
+    typeBoost: { type: "fairy", multiplier: 1.33 }, vgcRelevance: 9,
+  },
   "Adaptability": {
     name: "Adaptability", category: "offensive",
     description: "STAB bonus is 2× instead of 1.5×.",

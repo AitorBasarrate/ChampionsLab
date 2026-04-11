@@ -8,7 +8,7 @@ import {
   Plus, X, Download, Upload, Copy, Trash2, Shield, Zap,
   ChevronDown, Check, AlertTriangle, Sparkles, Star,
   TrendingUp, Users, Brain, Target, Award, Minus, Settings2,
-  Save, FolderOpen, Share2,
+  Save, FolderOpen, Share2, SlidersHorizontal,
 } from "lucide-react";
 import { POKEMON_SEED, STAT_PRESETS } from "@/lib/pokemon-data";
 import {
@@ -43,12 +43,14 @@ import {
   calculateStats,
   isItemAvailable,
 } from "@/lib/engine";
+import { getMatchup, getAllTypes } from "@/lib/engine/type-chart";
 import {
   getSavedTeams, saveTeam, deleteTeam, deserializeTeam, saveLastTeam, getLastTeam,
   serializeTeam,
   type SavedTeam, type SavedTeamSlot,
 } from "@/lib/storage";
 import { deflateRaw, inflateRaw } from "pako";
+import QRCode from "qrcode";
 
 const EMPTY_STAT_POINTS: StatPoints = { hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed: 0 };
 const MAX_TOTAL_POINTS = 66;
@@ -126,6 +128,10 @@ export default function TeamBuilderPage() {
   const [showPokemonPicker, setShowPokemonPicker] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
   const [pickerTypeFilter, setPickerTypeFilter] = useState<PokemonType | null>(null);
+  const [pickerStatFilters, setPickerStatFilters] = useState({ hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed: 0, bst: 0 });
+  const [showStatFilters, setShowStatFilters] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 640 : false
+  );
   const [showExport, setShowExport] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [importText, setImportText] = useState("");
@@ -316,6 +322,10 @@ export default function TeamBuilderPage() {
     const filled = slots.filter(s => s.pokemon);
     if (filled.length === 0) return;
 
+    // Build share URL first so we can generate a QR code
+    const shareUrlForQR = await buildShareUrl();
+    if (shareUrlForQR) setShareUrl(shareUrlForQR);
+
     const W = 1200, cardH = 200, headerH = 140, footerH = 60;
     const H = headerH + Math.ceil(filled.length / 2) * cardH + footerH;
     const canvas = document.createElement("canvas");
@@ -353,7 +363,7 @@ export default function TeamBuilderPage() {
     ctx.fillStyle = accentGrad;
     ctx.fillRect(40, 100, 460, 3);
 
-    // Header RIGHT - Logo + brand + URL (right-aligned)
+    // Header RIGHT - QR + Logo + brand + URL (right-aligned)
     const logo = await new Promise<HTMLImageElement | null>((resolve) => {
       const img = new window.Image();
       img.crossOrigin = "anonymous";
@@ -361,6 +371,25 @@ export default function TeamBuilderPage() {
       img.onerror = () => resolve(null);
       img.src = "/logo.png";
     });
+
+    // Generate QR code image from share URL
+    let qrImage: HTMLImageElement | null = null;
+    if (shareUrlForQR) {
+      try {
+        const qrDataUrl = await QRCode.toDataURL(shareUrlForQR, {
+          width: 200,
+          margin: 1,
+          color: { dark: "#ffffffee", light: "#00000000" },
+          errorCorrectionLevel: "M",
+        });
+        qrImage = await new Promise<HTMLImageElement | null>((resolve) => {
+          const img = new window.Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = qrDataUrl;
+        });
+      } catch { /* QR generation failed, skip it */ }
+    }
 
     ctx.textAlign = "right";
     ctx.fillStyle = "#ffffff";
@@ -373,18 +402,44 @@ export default function TeamBuilderPage() {
     ctx.fillStyle = "#a78bfa";
     ctx.fillText("championslab.xyz", W - 40, 80);
 
+    // Position logo to left of brand text
+    let logoRightEdge = W - 40 - brandWidth - 14;
     if (logo) {
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       const logoW = 120;
       const logoH = 80;
-      ctx.drawImage(logo, W - 40 - brandWidth - logoW - 14, 10, logoW, logoH);
+      ctx.drawImage(logo, logoRightEdge - logoW, 10, logoW, logoH);
+      logoRightEdge = logoRightEdge - logoW - 14;
+    }
+
+    // Draw QR code to the left of the logo
+    if (qrImage) {
+      const qrSize = 86;
+      const qrX = logoRightEdge - qrSize;
+      const qrY = 8;
+      // Subtle rounded background behind QR
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.beginPath();
+      ctx.roundRect(qrX - 6, qrY - 2, qrSize + 12, qrSize + 16, 10);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+      // "Scan to import" label below QR
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.font = "bold 8px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("SCAN TO IMPORT", qrX + qrSize / 2, qrY + qrSize + 10);
     }
     ctx.textAlign = "left";
 
     // Load sprites as images (use mega sprite if slot is mega)
     const spritePromises = filled.map(s => {
-      const megaForms = s.pokemon!.forms?.filter(f => f.isMega) ?? [];
+      const megaForms = s.pokemon!.forms?.filter(f => f.isMega && !f.hidden) ?? [];
       const megaSprite = s.isMega && megaForms[s.megaFormIndex ?? 0]
         ? megaForms[s.megaFormIndex ?? 0].sprite
         : s.pokemon!.sprite;
@@ -429,7 +484,16 @@ export default function TeamBuilderPage() {
         const nameWidth = ctx.measureText(p.name).width;
         ctx.font = "15px Inter, system-ui, sans-serif";
         ctx.fillStyle = "rgba(255,255,255,0.6)";
-        ctx.fillText(`@ ${s.item}`, x + 110 + nameWidth + 10, y + 48);
+        const itemStart = x + 110 + nameWidth + 10;
+        const maxItemWidth = x + 395 - itemStart; // stop before type badges
+        let itemText = `@ ${s.item}`;
+        if (maxItemWidth > 30 && ctx.measureText(itemText).width > maxItemWidth) {
+          while (itemText.length > 3 && ctx.measureText(itemText + "…").width > maxItemWidth) {
+            itemText = itemText.slice(0, -1);
+          }
+          itemText = itemText.trimEnd() + "…";
+        }
+        ctx.fillText(itemText, itemStart, y + 48);
       }
 
       // Nature + Ability
@@ -503,7 +567,6 @@ export default function TeamBuilderPage() {
     setShareImageUrl(dataUrl);
     setUrlCopied(false);
     setShowShare(true);
-    buildShareUrl().then(url => setShareUrl(url));
   };
 
   const downloadShareImage = () => {
@@ -554,14 +617,42 @@ export default function TeamBuilderPage() {
       const sets = suggestSets(pokemon, teamPokemon);
       const bestSet = sets.length > 0 ? sets[0].set : null;
       const newSlots = [...slots];
-      newSlots[activeSlot] = {
-        pokemon,
-        ability: bestSet?.ability ?? pokemon.abilities[0]?.name,
-        nature: bestSet?.nature ?? "Adamant",
-        moves: bestSet?.moves ?? pokemon.moves.slice(0, 4).map((m) => m.name),
-        statPoints: bestSet?.sp ?? { ...EMPTY_STAT_POINTS },
-        item: bestSet?.item && isItemAvailable(bestSet.item) ? bestSet.item : undefined,
-      };
+
+      // Auto-enable mega if the search matched a mega form ability
+      const q = pickerSearch.toLowerCase().trim();
+      const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
+      const megaAbilityMatch = q && pokemon.hasMega && megaForms.length > 0 &&
+        !pokemon.abilities.some(a => a.name.toLowerCase().includes(q)) &&
+        megaForms.some(f => f.abilities.some(a => a.name.toLowerCase().includes(q)));
+      if (megaAbilityMatch) {
+        const matchedFormIndex = megaForms.findIndex(f => f.abilities.some(a => a.name.toLowerCase().includes(q)));
+        const formIndex = matchedFormIndex >= 0 ? matchedFormIndex : 0;
+        const megaAbility = megaForms[formIndex]?.abilities?.[0]?.name;
+        const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
+        const usageSets = USAGE_DATA[pokemon.id] ?? [];
+        const megaSet = usageSets.find(s => isMegaItem(s.item) && s.ability === megaAbility);
+        const megaItem = megaSet?.item ?? usageSets.find(s => isMegaItem(s.item))?.item;
+        newSlots[activeSlot] = {
+          pokemon,
+          ability: megaAbility ?? bestSet?.ability ?? pokemon.abilities[0]?.name,
+          nature: megaSet?.nature ?? bestSet?.nature ?? "Adamant",
+          moves: megaSet?.moves ?? bestSet?.moves ?? pokemon.moves.slice(0, 4).map((m) => m.name),
+          statPoints: megaSet?.sp ?? bestSet?.sp ?? { ...EMPTY_STAT_POINTS },
+          item: megaItem && isItemAvailable(megaItem) ? megaItem : undefined,
+          isMega: true,
+          megaFormIndex: formIndex,
+          preMegaAbility: pokemon.abilities[0]?.name,
+        };
+      } else {
+        newSlots[activeSlot] = {
+          pokemon,
+          ability: bestSet?.ability ?? pokemon.abilities[0]?.name,
+          nature: bestSet?.nature ?? "Adamant",
+          moves: bestSet?.moves ?? pokemon.moves.slice(0, 4).map((m) => m.name),
+          statPoints: bestSet?.sp ?? { ...EMPTY_STAT_POINTS },
+          item: bestSet?.item && isItemAvailable(bestSet.item) ? bestSet.item : undefined,
+        };
+      }
       setSlots(newSlots);
       setShowPokemonPicker(false);
       setSelectedSlotIndex(activeSlot);
@@ -588,7 +679,7 @@ export default function TeamBuilderPage() {
       let megaFormIndex = 0;
       if (pokemon.hasMega && set?.item && isMegaItem(set.item)) {
         isMega = true;
-        const megaForms = pokemon.forms?.filter(f => f.isMega) ?? [];
+        const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
         const idx = megaForms.findIndex(f => f.abilities.some(a => a.name === set.ability));
         megaFormIndex = idx >= 0 ? idx : 0;
       }
@@ -626,7 +717,7 @@ export default function TeamBuilderPage() {
         const megaSet = usageSets.find(s => isMegaItem(s.item));
         if (megaSet) {
           isMega = true;
-          const megaForms = pokemon.forms?.filter(f => f.isMega) ?? [];
+          const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
           const idx = megaForms.findIndex(f => f.abilities.some(a => a.name === megaSet.ability));
           megaFormIndex = idx >= 0 ? idx : 0;
           const megaAbility = megaForms[megaFormIndex]?.abilities?.[0]?.name;
@@ -672,7 +763,7 @@ export default function TeamBuilderPage() {
     const setItem = bestSet?.item;
     if (pokemon.hasMega && setItem && isMegaItem(setItem)) {
       isMega = true;
-      const megaForms = pokemon.forms?.filter(f => f.isMega) ?? [];
+      const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
       const idx = megaForms.findIndex(f => f.abilities.some(a => a.name === bestSet?.ability));
       megaFormIndex = idx >= 0 ? idx : 0;
     }
@@ -704,7 +795,7 @@ export default function TeamBuilderPage() {
     const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
     if (set.item && isMegaItem(set.item) && slot.pokemon?.hasMega) {
       slot.isMega = true;
-      const megaForms = slot.pokemon.forms?.filter(f => f.isMega) ?? [];
+      const megaForms = slot.pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
       const matchedIdx = megaForms.findIndex(f => f.abilities.some(a => a.name === set.ability));
       slot.megaFormIndex = matchedIdx >= 0 ? matchedIdx : 0;
     } else if (set.item && !isMegaItem(set.item)) {
@@ -756,6 +847,8 @@ export default function TeamBuilderPage() {
     setActiveSlot(index);
     setPickerSearch("");
     setPickerTypeFilter(null);
+    setPickerStatFilters({ hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed: 0, bst: 0 });
+    setShowStatFilters(window.innerWidth >= 640);
     setShowPokemonPicker(true);
   };
 
@@ -766,7 +859,7 @@ export default function TeamBuilderPage() {
   };
   const resolveSlotTypes = (s: TeamSlot): PokemonType[] => {
     if (s.isMega && s.pokemon!.forms) {
-      const megaForms = s.pokemon!.forms.filter(f => f.isMega);
+      const megaForms = s.pokemon!.forms.filter(f => f.isMega && !f.hidden);
       const mf = megaForms[s.megaFormIndex ?? 0];
       if (mf) return mf.types as PokemonType[];
     }
@@ -775,7 +868,7 @@ export default function TeamBuilderPage() {
   const resolveSlotAbility = (s: TeamSlot): string => {
     if (s.ability) return s.ability;
     if (s.isMega && s.pokemon!.forms) {
-      const megaForms = s.pokemon!.forms.filter(f => f.isMega);
+      const megaForms = s.pokemon!.forms.filter(f => f.isMega && !f.hidden);
       const mf = megaForms[s.megaFormIndex ?? 0];
       if (mf) return mf.abilities[0]?.name ?? s.pokemon!.abilities[0]?.name ?? "";
     }
@@ -920,9 +1013,11 @@ export default function TeamBuilderPage() {
               else if (stat === "spe") sp.speed = val;
             }
           }
-          // If "Stat Points:" with small values, treat as native SP (no conversion)
+          // Detect native Stat Points: either "Stat Points:" prefix, or "EVs:" with all values ≤ 32
+          // (Showdown now uses the same 0-32 SP system as Champions)
           const maxVal = Math.max(sp.hp, sp.attack, sp.defense, sp.spAtk, sp.spDef, sp.speed);
-          if (isStatPoints && maxVal <= MAX_PER_STAT) isNativeSP = true;
+          const totalVal = sp.hp + sp.attack + sp.defense + sp.spAtk + sp.spDef + sp.speed;
+          if ((isStatPoints && maxVal <= MAX_PER_STAT) || (!isStatPoints && maxVal <= MAX_PER_STAT && totalVal <= MAX_TOTAL_POINTS)) isNativeSP = true;
         }
       }
       // Convert Showdown EVs to our stat point system (skip if already native SP)
@@ -931,7 +1026,7 @@ export default function TeamBuilderPage() {
       let isMega = false;
       let megaFormIndex = 0;
       if (pokemon.hasMega) {
-        const megaForms = pokemon.forms?.filter(f => f.isMega) ?? [];
+        const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
         if (showdownMegaSuffix !== null) {
           // Came from Showdown mega name like "Charizard-Mega-X"
           isMega = true;
@@ -989,7 +1084,7 @@ export default function TeamBuilderPage() {
         // Use Showdown mega naming for mega Pokemon (e.g., Charizard-Mega-Y)
         let exportName = p.showdownName ?? p.name;
         if (s.isMega && p.hasMega) {
-          const megaForms = p.forms?.filter(f => f.isMega) ?? [];
+          const megaForms = p.forms?.filter(f => f.isMega && !f.hidden) ?? [];
           if (megaForms.length > 1) {
             // Multi-form mega: Charizard-Mega-X or Charizard-Mega-Y
             exportName = `${p.name}-Mega-${s.megaFormIndex === 1 ? "Y" : "X"}`;
@@ -1003,13 +1098,12 @@ export default function TeamBuilderPage() {
         if (s.nature) lines.push(`${s.nature} Nature`);
 
         lines.push(`Level: 50`);
-        lines.push(`IVs: 31 HP / 31 Atk / 31 Def / 31 SpA / 31 SpD / 31 Spe`);
-        const evs = statPointsToEVs(s.statPoints);
-        const evParts = STAT_KEYS
-          .map(k => ({ val: evs[k], label: STAT_LABELS[k] }))
+        // Export Stat Points directly as EVs (Showdown now uses the same SP system)
+        const spParts = STAT_KEYS
+          .map(k => ({ val: s.statPoints[k], label: STAT_LABELS[k] }))
           .filter(e => e.val > 0)
           .map(e => `${e.val} ${e.label}`);
-        if (evParts.length > 0) lines.push(`EVs: ${evParts.join(" / ")}`);
+        if (spParts.length > 0) lines.push(`EVs: ${spParts.join(" / ")}`);
         s.moves.forEach((m) => lines.push(`- ${m}`));
         return lines.join("\n");
       })
@@ -1021,21 +1115,30 @@ export default function TeamBuilderPage() {
     navigator.clipboard.writeText(exportPokepaste());
   };
 
-  const filteredPicker = POKEMON_SEED.filter(
-    (p) => {
+  const filteredPicker = useMemo(() => {
+    const sf = pickerStatFilters;
+    const hasStatFilter = sf.hp > 0 || sf.attack > 0 || sf.defense > 0 || sf.spAtk > 0 || sf.spDef > 0 || sf.speed > 0 || sf.bst > 0;
+    return POKEMON_SEED.filter((p) => {
       if (p.hidden) return false;
       if (usedPokemonIds.includes(p.id)) return false;
       if (pickerTypeFilter && !p.types.includes(pickerTypeFilter)) return false;
+      if (hasStatFilter) {
+        const bs = p.baseStats;
+        if (bs.hp < sf.hp || bs.attack < sf.attack || bs.defense < sf.defense ||
+            bs.spAtk < sf.spAtk || bs.spDef < sf.spDef || bs.speed < sf.speed) return false;
+        if (sf.bst > 0 && (bs.hp + bs.attack + bs.defense + bs.spAtk + bs.spDef + bs.speed) < sf.bst) return false;
+      }
       if (pickerSearch === "") return true;
       const q = pickerSearch.toLowerCase();
       return (
         p.name.toLowerCase().includes(q) ||
         p.types.some((t) => t.includes(q)) ||
         p.abilities.some((a) => a.name.toLowerCase().includes(q)) ||
-        p.moves.some((m) => m.name.toLowerCase().includes(q))
+        p.moves.some((m) => m.name.toLowerCase().includes(q)) ||
+        (p.hasMega && p.forms?.some((f) => f.isMega && f.abilities.some((a) => a.name.toLowerCase().includes(q))))
       );
-    }
-  );
+    });
+  }, [pickerSearch, pickerTypeFilter, pickerStatFilters, usedPokemonIds]);
 
   return (
     <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
@@ -1427,7 +1530,7 @@ export default function TeamBuilderPage() {
                       <span className="text-[10px] font-bold text-muted-foreground">{i + 1}</span>
                     </div>
                     {slot.isMega && (() => {
-                      const megaForms = slot.pokemon.forms?.filter(f => f.isMega) ?? [];
+                      const megaForms = slot.pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
                       const activeMega = megaForms[slot.megaFormIndex ?? 0];
                       const label = megaForms.length > 1 && activeMega ? activeMega.name.replace(slot.pokemon.name, "").replace("Mega ", "").trim() : "MEGA";
                       return (
@@ -1437,7 +1540,7 @@ export default function TeamBuilderPage() {
                       );
                     })()}
                     {(() => {
-                      const megaForms = slot.pokemon.forms?.filter(f => f.isMega) ?? [];
+                      const megaForms = slot.pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
                       const activeMega = slot.isMega ? megaForms[slot.megaFormIndex ?? 0] : null;
                       const displaySprite = activeMega?.sprite ?? slot.pokemon.officialArt;
                       const displayName = activeMega?.name ?? slot.pokemon.name;
@@ -1497,7 +1600,7 @@ export default function TeamBuilderPage() {
                 >
                   <div className="flex items-center justify-between mb-4">
                     {(() => {
-                      const megaForms = editPkm.forms?.filter(f => f.isMega) ?? [];
+                      const megaForms = editPkm.forms?.filter(f => f.isMega && !f.hidden) ?? [];
                       const activeMega = editSlotData.isMega ? megaForms[editSlotData.megaFormIndex ?? 0] : null;
                       const displaySprite = activeMega?.sprite ?? editPkm.officialArt;
                       const displayName = activeMega?.name ?? editPkm.name;
@@ -1595,6 +1698,72 @@ export default function TeamBuilderPage() {
                         })}
                       </div>
                       {slotSuggestion && slotSuggestion.suggestedMoves.length > 0 && <p className="text-[9px] text-muted-foreground mt-2">★ = engine recommended</p>}
+
+                      {/* Mega Toggle */}
+                      {editPkm.hasMega && (() => {
+                        const megaForms = editPkm.forms?.filter(f => f.isMega && !f.hidden) ?? [];
+                        const isMega = editSlotData.isMega || false;
+                        const activeIdx = editSlotData.megaFormIndex ?? 0;
+                        const activeMega = megaForms[activeIdx];
+                        const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
+                        const getMegaStone = (formIndex: number) => {
+                          const form = megaForms[formIndex];
+                          if (!form) return undefined;
+                          const sets = USAGE_DATA[editPkm.id] ?? [];
+                          const megaSet = sets.find(s => isMegaItem(s.item) && s.ability === form.abilities[0]?.name);
+                          if (megaSet) return megaSet.item;
+                          return sets.find(s => isMegaItem(s.item))?.item;
+                        };
+                        return (
+                          <div className="mt-4 pt-3 border-t border-gray-100">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold mb-2">Mega Evolution</p>
+                            {megaForms.length <= 1 ? (
+                              <button onClick={() => {
+                                if (isMega) {
+                                  updateSlot(selectedSlotIndex, { isMega: false, megaFormIndex: 0, ability: editSlotData.preMegaAbility || editPkm.abilities[0]?.name, item: undefined, preMegaAbility: undefined });
+                                } else {
+                                  const ab = megaForms[0]?.abilities?.[0];
+                                  if (ab) updateSlot(selectedSlotIndex, { isMega: true, megaFormIndex: 0, ability: ab.name, preMegaAbility: editSlotData.ability || editPkm.abilities[0]?.name, item: getMegaStone(0) });
+                                }
+                              }} className={cn("px-4 py-2 rounded-lg text-[12px] font-medium border transition-all flex items-center gap-2", isMega ? "bg-amber-100 border-amber-300 text-amber-800" : "bg-gray-50 border-gray-200 hover:bg-amber-50 hover:border-amber-200")}>
+                                <Sparkles className="w-4 h-4" />{isMega ? "Mega Active" : "Enable Mega"}
+                              </button>
+                            ) : (
+                              <div className="flex flex-wrap gap-2">
+                                {megaForms.map((form, fi) => {
+                                  const isActive = isMega && activeIdx === fi;
+                                  return (
+                                    <button key={fi} onClick={() => {
+                                      if (isActive) {
+                                        updateSlot(selectedSlotIndex, { isMega: false, megaFormIndex: 0, ability: editSlotData.preMegaAbility || editPkm.abilities[0]?.name, item: undefined, preMegaAbility: undefined });
+                                      } else {
+                                        const ab = form.abilities?.[0];
+                                        if (ab) updateSlot(selectedSlotIndex, { isMega: true, megaFormIndex: fi, ability: ab.name, preMegaAbility: editSlotData.ability || editPkm.abilities[0]?.name, item: getMegaStone(fi) });
+                                      }
+                                    }} className={cn("px-4 py-2 rounded-lg text-[12px] font-medium border transition-all flex items-center gap-2", isActive ? "bg-amber-100 border-amber-300 text-amber-800" : "bg-gray-50 border-gray-200 hover:bg-amber-50 hover:border-amber-200")}>
+                                      <Sparkles className="w-4 h-4" />{form.name.replace(editPkm.name, "").replace("Mega ", "").trim() || "Mega"}
+                                    </button>
+                                  );
+                                })}
+                                {isMega && (
+                                  <button onClick={() => updateSlot(selectedSlotIndex, { isMega: false, megaFormIndex: 0, ability: editPkm.abilities[0]?.name, item: undefined })} className="px-3 py-2 rounded-lg text-[11px] font-medium border border-gray-200 bg-gray-50 hover:bg-red-50 hover:border-red-200 transition-all text-gray-600">
+                                    Disable
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                            {activeMega && isMega && (
+                              <div className="mt-1.5 p-2 rounded-lg bg-amber-50/50 border border-amber-100 text-[10px]">
+                                <p className="font-medium text-amber-800">{activeMega.name}</p>
+                                {activeMega.abilities?.[0] && <p className="text-amber-700 mt-0.5">{activeMega.abilities[0].name}: {activeMega.abilities[0].description}</p>}
+                                {getMegaStone(activeIdx) && <p className="text-amber-600 mt-0.5">Held Item: {getMegaStone(activeIdx)}</p>}
+                                <p className="text-muted-foreground mt-0.5">Types: {activeMega.types.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join("/")}</p>
+                              </div>
+                            )}
+                            <p className="text-[9px] text-muted-foreground mt-1">Mega stones can be held by multiple Pokémon but only one can Mega Evolve per battle</p>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     {/* Col 2: Ability + Nature + Item */}
@@ -1603,7 +1772,7 @@ export default function TeamBuilderPage() {
                         <p className="text-[10px] text-muted-foreground uppercase font-bold mb-2">{editSlotData.isMega ? "Pre-Mega Ability" : "Ability"}</p>
                         <div className="space-y-1.5">
                           {(() => {
-                            const megaForms = editPkm.forms?.filter(f => f.isMega) ?? [];
+                            const megaForms = editPkm.forms?.filter(f => f.isMega && !f.hidden) ?? [];
                             const allMegaAbilities: { ab: typeof editPkm.abilities[0]; formIndex: number; formName: string }[] = [];
                             megaForms.forEach((form, fi) => {
                               form.abilities.forEach(ab => {
@@ -1745,7 +1914,7 @@ export default function TeamBuilderPage() {
                       </div>
                       <div className="space-y-1.5">
                         {(() => {
-                          const megaForms = editPkm.forms?.filter(f => f.isMega) ?? [];
+                          const megaForms = editPkm.forms?.filter(f => f.isMega && !f.hidden) ?? [];
                           const activeBase = editSlotData.isMega && megaForms[editSlotData.megaFormIndex ?? 0]
                             ? megaForms[editSlotData.megaFormIndex ?? 0].baseStats
                             : editPkm.baseStats;
@@ -1784,70 +1953,73 @@ export default function TeamBuilderPage() {
                     </div>
                   </div>
 
-                  {/* Mega Toggle */}
-                  {editPkm.hasMega && (() => {
-                    const megaForms = editPkm.forms?.filter(f => f.isMega) ?? [];
-                    const isMega = editSlotData.isMega || false;
-                    const activeIdx = editSlotData.megaFormIndex ?? 0;
-                    const activeMega = megaForms[activeIdx];
-                    const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
-                    // Find mega stone for a specific form from usage data
-                    const getMegaStone = (formIndex: number) => {
-                      const form = megaForms[formIndex];
-                      if (!form) return undefined;
-                      const sets = USAGE_DATA[editPkm.id] ?? [];
-                      const megaSet = sets.find(s => isMegaItem(s.item) && s.ability === form.abilities[0]?.name);
-                      if (megaSet) return megaSet.item;
-                      // Fallback: just find any mega stone set
-                      return sets.find(s => isMegaItem(s.item))?.item;
-                    };
+                  {/* Type Defenses & Coverage */}
+                  {(() => {
+                    const megaForms = editPkm.forms?.filter(f => f.isMega && !f.hidden) ?? [];
+                    const activeTypes = editSlotData.isMega && megaForms[editSlotData.megaFormIndex ?? 0]
+                      ? megaForms[editSlotData.megaFormIndex ?? 0].types
+                      : editPkm.types;
+                    const allTypes = getAllTypes();
+                    // offensive: best effectiveness from selected moves
+                    const selectedMoveTypes = editSlotData.moves
+                      .filter(Boolean)
+                      .map(mName => editPkm.moves.find(m => m.name === mName))
+                      .filter((m): m is NonNullable<typeof m> => m != null && m.category !== "status")
+                      .map(m => m.type);
+                    const uniqueMoveTypes = [...new Set(selectedMoveTypes)];
                     return (
-                      <div className="mt-4 pt-3 border-t border-gray-100">
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold mb-2">Mega Evolution</p>
-                        {megaForms.length <= 1 ? (
-                          <button onClick={() => {
-                            if (isMega) {
-                              updateSlot(selectedSlotIndex, { isMega: false, megaFormIndex: 0, ability: editSlotData.preMegaAbility || editPkm.abilities[0]?.name, item: undefined, preMegaAbility: undefined });
-                            } else {
-                              const ab = megaForms[0]?.abilities?.[0];
-                              if (ab) updateSlot(selectedSlotIndex, { isMega: true, megaFormIndex: 0, ability: ab.name, preMegaAbility: editSlotData.ability || editPkm.abilities[0]?.name, item: getMegaStone(0) });
-                            }
-                          }} className={cn("px-4 py-2 rounded-lg text-[12px] font-medium border transition-all flex items-center gap-2", isMega ? "bg-amber-100 border-amber-300 text-amber-800" : "bg-gray-50 border-gray-200 hover:bg-amber-50 hover:border-amber-200")}>
-                            <Sparkles className="w-4 h-4" />{isMega ? "Mega Active" : "Enable Mega"}
-                          </button>
-                        ) : (
-                          <div className="flex flex-wrap gap-2">
-                            {megaForms.map((form, fi) => {
-                              const isActive = isMega && activeIdx === fi;
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Defensive */}
+                        <div>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold mb-2">Type Defenses</p>
+                          <div className="grid grid-cols-6 gap-1">
+                            {allTypes.map((type) => {
+                              const mult = getMatchup(type as PokemonType, activeTypes);
+                              let label = "";
+                              let bg = "bg-gray-50 dark:bg-gray-200/5";
+                              let textColor = "text-gray-300 dark:text-gray-600";
+                              if (mult === 0) { label = "0"; bg = "bg-gray-900 dark:bg-gray-900"; textColor = "text-gray-400"; }
+                              else if (mult === 0.25) { label = "\u00bc"; bg = "bg-emerald-100 dark:bg-emerald-500/20"; textColor = "text-emerald-700 dark:text-emerald-400"; }
+                              else if (mult === 0.5) { label = "\u00bd"; bg = "bg-emerald-50 dark:bg-emerald-500/10"; textColor = "text-emerald-600 dark:text-emerald-400"; }
+                              else if (mult === 1) { label = ""; }
+                              else if (mult === 2) { label = "2\u00d7"; bg = "bg-red-50 dark:bg-red-500/10"; textColor = "text-red-600 dark:text-red-400"; }
+                              else if (mult === 4) { label = "4\u00d7"; bg = "bg-red-100 dark:bg-red-500/20"; textColor = "text-red-700 dark:text-red-300"; }
                               return (
-                                <button key={fi} onClick={() => {
-                                  if (isActive) {
-                                    updateSlot(selectedSlotIndex, { isMega: false, megaFormIndex: 0, ability: editSlotData.preMegaAbility || editPkm.abilities[0]?.name, item: undefined, preMegaAbility: undefined });
-                                  } else {
-                                    const ab = form.abilities?.[0];
-                                    if (ab) updateSlot(selectedSlotIndex, { isMega: true, megaFormIndex: fi, ability: ab.name, preMegaAbility: editSlotData.ability || editPkm.abilities[0]?.name, item: getMegaStone(fi) });
-                                  }
-                                }} className={cn("px-4 py-2 rounded-lg text-[12px] font-medium border transition-all flex items-center gap-2", isActive ? "bg-amber-100 border-amber-300 text-amber-800" : "bg-gray-50 border-gray-200 hover:bg-amber-50 hover:border-amber-200")}>
-                                  <Sparkles className="w-4 h-4" />{form.name.replace(editPkm.name, "").replace("Mega ", "").trim() || "Mega"}
-                                </button>
+                                <div key={type} className={cn("flex flex-col items-center gap-0.5 py-1 rounded-md", bg)}>
+                                  <span className="w-full text-center text-[7px] font-bold uppercase text-white/90 rounded px-0.5 py-px leading-none" style={{ backgroundColor: TYPE_COLORS[type as PokemonType] }}>{type.slice(0, 3)}</span>
+                                  <span className={cn("text-[10px] font-bold leading-none", textColor)}>{label}</span>
+                                </div>
                               );
                             })}
-                            {isMega && (
-                              <button onClick={() => updateSlot(selectedSlotIndex, { isMega: false, megaFormIndex: 0, ability: editPkm.abilities[0]?.name, item: undefined })} className="px-3 py-2 rounded-lg text-[11px] font-medium border border-gray-200 bg-gray-50 hover:bg-red-50 hover:border-red-200 transition-all text-gray-600">
-                                Disable
-                              </button>
-                            )}
                           </div>
-                        )}
-                        {activeMega && isMega && (
-                          <div className="mt-1.5 p-2 rounded-lg bg-amber-50/50 border border-amber-100 text-[10px]">
-                            <p className="font-medium text-amber-800">{activeMega.name}</p>
-                            {activeMega.abilities?.[0] && <p className="text-amber-700 mt-0.5">{activeMega.abilities[0].name}: {activeMega.abilities[0].description}</p>}
-                            {getMegaStone(activeIdx) && <p className="text-amber-600 mt-0.5">Held Item: {getMegaStone(activeIdx)}</p>}
-                            <p className="text-muted-foreground mt-0.5">Types: {activeMega.types.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join("/")}</p>
+                        </div>
+                        {/* Offensive */}
+                        <div>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold mb-2">Move Coverage{uniqueMoveTypes.length === 0 ? " (pick moves)" : ""}</p>
+                          <div className="grid grid-cols-6 gap-1">
+                            {allTypes.map((type) => {
+                              let best = 0;
+                              for (const mt of uniqueMoveTypes) {
+                                const eff = getMatchup(mt, [type as PokemonType]);
+                                if (eff > best) best = eff;
+                              }
+                              let label = "";
+                              let bg = "bg-gray-50 dark:bg-gray-200/5";
+                              let textColor = "text-gray-300 dark:text-gray-600";
+                              if (uniqueMoveTypes.length === 0) { label = "\u2014"; }
+                              else if (best >= 2) { label = "2\u00d7"; bg = "bg-emerald-50 dark:bg-emerald-500/10"; textColor = "text-emerald-600 dark:text-emerald-400"; }
+                              else if (best === 1) { label = "1\u00d7"; textColor = "text-gray-400 dark:text-gray-500"; }
+                              else if (best > 0 && best < 1) { label = "\u00bd"; bg = "bg-red-50 dark:bg-red-500/10"; textColor = "text-red-500 dark:text-red-400"; }
+                              else { label = "0"; bg = "bg-gray-900 dark:bg-gray-900"; textColor = "text-gray-400"; }
+                              return (
+                                <div key={type} className={cn("flex flex-col items-center gap-0.5 py-1 rounded-md", bg)}>
+                                  <span className="w-full text-center text-[7px] font-bold uppercase text-white/90 rounded px-0.5 py-px leading-none" style={{ backgroundColor: TYPE_COLORS[type as PokemonType] }}>{type.slice(0, 3)}</span>
+                                  <span className={cn("text-[10px] font-bold leading-none", textColor)}>{label}</span>
+                                </div>
+                              );
+                            })}
                           </div>
-                        )}
-                        <p className="text-[9px] text-muted-foreground mt-1">Mega stones can be held by multiple Pokémon but only one can Mega Evolve per battle</p>
+                        </div>
                       </div>
                     );
                   })()}
@@ -1891,7 +2063,7 @@ export default function TeamBuilderPage() {
                     </div>
                   </div>
                   <div className="flex gap-1 mb-2">
-                    {meta.pokemonIds.map((id, pidx) => { const p = POKEMON_SEED.find(pk => pk.id === id); if (!p) return null; const megaForms = p.forms?.filter(f => f.isMega) ?? []; const useSets = USAGE_DATA[p.id] ?? []; const hasMegaSet = p.hasMega && useSets.some(s => s.item.endsWith("ite") || s.item.endsWith("ite X") || s.item.endsWith("ite Y") || s.item.endsWith("ite Z")); const isFirstMega = hasMegaSet && !meta.pokemonIds.slice(0, pidx).some(prevId => { const pp = POKEMON_SEED.find(pk => pk.id === prevId); return pp?.hasMega && (USAGE_DATA[prevId] ?? []).some(s => s.item.endsWith("ite") || s.item.endsWith("ite X") || s.item.endsWith("ite Y") || s.item.endsWith("ite Z")); }); const megaSprite = isFirstMega && megaForms[0] ? megaForms[0].sprite : p.sprite; const megaName = isFirstMega && megaForms[0] ? megaForms[0].name : p.name; return <div key={id} className="flex flex-col items-center relative"><Image src={megaSprite} alt={megaName} width={32} height={32} className="rounded" unoptimized />{isFirstMega && <span className="absolute -top-1 -right-1 px-0.5 text-[6px] font-bold bg-amber-500 text-white rounded">M</span>}<span className="text-[7px] text-muted-foreground mt-0.5 truncate w-9 text-center">{megaName.length > 10 ? p.name : megaName}</span></div>; })}
+                    {meta.pokemonIds.map((id, pidx) => { const p = POKEMON_SEED.find(pk => pk.id === id); if (!p) return null; const megaForms = p.forms?.filter(f => f.isMega && !f.hidden) ?? []; const useSets = USAGE_DATA[p.id] ?? []; const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z"); const megaSet = p.hasMega ? useSets.find(s => isMegaItem(s.item)) : null; const hasMegaSet = !!megaSet; const isFirstMega = hasMegaSet && !meta.pokemonIds.slice(0, pidx).some(prevId => { const pp = POKEMON_SEED.find(pk => pk.id === prevId); return pp?.hasMega && (USAGE_DATA[prevId] ?? []).some(s => isMegaItem(s.item)); }); const resolvedMegaForm = (() => { if (!isFirstMega || megaForms.length === 0) return null; if (megaForms.length === 1) return megaForms[0]; if (megaSet) { const suffix = megaSet.item.match(/ ([XYZ])$/)?.[1]; if (suffix) { return megaForms.find(f => f.name.endsWith(` ${suffix}`)) ?? megaForms[0]; } const matched = megaForms.find(f => f.abilities.some(a => a.name === megaSet.ability)); if (matched) return matched; } return megaForms[0]; })(); const megaSprite = resolvedMegaForm ? resolvedMegaForm.sprite : p.sprite; const megaName = resolvedMegaForm ? resolvedMegaForm.name : p.name; return <div key={id} className="flex flex-col items-center relative"><Image src={megaSprite} alt={megaName} width={32} height={32} className="rounded" unoptimized />{isFirstMega && <span className="absolute -top-1 -right-1 px-0.5 text-[6px] font-bold bg-amber-500 text-white rounded">M</span>}<span className="text-[7px] text-muted-foreground mt-0.5 truncate w-9 text-center">{megaName.length > 10 ? p.name : megaName}</span></div>; })}
                   </div>
                   {meta.corePairs.length > 0 && <div className="flex flex-wrap gap-1 mb-1.5">{meta.corePairs.map(cp => <span key={cp} className="px-1.5 py-0.5 text-[8px] rounded bg-emerald-50 text-emerald-600 font-medium">{cp}</span>)}</div>}
                   <div className="space-y-0">
@@ -2117,7 +2289,7 @@ export default function TeamBuilderPage() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
-              className="fixed inset-x-3 top-20 bottom-3 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-2xl sm:max-h-[80vh] glass rounded-2xl border border-gray-200/60 flex flex-col overflow-hidden"
+              className="fixed inset-x-3 top-20 bottom-3 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-2xl sm:h-[80vh] glass rounded-2xl border border-gray-200/60 flex flex-col overflow-hidden"
             >
               {/* Picker Header */}
               <div className="p-4 border-b border-gray-200/60">
@@ -2141,34 +2313,115 @@ export default function TeamBuilderPage() {
                     <button
                       key={t}
                       onClick={() => setPickerTypeFilter(pickerTypeFilter === t ? null : t)}
-                      className="px-2 py-1 rounded-full text-[10px] font-semibold capitalize transition-all"
+                      className="px-2.5 py-1 rounded-full text-[10px] font-bold capitalize transition-all"
                       style={{
-                        backgroundColor: pickerTypeFilter === t ? TYPE_COLORS[t] : `${TYPE_COLORS[t]}18`,
+                        backgroundColor: pickerTypeFilter === t ? TYPE_COLORS[t] : `${TYPE_COLORS[t]}30`,
                         color: pickerTypeFilter === t ? "#fff" : TYPE_COLORS[t],
-                        border: `1px solid ${pickerTypeFilter === t ? TYPE_COLORS[t] : `${TYPE_COLORS[t]}40`}`,
+                        border: `1.5px solid ${pickerTypeFilter === t ? TYPE_COLORS[t] : `${TYPE_COLORS[t]}60`}`,
+                        textShadow: pickerTypeFilter === t ? "0 1px 2px rgba(0,0,0,0.2)" : "none",
                       }}
                     >
                       {t}
                     </button>
                   ))}
                 </div>
-                {(pickerSearch || pickerTypeFilter) && (
-                  <p className="text-[10px] text-muted-foreground mt-2">{filteredPicker.length} Pokémon found</p>
-                )}
+
+                {/* Base Stats section */}
+                <div className="mt-3 rounded-xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden bg-white/40 dark:bg-white/5">
+                  <button
+                    onClick={() => setShowStatFilters(!showStatFilters)}
+                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-500" />
+                      <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-200">Base Stat Filter</span>
+                      {Object.values(pickerStatFilters).some(v => v > 0) && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                          {Object.values(pickerStatFilters).filter(v => v > 0).length} active
+                        </span>
+                      )}
+                    </div>
+                    <ChevronDown className={cn("w-3.5 h-3.5 text-gray-400 transition-transform", showStatFilters && "rotate-180")} />
+                  </button>
+
+                  {showStatFilters && (
+                    <div className="px-3 pb-3 pt-1 border-t border-gray-100 dark:border-gray-700/60">
+                      <div className="flex justify-end mb-1.5">
+                        <button
+                          onClick={() => setPickerStatFilters({ hp: 0, attack: 0, defense: 0, spAtk: 0, spDef: 0, speed: 0, bst: 0 })}
+                          className={cn(
+                            "text-[10px] font-semibold transition-colors",
+                            Object.values(pickerStatFilters).some(v => v > 0)
+                              ? "text-emerald-500 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                              : "text-transparent pointer-events-none"
+                          )}
+                        >
+                          Clear all
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-5 gap-y-1.5">
+                        {([
+                          { key: "hp" as const, label: "HP", color: "#ff5959", max: 255 },
+                          { key: "attack" as const, label: "Atk", color: "#f5ac78", max: 255 },
+                          { key: "defense" as const, label: "Def", color: "#fae078", max: 255 },
+                          { key: "spAtk" as const, label: "SpA", color: "#9db7f5", max: 255 },
+                          { key: "spDef" as const, label: "SpD", color: "#a7db8d", max: 255 },
+                          { key: "speed" as const, label: "Spe", color: "#fa92b2", max: 255 },
+                          { key: "bst" as const, label: "BST", color: "#888", max: 800 },
+                        ]).map(({ key, label, color, max }) => (
+                          <div key={key} className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-bold w-7 text-right shrink-0" style={{ color }}>{label}</span>
+                            <input
+                              type="range"
+                              min={0}
+                              max={max}
+                              step={key === "bst" ? 10 : 5}
+                              value={pickerStatFilters[key]}
+                              onChange={(e) => setPickerStatFilters(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                              className="flex-1 h-1.5 cursor-pointer"
+                              style={{ accentColor: color }}
+                            />
+                            <span className={cn(
+                              "text-[10px] font-mono w-8 tabular-nums shrink-0 text-right transition-colors",
+                              pickerStatFilters[key] > 0 ? "font-bold" : "text-gray-400 dark:text-gray-500"
+                            )} style={pickerStatFilters[key] > 0 ? { color } : undefined}>
+                              {pickerStatFilters[key] > 0 ? `≥${pickerStatFilters[key]}` : "—"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Result count */}
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-[10px] text-muted-foreground">
+                    {filteredPicker.length} Pokémon{pickerSearch || pickerTypeFilter || Object.values(pickerStatFilters).some(v => v > 0) ? " found" : " available"}
+                  </p>
+                </div>
               </div>
 
               {/* Picker Grid */}
-              <div className="flex-1 overflow-y-auto p-4">
+              <div className="flex-1 overflow-y-auto p-4 min-h-[40vh]">
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  {filteredPicker.map((pokemon) => (
+                  {filteredPicker.map((pokemon) => {
+                    const q = pickerSearch.toLowerCase().trim();
+                    const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
+                    const isMegaAbilityMatch = q && pokemon.hasMega && megaForms.length > 0 &&
+                      !pokemon.abilities.some(a => a.name.toLowerCase().includes(q)) &&
+                      megaForms.some(f => f.abilities.some(a => a.name.toLowerCase().includes(q)));
+                    const matchedMegaForm = isMegaAbilityMatch ? megaForms.find(f => f.abilities.some(a => a.name.toLowerCase().includes(q))) ?? megaForms[0] : null;
+                    const megaMatchAbility = matchedMegaForm?.abilities[0]?.name ?? null;
+                    return (
                     <button
                       key={pokemon.id}
                       onClick={() => addPokemon(pokemon)}
-                      className="glass glass-hover rounded-xl p-3 text-left transition-all hover:border-emerald-300 border border-transparent"
+                      className={cn("glass glass-hover rounded-xl p-3 text-left transition-all border border-transparent", isMegaAbilityMatch ? "hover:border-amber-300 ring-1 ring-amber-200" : "hover:border-emerald-300")}
                     >
                       <div className="flex items-center gap-2">
                         <Image
-                          src={pokemon.sprite}
+                          src={matchedMegaForm?.sprite ?? pokemon.sprite}
                           alt={pokemon.name}
                           width={40}
                           height={40}
@@ -2176,9 +2429,12 @@ export default function TeamBuilderPage() {
                           unoptimized
                         />
                         <div className="min-w-0">
-                          <p className="text-xs font-medium truncate">{pokemon.name}</p>
+                          <p className="text-xs font-medium truncate">{matchedMegaForm ? matchedMegaForm.name.replace(pokemon.name + " ", "M-").replace(pokemon.name, `M-${pokemon.name}`) : pokemon.name}</p>
+                          {isMegaAbilityMatch && megaMatchAbility && (
+                            <p className="text-[9px] text-amber-600 dark:text-amber-400 font-medium truncate">{megaMatchAbility}</p>
+                          )}
                           <div className="flex gap-1 mt-0.5">
-                            {pokemon.types.map((t) => (
+                            {(matchedMegaForm?.types ?? pokemon.types).map((t) => (
                               <span
                                 key={t}
                                 className="w-2 h-2 rounded-full"
@@ -2189,7 +2445,8 @@ export default function TeamBuilderPage() {
                         </div>
                       </div>
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </motion.div>

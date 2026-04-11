@@ -11,6 +11,36 @@ interface ChangelogEntry {
 
 const SHARED_ENTRIES: ChangelogEntry[] = [
   {
+    date: "11/04/2026",
+    items: [
+      "🎯 Showdown-style Base Stat Filter — filter Pokémon by minimum HP, Atk, Def, SpA, SpD, Spe, and BST in both Pokédex and Team Builder picker",
+      "Sort by any stat in the Pokédex — HP, Attack, Defense, Sp.Atk, Sp.Def, Speed, and BST added as sort options",
+      "🧠 AI Synergy-Aware Team Selection — smartPick4 now evaluates all possible 4-mon combinations with pairwise synergy scoring (weather moves + weather-dependent partners, Fake Out + megas, Follow Me + setup, +12 to +15 per synergy pair)",
+      "Fixed AI circular swap bug — Pokémon that just switched out can no longer be immediately switched back in by their ally on the same turn",
+      "Fixed AI spread move awareness — ally now preemptively switches to an immune/resistant bench Pokémon when partner uses Earthquake, Sludge Wave, or Surf that would KO them",
+      "Fixed Earth Eater ability — Orthworm's Ground-type immunity now works correctly in the Team Builder type chart",
+      "Fixed Fairy Aura — Mega Floette's Fairy-type moves now get the 1.33× boost in both the Battle Engine and Damage Calculator",
+      "Fixed King's Shield battle log — Attack drop on contact now shown in the battle replay",
+      "Fixed Palafin/Aegislash damage calculator — Hero Form stats (160 Atk) used for attacking Palafin, Blade Form (140 Atk/SpA) for attacking Aegislash, Shield Form (150 Def/SpD) for defending Aegislash",
+      "Added Light of Ruin to move database — Fairy-type, 140 BP, 90 accuracy, 50% recoil (Mega Floette's signature move)",
+      "Mega form sprites and names now display correctly in the Damage Calculator",
+      "Fixed AI Focus Sash pivot — Pokémon at very low HP no longer waste turns switching out instead of attacking",
+      "Fixed AI mega/weather team conflicts — smartPick4 no longer brings duplicate mega holders or conflicting weather setters (Rain + Sand)",
+      "Fixed Mega Manectric Intimidate — Intimidate now triggers on Mega Evolution with full battle log messages, including Mirror Armor/Guard Dog/Competitive/Defiant interactions",
+      "Fixed mid-battle switch Intimidate log — switching in an Intimidate user now shows the Attack drop in the battle replay",
+      "Fixed Ditto Imposter + Intimidate bug — Ditto no longer fires the copied Intimidate on entry (Imposter already consumed the on-entry trigger), and reverts to original form on switch-out so Imposter retriggers correctly",
+      "📋 Improved Battle Replay logging — end-of-turn events now show burn/poison damage, sandstorm chip, Leftovers/Grassy Terrain healing, Lum Berry cures, and weather/Trick Room/Tailwind/screens expiring with descriptive messages",
+      "Status move descriptions — Tailwind, Trick Room, Light Screen, Reflect, Aurora Veil, weather, and terrain moves now explain their effect in the battle replay",
+      "🔍 Mega ability search in Team Builder — searching by a mega ability (e.g. 'Intimidate') now shows M-Manectric with mega sprite, amber highlight, and auto-enables Mega Evolution when added",
+      "🐱 Meowstic gender form split — Meowstic-M and Meowstic-F are now separate entries with correct gender-specific abilities (Prankster vs Competitive) and movepools from Serebii Champions Pokédex",
+      "Hidden Z-variant Megas — Mega Lucario Z, Mega Garchomp Z, and Mega Absol Z are not in Pokémon Champions and are now hidden across the entire site (Pokédex, Team Builder, Battle Bot, Meta, engine)",
+      "Added Brutal Swing to Manectric's movepool — Dark, Physical, 60 BP, 100 accuracy",
+      "Compact Tier & Usage cards in Pokémon detail modal — switched from stacked to inline layout to save vertical space",
+      "Mega Evolution section moved into the Moves column in Team Builder for a more compact layout",
+      "Fixed README starter commands — removed incorrect nested directory path (Closes #21)",
+    ],
+  },
+  {
     date: "09/04/2026",
     items: [
       "🔬 Full 2M Battle Simulation retraining — fresh ELO rankings, win rates, core pairs, archetypes, and meta tier data generated from clean roster",

@@ -1554,7 +1554,7 @@ export default function BattleBotPage() {
           const editPkm = selectedPokemon[editingSlotIndex];
           const editSet = selectedSets[editingSlotIndex];
           if (!editPkm || !editSet) return null;
-          const megaForms = editPkm.forms?.filter(f => f.isMega) ?? [];
+          const megaForms = editPkm.forms?.filter(f => f.isMega && !f.hidden) ?? [];
           const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
           const isMega = isMegaItem(editSet.item);
           const activeMegaForm = isMega ? megaForms.find(f => f.abilities.some(a => a.name === editSet.ability)) ?? megaForms[0] : null;
