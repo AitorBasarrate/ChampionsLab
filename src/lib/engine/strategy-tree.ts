@@ -435,7 +435,7 @@ function buildScenarioBranch(
         ? `${myWeather.toUpperCase()} persists (${myWeatherSetter.pokemon.name} slower → sets last)`
         : `${oppWeather.toUpperCase()} overrides (${oppWeatherSetter.pokemon.name} slower)`,
       detail: weWinWeather
-        ? `Your ${myWeather} is active — 5 turns`
+        ? `Your ${myWeather} is active  -  5 turns`
         : `Opponent's ${oppWeather} is active. Consider manual weather reset.`,
       severity: weWinWeather ? "good" : "bad",
       fieldState: { weather: weWinWeather ? myWeather : oppWeather },
@@ -514,9 +514,9 @@ function buildScenarioBranch(
     type: "turn-label",
     label: "Turn 2",
     detail: turn1Actions.some(a => a.label.includes("Tailwind"))
-      ? "Tailwind active — you outspeed"
+      ? "Tailwind active  -  you outspeed"
       : turn1Actions.some(a => a.label.includes("Trick Room"))
-      ? "Trick Room active — slowest moves first"
+      ? "Trick Room active  -  slowest moves first"
       : weFaster ? "Maintain tempo" : "Contest speed advantage",
     severity: "neutral",
     children: [],
@@ -600,7 +600,7 @@ function buildTurn1Actions(
       return { id: nextId(), type: "action", label: `${partner.pokemon.name}: Tailwind`, detail: "Double your side's speed for 4 turns", pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], moveType: "flying", severity: "good", children: [] };
     }
     if (trUser && trUser === partner) {
-      return { id: nextId(), type: "action", label: `${partner.pokemon.name}: Trick Room`, detail: "Reverse speed for 5 turns — your slow mons move first", pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], moveType: "psychic", severity: "good", children: [] };
+      return { id: nextId(), type: "action", label: `${partner.pokemon.name}: Trick Room`, detail: "Reverse speed for 5 turns  -  your slow mons move first", pokemon: [partner.pokemon.name], sprites: [partner.pokemon.sprite], moveType: "psychic", severity: "good", children: [] };
     }
     if (redirector && redirector === partner) {
       const redirectMove = partner.moves.find(m => m.role === "redirection")!;
@@ -647,7 +647,7 @@ function buildTurn1Actions(
         id: nextId(),
         type: "decision",
         label: `${oppFakeOutUser.pokemon.name} threatens Fake Out → ${nonFakeOutLead.pokemon.name}`,
-        detail: `May block your ${setupMoveName} — choose your play`,
+        detail: `May block your ${setupMoveName}  -  choose your play`,
         severity: "neutral",
         children: [],
       };
@@ -657,7 +657,7 @@ function buildTurn1Actions(
         id: nextId(),
         type: "action",
         label: `${fakeOutUser.pokemon.name}: Fake Out → ${target.pokemon.name}`,
-        detail: `Flinch to ${reason} — partner sets up freely`,
+        detail: `Flinch to ${reason}  -  partner sets up freely`,
         pokemon: [fakeOutUser.pokemon.name],
         sprites: [fakeOutUser.pokemon.sprite],
         moveType: "normal",
@@ -673,7 +673,7 @@ function buildTurn1Actions(
           id: nextId(),
           type: "action",
           label: `${fakeOutUser.pokemon.name}: Fake Out → ${target.pokemon.name}`,
-          detail: `Partner Protects to block Fake Out — ${setupMoveName} delayed to Turn 2`,
+          detail: `Partner Protects to block Fake Out  -  ${setupMoveName} delayed to Turn 2`,
           pokemon: [fakeOutUser.pokemon.name],
           sprites: [fakeOutUser.pokemon.sprite],
           moveType: "normal",
@@ -683,7 +683,7 @@ function buildTurn1Actions(
             id: nextId(),
             type: "action",
             label: `${nonFakeOutLead.pokemon.name}: Protect`,
-            detail: `Block opponent's Fake Out — set up ${setupMoveName} next turn`,
+            detail: `Block opponent's Fake Out  -  set up ${setupMoveName} next turn`,
             pokemon: [nonFakeOutLead.pokemon.name],
             sprites: [nonFakeOutLead.pokemon.sprite],
             severity: "neutral",
@@ -696,7 +696,7 @@ function buildTurn1Actions(
           id: nextId(),
           type: "action",
           label: `${nonFakeOutLead.pokemon.name} gets flinched`,
-          detail: `No Protect — ${setupMoveName} delayed to Turn 2. ${fakeOutUser.pokemon.name} still flinches ${target.pokemon.name}.`,
+          detail: `No Protect  -  ${setupMoveName} delayed to Turn 2. ${fakeOutUser.pokemon.name} still flinches ${target.pokemon.name}.`,
           severity: "bad",
           branchLabel: "If flinched",
           children: [],
@@ -761,7 +761,7 @@ function buildTurn1Actions(
           id: nextId(),
           type: "action",
           label: `${speedUser.pokemon.name}: Protect`,
-          detail: `Block Fake Out — set ${speedMoveName} Turn 2`,
+          detail: `Block Fake Out  -  set ${speedMoveName} Turn 2`,
           pokemon: [speedUser.pokemon.name],
           sprites: [speedUser.pokemon.sprite],
           severity: "neutral",
@@ -816,7 +816,7 @@ function buildTurn1Actions(
             ...attackNode,
             id: nextId(),
             branchLabel: "Press damage",
-            detail: `Ignore TR threat — deal maximum damage. Counter-TR later if needed.`,
+            detail: `Ignore TR threat  -  deal maximum damage. Counter-TR later if needed.`,
           },
         ],
       };
@@ -846,7 +846,7 @@ function buildTurn1Actions(
       id: nextId(),
       type: "action",
       label: `${redirector.pokemon.name}: ${redirectMove.name}`,
-      detail: "Draw all single-target attacks — protect partner",
+      detail: "Draw all single-target attacks  -  protect partner",
       pokemon: [redirector.pokemon.name],
       sprites: [redirector.pokemon.sprite],
       moveType: "normal",
@@ -928,7 +928,7 @@ function buildTurn1Actions(
       actions.push({
         id: nextId(),
         type: "decision",
-        label: "No speed control — opponent moves first!",
+        label: "No speed control  -  opponent moves first!",
         detail: "Consider bringing a Tailwind/Trick Room user or Protect to survive turn 1",
         severity: "bad",
         children: [],
@@ -1027,7 +1027,7 @@ function buildTurn2Actions(
         id: nextId(),
         type: "action",
         label: `${partner.pokemon.name}: ${setupMove}`,
-        detail: `Delayed from Turn 1 — set up now`,
+        detail: `Delayed from Turn 1  -  set up now`,
         severity: "good",
         branchLabel: "Setup delayed",
         moveType: sMoveType,
@@ -1036,7 +1036,7 @@ function buildTurn2Actions(
 
       actions.push(gateNode);
     } else {
-      // No delayed setup — Fake Out user now does their main job
+      // No delayed setup  -  Fake Out user now does their main job
       if (fakeOutUser.hasTailwind && !planHasTailwind) {
         actions.push({
           id: nextId(),
@@ -1066,7 +1066,7 @@ function buildTurn2Actions(
             id: nextId(),
             type: "action",
             label: `${fakeOutUser.pokemon.name}: ${bestAtk.name} → ${spread ? "both foes" : target.pokemon.name}`,
-            detail: `Fake Out used — switch to offense`,
+            detail: `Fake Out used  -  switch to offense`,
             severity: "neutral",
             moveType: bestAtk.data.type,
             children: [],
@@ -1121,7 +1121,7 @@ function buildTurn2Actions(
       gateNode.children.push({
         id: nextId(),
         type: "action",
-        label: `Both attack — you outspeed`,
+        label: `Both attack  -  you outspeed`,
         detail: offenseDetails.join(" + ") || "Full offense",
         severity: "good",
         branchLabel: "Setup went up",
@@ -1145,7 +1145,7 @@ function buildTurn2Actions(
         id: nextId(),
         type: "action",
         label: `${speedUser.pokemon.name}: ${setupMove}`,
-        detail: `Delayed from Turn 1 — set up now`,
+        detail: `Delayed from Turn 1  -  set up now`,
         severity: "good",
         branchLabel: "Setup delayed",
         moveType: sMoveType,
@@ -1166,7 +1166,7 @@ function buildTurn2Actions(
           id: nextId(),
           type: "action",
           label: `${lead1.pokemon.name}: ${bestAtk1.name} → ${spread ? "both foes" : target1.pokemon.name}`,
-          detail: `You outspeed — full offense`,
+          detail: `You outspeed  -  full offense`,
           severity: bestAtk1.effectiveness >= 2 ? "good" : "neutral",
           moveType: bestAtk1.data.type,
           children: [],
@@ -1306,7 +1306,7 @@ function buildEndgameActions(
         id: nextId(),
         type: "action",
         label: `${pu.pokemon.name}: ${priMove.name} to finish`,
-        detail: `Priority +${priMove.data!.priority} — pick off weakened targets`,
+        detail: `Priority +${priMove.data!.priority}  -  pick off weakened targets`,
         severity: "good",
         moveType: priMove.data!.type,
         children: [],
@@ -1319,12 +1319,12 @@ function buildEndgameActions(
     id: nextId(),
     type: "outcome",
     label: winRate >= 60
-      ? "Favorable — maintain board control & trade efficiently"
+      ? "Favorable  -  maintain board control & trade efficiently"
       : winRate >= 50
-      ? "Close matchup — avoid misplays, protect key pieces"
+      ? "Close matchup  -  avoid misplays, protect key pieces"
       : winRate >= 40
-      ? "Uphill battle — need early KOs to swing momentum"
-      : "Tough matchup — consider alternate lead or surprise play",
+      ? "Uphill battle  -  need early KOs to swing momentum"
+      : "Tough matchup  -  consider alternate lead or surprise play",
     severity: winRate >= 55 ? "good" : winRate >= 45 ? "neutral" : "bad",
     children: [],
   });
@@ -1368,13 +1368,13 @@ function determineWinCondition(
   if (archetype === "sand") return "Chip with sandstorm + Sand Rush physical sweeping";
   if (archetype === "trick-room" || archetype === "hard-trick-room") return "Set Trick Room and let slow powerhouses sweep";
   if (archetype === "tailwind") return "Set Tailwind early and outpace with strong attacks";
-  if (archetype === "hyper-offense") return "Maximum turn 1 pressure — KO before they set up";
+  if (archetype === "hyper-offense") return "Maximum turn 1 pressure  -  KO before they set up";
 
   // Generic based on leads
-  if (lead1.hasSetup || lead2.hasSetup) return "Set up safely then sweep — protect your booster";
+  if (lead1.hasSetup || lead2.hasSetup) return "Set up safely then sweep  -  protect your booster";
   if (lead1.hasFakeOut || lead2.hasFakeOut) return "Disrupt turn 1, establish board control, then overwhelm";
-  if (weather) return `Control the game under ${weather} — leverage weather-boosted attacks`;
-  if (terrain) return `Capitalize on ${terrain} terrain — position to maximize its boost`;
+  if (weather) return `Control the game under ${weather}  -  leverage weather-boosted attacks`;
+  if (terrain) return `Capitalize on ${terrain} terrain  -  position to maximize its boost`;
 
   return "Trade favorably and maintain board advantage";
 }
@@ -1408,7 +1408,7 @@ function generateBackupPlan(
 
   if (backMons.length > 0) {
     const bestBack = backMons[0];
-    return `Pivot to ${bestBack.pokemon.name} — fresh matchup and momentum reset`;
+    return `Pivot to ${bestBack.pokemon.name}  -  fresh matchup and momentum reset`;
   }
 
   return "Adjust your game plan based on what the opponent reveals";

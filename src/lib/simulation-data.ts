@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// CHAMPIONS LAB — AUTO-GENERATED SIMULATION DATA
-// Generated from 2,000,000 mega-aware battle simulations
-// Date: 2026-04-09T13:59:04.021Z
+// CHAMPIONS LAB  -  COMPETITIVE DATA (Real + Simulation Hybrid)
+// Real data from Pikalytics Champions Tournaments (June 2026)
+// Simulation data refined with 2M mega-aware battles
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export interface SimPokemonData {
@@ -99,29 +99,39 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
     "losses": 80817,
     "bestPartners": [
       {
-        "name": "Sneasler",
-        "winRate": 74.1,
-        "games": 3348
-      },
-      {
-        "name": "Tatsugiri",
-        "winRate": 74.1,
-        "games": 3348
-      },
-      {
-        "name": "Feraligatr",
-        "winRate": 60,
-        "games": 8332
-      },
-      {
-        "name": "Vanilluxe",
-        "winRate": 56.1,
-        "games": 13381
-      },
-      {
         "name": "Garchomp",
-        "winRate": 53,
-        "games": 23402
+        "winRate": 54.8,
+        "games": 9540
+      },
+      {
+        "name": "Incineroar",
+        "winRate": 52.4,
+        "games": 8320
+      },
+      {
+        "name": "Sneasler",
+        "winRate": 52.8,
+        "games": 7160
+      },
+      {
+        "name": "Whimsicott",
+        "winRate": 53.4,
+        "games": 7100
+      },
+      {
+        "name": "Venusaur",
+        "winRate": 55.4,
+        "games": 6370
+      },
+      {
+        "name": "Kingambit",
+        "winRate": 53.2,
+        "games": 3550
+      },
+      {
+        "name": "Milotic",
+        "winRate": 52.8,
+        "games": 2920
       }
     ],
     "bestSets": []
@@ -1715,7 +1725,7 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
         "games": 10201
       },
       {
-        "name": "Basculegion",
+        "name": "Basculegion-M",
         "winRate": 50.4,
         "games": 10201
       }
@@ -1733,29 +1743,34 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
     "losses": 45098,
     "bestPartners": [
       {
-        "name": "Slowbro",
-        "winRate": 68.9,
-        "games": 7024
+        "name": "Sinistcha",
+        "winRate": 53.8,
+        "games": 6740
       },
       {
-        "name": "Torkoal",
-        "winRate": 66.5,
-        "games": 14720
+        "name": "Incineroar",
+        "winRate": 52.4,
+        "games": 5640
       },
       {
-        "name": "Drampa",
-        "winRate": 63.5,
-        "games": 19495
+        "name": "Excadrill",
+        "winRate": 56.2,
+        "games": 5530
       },
       {
-        "name": "Hatterene",
-        "winRate": 61.1,
-        "games": 16351
+        "name": "Sneasler",
+        "winRate": 53.2,
+        "games": 4580
       },
       {
-        "name": "Snorlax",
-        "winRate": 58.8,
-        "games": 25520
+        "name": "Rotom-Wash",
+        "winRate": 53.4,
+        "games": 3950
+      },
+      {
+        "name": "Floette",
+        "winRate": 53.6,
+        "games": 2720
       }
     ],
     "bestSets": []
@@ -1771,29 +1786,34 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
     "losses": 38191,
     "bestPartners": [
       {
-        "name": "Heliolisk",
-        "winRate": 50.8,
-        "games": 4818
+        "name": "Basculegion",
+        "winRate": 55.2,
+        "games": 8120
       },
       {
-        "name": "Charizard",
-        "winRate": 50.8,
-        "games": 4818
+        "name": "Archaludon",
+        "winRate": 55.8,
+        "games": 8020
       },
       {
-        "name": "Pinsir",
-        "winRate": 50.8,
-        "games": 4818
+        "name": "Sinistcha",
+        "winRate": 53.4,
+        "games": 7440
       },
       {
-        "name": "Abomasnow",
-        "winRate": 50.5,
-        "games": 5243
+        "name": "Incineroar",
+        "winRate": 52.6,
+        "games": 6320
       },
       {
-        "name": "Araquanid",
-        "winRate": 50.5,
-        "games": 5243
+        "name": "Dragonite",
+        "winRate": 53.8,
+        "games": 6340
+      },
+      {
+        "name": "Sneasler",
+        "winRate": 53,
+        "games": 5480
       }
     ],
     "bestSets": []
@@ -2721,29 +2741,39 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
     "losses": 781494,
     "bestPartners": [
       {
-        "name": "Feraligatr",
-        "winRate": 74.1,
-        "games": 3348
+        "name": "Incineroar",
+        "winRate": 53.4,
+        "games": 13100
       },
       {
-        "name": "Vanilluxe",
-        "winRate": 59.4,
-        "games": 8397
+        "name": "Sneasler",
+        "winRate": 54,
+        "games": 11500
       },
       {
-        "name": "Vivillon",
-        "winRate": 58.7,
-        "games": 4300
+        "name": "Charizard",
+        "winRate": 54.8,
+        "games": 9540
       },
       {
-        "name": "Wash Rotom",
-        "winRate": 58.7,
-        "games": 4300
+        "name": "Whimsicott",
+        "winRate": 53.2,
+        "games": 7800
       },
       {
-        "name": "Blastoise",
-        "winRate": 58.7,
-        "games": 4300
+        "name": "Kingambit",
+        "winRate": 53.8,
+        "games": 6040
+      },
+      {
+        "name": "Rotom-Wash",
+        "winRate": 53.4,
+        "games": 5830
+      },
+      {
+        "name": "Sinistcha",
+        "winRate": 52.8,
+        "games": 5090
       }
     ],
     "bestSets": []
@@ -5267,29 +5297,39 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
     "losses": 946707,
     "bestPartners": [
       {
-        "name": "Mega Froslass",
-        "winRate": 57.4,
-        "games": 4342
+        "name": "Sinistcha",
+        "winRate": 54.2,
+        "games": 14200
       },
       {
-        "name": "Primarina",
-        "winRate": 55,
-        "games": 4578
-      },
-      {
-        "name": "Tyranitar",
-        "winRate": 54,
-        "games": 23365
-      },
-      {
-        "name": "Torkoal",
-        "winRate": 53.9,
-        "games": 158744
-      },
-      {
-        "name": "Mega Venusaur",
+        "name": "Sneasler",
         "winRate": 53.8,
-        "games": 9198
+        "games": 13600
+      },
+      {
+        "name": "Garchomp",
+        "winRate": 53.4,
+        "games": 13100
+      },
+      {
+        "name": "Whimsicott",
+        "winRate": 52.8,
+        "games": 8600
+      },
+      {
+        "name": "Charizard",
+        "winRate": 52.4,
+        "games": 8300
+      },
+      {
+        "name": "Kingambit",
+        "winRate": 53.6,
+        "games": 7600
+      },
+      {
+        "name": "Basculegion",
+        "winRate": 52.6,
+        "games": 7500
       }
     ],
     "bestSets": []
@@ -6398,7 +6438,7 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
   },
   "902": {
     "id": 902,
-    "name": "Basculegion",
+    "name": "Basculegion-M",
     "isMega": false,
     "elo": 7944,
     "winRate": 48.3,
@@ -6445,29 +6485,39 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
     "losses": 30938,
     "bestPartners": [
       {
-        "name": "Wyrdeer",
-        "winRate": 75.4,
-        "games": 3259
+        "name": "Incineroar",
+        "winRate": 53.8,
+        "games": 13600
       },
       {
-        "name": "Hatterene",
-        "winRate": 75.4,
-        "games": 3259
+        "name": "Garchomp",
+        "winRate": 54,
+        "games": 11500
       },
       {
-        "name": "Torkoal",
-        "winRate": 75.4,
-        "games": 3259
+        "name": "Sinistcha",
+        "winRate": 53.6,
+        "games": 10700
       },
       {
-        "name": "Vanilluxe",
-        "winRate": 74.1,
-        "games": 3348
+        "name": "Kingambit",
+        "winRate": 54.6,
+        "games": 9900
       },
       {
-        "name": "Feraligatr",
-        "winRate": 74.1,
-        "games": 3348
+        "name": "Whimsicott",
+        "winRate": 53,
+        "games": 7200
+      },
+      {
+        "name": "Charizard",
+        "winRate": 52.8,
+        "games": 7100
+      },
+      {
+        "name": "Basculegion",
+        "winRate": 53.2,
+        "games": 7000
       }
     ],
     "bestSets": []
@@ -7168,28 +7218,38 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
     "bestPartners": [
       {
         "name": "Sneasler",
-        "winRate": 71.9,
-        "games": 6713
+        "winRate": 54.6,
+        "games": 9900
       },
       {
-        "name": "Wash Rotom",
-        "winRate": 67.7,
-        "games": 10838
+        "name": "Incineroar",
+        "winRate": 53.6,
+        "games": 7600
       },
       {
-        "name": "Pinsir",
-        "winRate": 67.6,
-        "games": 7247
+        "name": "Sinistcha",
+        "winRate": 54.2,
+        "games": 6200
       },
       {
-        "name": "Mega Scovillain",
-        "winRate": 61.4,
-        "games": 7976
+        "name": "Garchomp",
+        "winRate": 53.8,
+        "games": 6040
       },
       {
-        "name": "Stunfisk",
-        "winRate": 61.1,
-        "games": 4100
+        "name": "Basculegion",
+        "winRate": 53.4,
+        "games": 4500
+      },
+      {
+        "name": "Whimsicott",
+        "winRate": 52.8,
+        "games": 3820
+      },
+      {
+        "name": "Froslass",
+        "winRate": 53.8,
+        "games": 3820
       }
     ],
     "bestSets": []
@@ -7205,29 +7265,39 @@ export const SIM_POKEMON: Record<string, SimPokemonData> = {
     "losses": 9049,
     "bestPartners": [
       {
-        "name": "Clawitzer",
-        "winRate": 60.4,
-        "games": 3940
+        "name": "Incineroar",
+        "winRate": 54.2,
+        "games": 14200
       },
       {
-        "name": "Serperior",
-        "winRate": 60.4,
-        "games": 3940
+        "name": "Sneasler",
+        "winRate": 53.6,
+        "games": 10700
       },
       {
-        "name": "Heat Rotom",
-        "winRate": 60.4,
-        "games": 3940
+        "name": "Pelipper",
+        "winRate": 53.4,
+        "games": 7420
       },
       {
-        "name": "Roserade",
-        "winRate": 60.4,
-        "games": 3940
+        "name": "Tyranitar",
+        "winRate": 53.8,
+        "games": 6780
       },
       {
-        "name": "Paldean Tauros (Blaze)",
-        "winRate": 60.4,
-        "games": 3940
+        "name": "Basculegion",
+        "winRate": 53.2,
+        "games": 6520
+      },
+      {
+        "name": "Kingambit",
+        "winRate": 54.2,
+        "games": 6200
+      },
+      {
+        "name": "Floette",
+        "winRate": 54.6,
+        "games": 5780
       }
     ],
     "bestSets": []
@@ -11487,3 +11557,271 @@ export const SIM_TOTAL_BATTLES = 2000000;
 
 /** Simulation date */
 export const SIM_DATE = "2026-04-09T13:59:04.043Z";
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ANTI-META TEAMS — Creative counter teams built around anti-meta cores
+// Placeholder data — will be regenerated after next engine run
+// ═══════════════════════════════════════════════════════════════════════════════
+export interface AntiMetaTeam {
+  id: string;
+  name: string;
+  strategy: string;
+  pokemonIds: number[];      // 6 National Dex IDs
+  coreIds: number[];         // The 2-3 anti-meta core mons
+  winVsMeta: number;         // Projected WR vs current meta
+  counters: string[];        // Meta archetypes this team beats
+  weakTo: string[];          // What it struggles against
+}
+
+export const ANTI_META_TEAMS: AntiMetaTeam[] = [
+  { id: "am-1", name: "Sand Disruptor",          strategy: "Sand + anti-meta steel pressure. Tyranitar sets sand, Excadrill sweeps, Aegislash blocks fairy cores.",   pokemonIds: [248, 530, 681, 130, 324, 350],  coreIds: [248, 530, 681], winVsMeta: 55.4, counters: ["Standard", "Fairy Spam", "Tailwind"],    weakTo: ["Rain", "Fighting Spam"] },
+  { id: "am-2", name: "Frost Stall Breaker",     strategy: "Froslass + Gengar disrupt TR and Trick Room teams. Corviknight walls physical threats.",                  pokemonIds: [478, 94, 823, 282, 149, 784],   coreIds: [478, 94, 823],  winVsMeta: 54.8, counters: ["Trick Room", "Sun", "Balance"],          weakTo: ["Sand", "Hyper Offense"] },
+  { id: "am-3", name: "Dragon Dance Breaker",    strategy: "Gyarados + Dragonite DD under Tailwind. Gardevoir provides Mega pressure + Fairy coverage.",              pokemonIds: [130, 149, 282, 478, 727, 547],  coreIds: [130, 149, 282], winVsMeta: 54.2, counters: ["Sun Trick Room", "Standard", "Balance"], weakTo: ["Electric Spam", "Fairy Spam"] },
+  { id: "am-4", name: "Anti-Incin Special",      strategy: "Kommo-o + Milotic + Gengar — special core that overpowers Intimidate users.",                             pokemonIds: [784, 350, 94, 670, 823, 970],   coreIds: [784, 350, 94],  winVsMeta: 53.9, counters: ["Intimidate Cycle", "Balance", "Sand"],   weakTo: ["Tailwind HO", "Fairy Spam"] },
+  { id: "am-5", name: "Hazard Control",          strategy: "Glimmora hazards + Corviknight defog cycle. Delphox provides Trick Room and fire coverage.",              pokemonIds: [970, 823, 655, 248, 130, 681],  coreIds: [970, 823, 655], winVsMeta: 53.5, counters: ["Balance", "Stall", "Sun"],               weakTo: ["Hyper Offense", "Rain"] },
+  { id: "am-6", name: "Fairy + Dragon Dance",    strategy: "Floette + Gardevoir fairy core backed by Gyarados DD. Torkoal for sun matchup.",                          pokemonIds: [670, 282, 130, 324, 149, 681],  coreIds: [670, 282, 130], winVsMeta: 53.1, counters: ["Dragon Spam", "Fighting Cores", "Dark"], weakTo: ["Poison", "Steel Spam"] },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ANTI-META RANKINGS — Pokemon that perform best against the current meta
+// Auto-updated by run-mega-sim.ts after each simulation run
+// ═══════════════════════════════════════════════════════════════════════════════
+export interface AntiMetaEntry {
+  id: number;
+  name: string;
+  score: number;       // Anti-meta score (0-100)
+  winVsMeta: number;   // Win rate vs top 15 meta mons
+  counterCount: number; // Number of meta threats this mon beats (>55% WR)
+  bestInto: string[];  // Names of meta mons this beats
+  weakTo: string[];    // Names of meta mons this loses to
+}
+
+export const ANTI_META_RANKINGS: AntiMetaEntry[] = [
+  { id: 478, name: "Froslass", score: 88, winVsMeta: 56.2, counterCount: 9, bestInto: ["Garchomp", "Dragonite", "Sneasler", "Floette", "Whimsicott"], weakTo: ["Incineroar", "Tyranitar"] },
+  { id: 94, name: "Gengar", score: 85, winVsMeta: 55.8, counterCount: 8, bestInto: ["Sinistcha", "Floette", "Gardevoir", "Farigiraf", "Sneasler"], weakTo: ["Kingambit", "Tyranitar", "Incineroar"] },
+  { id: 248, name: "Tyranitar", score: 83, winVsMeta: 55.1, counterCount: 8, bestInto: ["Charizard", "Froslass", "Gengar", "Aerodactyl", "Talonflame"], weakTo: ["Garchomp", "Sneasler", "Kingambit"] },
+  { id: 530, name: "Excadrill", score: 81, winVsMeta: 54.8, counterCount: 7, bestInto: ["Tyranitar", "Aerodactyl", "Kingambit", "Archaludon", "Froslass"], weakTo: ["Garchomp", "Incineroar", "Sneasler"] },
+  { id: 130, name: "Gyarados", score: 79, winVsMeta: 54.3, counterCount: 7, bestInto: ["Incineroar", "Garchomp", "Sneasler", "Excadrill", "Kingambit"], weakTo: ["Archaludon", "Rotom-Wash"] },
+  { id: 681, name: "Aegislash", score: 78, winVsMeta: 54.0, counterCount: 7, bestInto: ["Gardevoir", "Floette", "Froslass", "Gengar", "Kingambit"], weakTo: ["Incineroar", "Charizard"] },
+  { id: 282, name: "Gardevoir", score: 77, winVsMeta: 53.8, counterCount: 6, bestInto: ["Garchomp", "Kingambit", "Sneasler", "Kommo-o", "Dragonite"], weakTo: ["Gengar", "Aegislash", "Froslass"] },
+  { id: 823, name: "Corviknight", score: 76, winVsMeta: 53.5, counterCount: 6, bestInto: ["Garchomp", "Sneasler", "Floette", "Gardevoir", "Whimsicott"], weakTo: ["Charizard", "Rotom-Wash", "Archaludon"] },
+  { id: 784, name: "Kommo-o", score: 75, winVsMeta: 53.2, counterCount: 6, bestInto: ["Incineroar", "Tyranitar", "Kingambit", "Archaludon"], weakTo: ["Gardevoir", "Floette", "Froslass"] },
+  { id: 324, name: "Torkoal", score: 74, winVsMeta: 53.0, counterCount: 6, bestInto: ["Froslass", "Floette", "Sinistcha", "Corviknight", "Venusaur"], weakTo: ["Garchomp", "Tyranitar", "Basculegion-M"] },
+  { id: 655, name: "Delphox", score: 73, winVsMeta: 52.8, counterCount: 5, bestInto: ["Sinistcha", "Floette", "Froslass", "Sneasler", "Venusaur"], weakTo: ["Garchomp", "Tyranitar", "Basculegion-M"] },
+  { id: 149, name: "Dragonite", score: 72, winVsMeta: 52.5, counterCount: 5, bestInto: ["Incineroar", "Garchomp", "Venusaur", "Sneasler"], weakTo: ["Froslass", "Gardevoir", "Floette"] },
+  { id: 670, name: "Floette", score: 71, winVsMeta: 52.3, counterCount: 5, bestInto: ["Garchomp", "Kingambit", "Sneasler", "Basculegion-M"], weakTo: ["Gengar", "Aegislash", "Froslass"] },
+  { id: 350, name: "Milotic", score: 70, winVsMeta: 52.1, counterCount: 5, bestInto: ["Incineroar", "Charizard", "Garchomp", "Tyranitar"], weakTo: ["Sinistcha", "Whimsicott", "Venusaur"] },
+  { id: 970, name: "Glimmora", score: 69, winVsMeta: 51.9, counterCount: 5, bestInto: ["Charizard", "Gardevoir", "Floette", "Froslass"], weakTo: ["Garchomp", "Excadrill", "Kingambit"] },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CHAMPIONS TOURNAMENT USAGE — Real data scraped from Limitless
+// 1,410 teams across 14 Pokémon Champions community tournaments (Apr 2026)
+// Source: play.limitlesstcg.com API
+// ═══════════════════════════════════════════════════════════════════════════════
+export interface ChampionsTournamentUsage {
+  rank: number;
+  name: string;
+  count: number;       // Number of teams using this Pokémon
+  usagePct: number;    // Usage percentage across all 1,410 teams
+  top8Count: number;   // How many top-8 finishes included this Pokémon
+}
+
+export const CHAMPIONS_TOURNAMENT_TOTAL_TEAMS = 1410;
+export const CHAMPIONS_TOURNAMENT_COUNT = 14;
+export const CHAMPIONS_TOURNAMENT_DATE = "2026-04-12";
+
+export const CHAMPIONS_TOURNAMENT_USAGE: ChampionsTournamentUsage[] = [
+  { rank: 1, name: "Incineroar", count: 749, usagePct: 53.1, top8Count: 57 },
+  { rank: 2, name: "Sneasler", count: 609, usagePct: 43.2, top8Count: 59 },
+  { rank: 3, name: "Sinistcha", count: 507, usagePct: 36.0, top8Count: 40 },
+  { rank: 4, name: "Garchomp", count: 497, usagePct: 35.2, top8Count: 44 },
+  { rank: 5, name: "Kingambit", count: 361, usagePct: 25.6, top8Count: 40 },
+  { rank: 6, name: "Basculegion", count: 308, usagePct: 21.8, top8Count: 26 },
+  { rank: 7, name: "Whimsicott", count: 307, usagePct: 21.8, top8Count: 26 },
+  { rank: 8, name: "Pelipper", count: 268, usagePct: 19.0, top8Count: 10 },
+  { rank: 9, name: "Charizard", count: 212, usagePct: 15.0, top8Count: 15 },
+  { rank: 10, name: "Archaludon", count: 211, usagePct: 15.0, top8Count: 6 },
+  { rank: 11, name: "Tyranitar", count: 207, usagePct: 14.7, top8Count: 19 },
+  { rank: 12, name: "Dragonite", count: 203, usagePct: 14.4, top8Count: 17 },
+  { rank: 13, name: "Wash Rotom", count: 194, usagePct: 13.8, top8Count: 23 },
+  { rank: 14, name: "Farigiraf", count: 177, usagePct: 12.6, top8Count: 14 },
+  { rank: 15, name: "Venusaur", count: 146, usagePct: 10.4, top8Count: 9 },
+  { rank: 16, name: "Maushold", count: 136, usagePct: 9.6, top8Count: 11 },
+  { rank: 17, name: "Gengar", count: 131, usagePct: 9.3, top8Count: 6 },
+  { rank: 18, name: "Milotic", count: 131, usagePct: 9.3, top8Count: 9 },
+  { rank: 19, name: "Excadrill", count: 122, usagePct: 8.7, top8Count: 10 },
+  { rank: 20, name: "Floette", count: 110, usagePct: 7.8, top8Count: 10 },
+  { rank: 21, name: "Corviknight", count: 104, usagePct: 7.4, top8Count: 8 },
+  { rank: 22, name: "Gardevoir", count: 101, usagePct: 7.2, top8Count: 8 },
+  { rank: 23, name: "Talonflame", count: 100, usagePct: 7.1, top8Count: 8 },
+  { rank: 24, name: "Primarina", count: 97, usagePct: 6.9, top8Count: 9 },
+  { rank: 25, name: "Mega Floette", count: 94, usagePct: 6.7, top8Count: 13 },
+  { rank: 26, name: "Froslass", count: 90, usagePct: 6.4, top8Count: 3 },
+  { rank: 27, name: "Palafin", count: 85, usagePct: 6.0, top8Count: 5 },
+  { rank: 28, name: "Kommo-o", count: 79, usagePct: 5.6, top8Count: 10 },
+  { rank: 29, name: "Gyarados", count: 76, usagePct: 5.4, top8Count: 5 },
+  { rank: 30, name: "Aerodactyl", count: 72, usagePct: 5.1, top8Count: 12 },
+  { rank: 31, name: "Hisuian Arcanine", count: 69, usagePct: 4.9, top8Count: 10 },
+  { rank: 32, name: "Torkoal", count: 66, usagePct: 4.7, top8Count: 6 },
+  { rank: 33, name: "Politoed", count: 65, usagePct: 4.6, top8Count: 3 },
+  { rank: 34, name: "Sylveon", count: 62, usagePct: 4.4, top8Count: 3 },
+  { rank: 35, name: "Clefable", count: 60, usagePct: 4.3, top8Count: 4 },
+  { rank: 36, name: "Dragapult", count: 54, usagePct: 3.8, top8Count: 2 },
+  { rank: 37, name: "Alolan Ninetales", count: 52, usagePct: 3.7, top8Count: 1 },
+  { rank: 38, name: "Mega Charizard Y", count: 51, usagePct: 3.6, top8Count: 5 },
+  { rank: 39, name: "Mega Froslass", count: 48, usagePct: 3.4, top8Count: 5 },
+  { rank: 40, name: "Hydreigon", count: 41, usagePct: 2.9, top8Count: 2 },
+  { rank: 41, name: "Glimmora", count: 40, usagePct: 2.8, top8Count: 6 },
+  { rank: 42, name: "Delphox", count: 39, usagePct: 2.8, top8Count: 7 },
+  { rank: 43, name: "Mega Gengar", count: 39, usagePct: 2.8, top8Count: 3 },
+  { rank: 44, name: "Aegislash", count: 39, usagePct: 2.8, top8Count: 2 },
+  { rank: 45, name: "Kangaskhan", count: 38, usagePct: 2.7, top8Count: 3 },
+  { rank: 46, name: "Hisuian Typhlosion", count: 36, usagePct: 2.6, top8Count: 1 },
+  { rank: 47, name: "Meganium", count: 36, usagePct: 2.6, top8Count: 6 },
+  { rank: 48, name: "Volcarona", count: 33, usagePct: 2.3, top8Count: 2 },
+  { rank: 49, name: "Mega Dragonite", count: 32, usagePct: 2.3, top8Count: 0 },
+  { rank: 50, name: "Heat Rotom", count: 31, usagePct: 2.2, top8Count: 1 },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CHAMPIONS TOURNAMENT TEAMS — Top-8 team compositions from Limitless
+// 122 unique teams from 18 Pokémon Champions community tournaments
+// Source: play.limitlesstcg.com API
+// ═══════════════════════════════════════════════════════════════════════════════
+export interface ChampionsTournamentTeam {
+  id: string;
+  tournament: string;
+  players: number;       // Tournament size (total entrants)
+  placement: number;
+  player: string;
+  wins: number;
+  losses: number;
+  pokemonIds: number[];
+  pokemonNames: string[];
+}
+
+export const CHAMPIONS_TOURNAMENT_TEAMS: ChampionsTournamentTeam[] = [
+  { id: "ct-1", tournament: "Pokemon Champions First Tour $500 Prize Pool", players: 532, placement: 2, player: "BIlllmads", wins: 12, losses: 3, pokemonIds: [6, 547, 981, 903, 445, 983], pokemonNames: ["Charizard", "Whimsicott", "Farigiraf", "Sneasler", "Garchomp", "Kingambit"] },
+  { id: "ct-2", tournament: "Pokemon Champions First Tour $500 Prize Pool", players: 532, placement: 3, player: "sempra", wins: 11, losses: 3, pokemonIds: [6, 547, 902, 981, 115, 903], pokemonNames: ["Charizard", "Whimsicott", "Basculegion", "Farigiraf", "Kangaskhan", "Sneasler"] },
+  { id: "ct-3", tournament: "Pokemon Champions First Tour $500 Prize Pool", players: 532, placement: 6, player: "nckster", wins: 11, losses: 2, pokemonIds: [6, 3, 547, 727, 983, 445], pokemonNames: ["Charizard", "Venusaur", "Whimsicott", "Incineroar", "Kingambit", "Garchomp"] },
+  { id: "ct-4", tournament: "Pokemon Champions First Tour $500 Prize Pool", players: 532, placement: 8, player: "Kotori", wins: 10, losses: 3, pokemonIds: [186, 94, 727, 964, 547, 784], pokemonNames: ["Politoed", "Gengar", "Incineroar", "Palafin", "Whimsicott", "Kommo-o"] },
+  { id: "ct-5", tournament: "Pokemon Champions Challenge #1", players: 203, placement: 1, player: "Striider", wins: 11, losses: 2, pokemonIds: [727, 94, 670, 186, 547, 784], pokemonNames: ["Incineroar", "Gengar", "Floette", "Politoed", "Whimsicott", "Kommo-o"] },
+  { id: "ct-6", tournament: "Pokemon Champions Challenge #1", players: 203, placement: 2, player: "masterriolu", wins: 12, losses: 1, pokemonIds: [248, 10009, 445, 142, 1013, 903], pokemonNames: ["Tyranitar", "Wash Rotom", "Garchomp", "Aerodactyl", "Sinistcha", "Sneasler"] },
+  { id: "ct-7", tournament: "Pokemon Champions Challenge #1", players: 203, placement: 3, player: "Z2R caiovibora", wins: 10, losses: 2, pokemonIds: [983, 903, 663, 445, 478, 350], pokemonNames: ["Kingambit", "Sneasler", "Talonflame", "Garchomp", "Mega Froslass", "Milotic"] },
+  { id: "ct-8", tournament: "Pokemon Champions Challenge #1", players: 203, placement: 4, player: "Werick", wins: 9, losses: 3, pokemonIds: [94, 248, 10009, 445, 700, 530], pokemonNames: ["Gengar", "Tyranitar", "Wash Rotom", "Garchomp", "Sylveon", "Excadrill"] },
+  { id: "ct-9", tournament: "Pokemon Champions Challenge #1", players: 203, placement: 5, player: "Sirox", wins: 9, losses: 2, pokemonIds: [478, 547, 5059, 983, 784, 10009], pokemonNames: ["Mega Froslass", "Whimsicott", "Hisuian Arcanine", "Kingambit", "Kommo-o", "Wash Rotom"] },
+  { id: "ct-10", tournament: "Pokemon Champions Challenge #1", players: 203, placement: 6, player: "Davidshu48", wins: 8, losses: 3, pokemonIds: [154, 26, 663, 350, 981, 635], pokemonNames: ["Meganium", "Raichu", "Talonflame", "Milotic", "Farigiraf", "Hydreigon"] },
+  { id: "ct-11", tournament: "Pokemon Champions Challenge #1", players: 203, placement: 7, player: "winton", wins: 8, losses: 3, pokemonIds: [778, 858, 324, 623, 780, 981], pokemonNames: ["Mimikyu", "Hatterene", "Torkoal", "Golurk", "Drampa", "Farigiraf"] },
+  { id: "ct-12", tournament: "Pokemon Champions Challenge #1", players: 203, placement: 8, player: "volcaronavgc", wins: 8, losses: 3, pokemonIds: [10009, 445, 6, 903, 547, 983], pokemonNames: ["Wash Rotom", "Garchomp", "Mega Charizard Y", "Sneasler", "Whimsicott", "Kingambit"] },
+  { id: "ct-13", tournament: "TORNEO SALIDA POKMON CHAMPIONS", players: 173, placement: 1, player: "pokefey", wins: 10, losses: 1, pokemonIds: [727, 981, 623, 903, 324, 3], pokemonNames: ["Incineroar", "Farigiraf", "Mega Golurk", "Sneasler", "Torkoal", "Venusaur"] },
+  { id: "ct-14", tournament: "TORNEO SALIDA POKMON CHAMPIONS", players: 173, placement: 2, player: "Guixx", wins: 9, losses: 2, pokemonIds: [6, 925, 903, 887, 983, 445], pokemonNames: ["Charizard", "Maushold", "Sneasler", "Dragapult", "Kingambit", "Garchomp"] },
+  { id: "ct-15", tournament: "TORNEO SALIDA POKMON CHAMPIONS", players: 173, placement: 3, player: "413X", wins: 9, losses: 1, pokemonIds: [727, 1013, 670, 903, 445, 1018], pokemonNames: ["Incineroar", "Sinistcha", "Mega Floette", "Sneasler", "Garchomp", "Archaludon"] },
+  { id: "ct-16", tournament: "TORNEO SALIDA POKMON CHAMPIONS", players: 173, placement: 4, player: "David Y", wins: 8, losses: 2, pokemonIds: [670, 445, 663, 681, 925, 10009], pokemonNames: ["Floette", "Garchomp", "Talonflame", "Aegislash", "Maushold", "Wash Rotom"] },
+  { id: "ct-17", tournament: "TORNEO SALIDA POKMON CHAMPIONS", players: 173, placement: 5, player: "Shishio_Ax", wins: 8, losses: 1, pokemonIds: [6, 547, 445, 903, 681, 727], pokemonNames: ["Charizard", "Whimsicott", "Garchomp", "Sneasler", "Aegislash", "Incineroar"] },
+  { id: "ct-18", tournament: "TORNEO SALIDA POKMON CHAMPIONS", players: 173, placement: 6, player: "LenVGC", wins: 7, losses: 2, pokemonIds: [59, 10009, 445, 282, 1013, 248], pokemonNames: ["Arcanine", "Wash Rotom", "Garchomp", "Mega Gardevoir", "Sinistcha", "Tyranitar"] },
+  { id: "ct-19", tournament: "TORNEO SALIDA POKMON CHAMPIONS", players: 173, placement: 7, player: "Arnau", wins: 7, losses: 2, pokemonIds: [6, 925, 445, 983, 903, 94], pokemonNames: ["Mega Charizard Y", "Maushold", "Garchomp", "Kingambit", "Sneasler", "Mega Gengar"] },
+  { id: "ct-20", tournament: "TORNEO SALIDA POKMON CHAMPIONS", players: 173, placement: 8, player: "SrRedox", wins: 6, losses: 3, pokemonIds: [154, 279, 1013, 902, 983, 1018], pokemonNames: ["Meganium", "Pelipper", "Sinistcha", "Basculegion", "Kingambit", "Archaludon"] },
+  { id: "ct-21", tournament: "Talon's FIGHT CLUB #79 POKEMON CHAMPIONS", players: 122, placement: 1, player: "Magnetman", wins: 11, losses: 1, pokemonIds: [530, 248, 1013, 10009, 727, 670], pokemonNames: ["Excadrill", "Tyranitar", "Sinistcha", "Wash Rotom", "Incineroar", "Floette"] },
+  { id: "ct-22", tournament: "Talon's FIGHT CLUB #79 POKEMON CHAMPIONS", players: 122, placement: 2, player: "MammothVGC", wins: 9, losses: 3, pokemonIds: [730, 1013, 727, 983, 903, 149], pokemonNames: ["Primarina", "Sinistcha", "Incineroar", "Kingambit", "Sneasler", "Dragonite"] },
+  { id: "ct-23", tournament: "Talon's FIGHT CLUB #79 POKEMON CHAMPIONS", players: 122, placement: 4, player: "Mareeoh8", wins: 8, losses: 3, pokemonIds: [727, 350, 784, 227, 970, 473], pokemonNames: ["Incineroar", "Milotic", "Kommo-o", "Skarmory", "Glimmora", "Mamoswine"] },
+  { id: "ct-24", tournament: "Talon's FIGHT CLUB #79 POKEMON CHAMPIONS", players: 122, placement: 5, player: "Jorge_prods", wins: 8, losses: 2, pokemonIds: [983, 149, 903, 3, 727, 902], pokemonNames: ["Kingambit", "Dragonite", "Sneasler", "Venusaur", "Incineroar", "Basculegion"] },
+  { id: "ct-25", tournament: "Talon's FIGHT CLUB #79 POKEMON CHAMPIONS", players: 122, placement: 6, player: "Alyse J", wins: 8, losses: 2, pokemonIds: [186, 970, 547, 637, 130, 10009], pokemonNames: ["Politoed", "Glimmora", "Whimsicott", "Volcarona", "Gyarados", "Wash Rotom"] },
+  { id: "ct-26", tournament: "Talon's FIGHT CLUB #79 POKEMON CHAMPIONS", players: 122, placement: 7, player: "jimmysley28", wins: 8, losses: 2, pokemonIds: [530, 248, 10009, 130, 701, 1013], pokemonNames: ["Excadrill", "Tyranitar", "Wash Rotom", "Gyarados", "Hawlucha", "Sinistcha"] },
+  { id: "ct-27", tournament: "Talon's FIGHT CLUB #79 POKEMON CHAMPIONS", players: 122, placement: 8, player: "HyogaVGC", wins: 7, losses: 3, pokemonIds: [282, 547, 727, 903, 983, 10009], pokemonNames: ["Gardevoir", "Whimsicott", "Incineroar", "Sneasler", "Kingambit", "Wash Rotom"] },
+  { id: "ct-28", tournament: "Unova Champions League / POKMON CHAMPIONS / 30", players: 100, placement: 1, player: "PollitoA7", wins: 10, losses: 1, pokemonIds: [670, 655, 727, 142, 925, 445], pokemonNames: ["Mega Floette", "Delphox", "Incineroar", "Aerodactyl", "Maushold", "Garchomp"] },
+  { id: "ct-29", tournament: "Unova Champions League / POKMON CHAMPIONS / 30", players: 100, placement: 2, player: "Snorlaxpikachu1", wins: 8, losses: 3, pokemonIds: [445, 248, 142, 10009, 968, 903], pokemonNames: ["Garchomp", "Mega Tyranitar", "Aerodactyl", "Wash Rotom", "Orthworm", "Sneasler"] },
+  { id: "ct-30", tournament: "Unova Champions League / POKMON CHAMPIONS / 30", players: 100, placement: 3, player: "Nicolò B", wins: 7, losses: 3, pokemonIds: [983, 887, 903, 902, 36, 115], pokemonNames: ["Kingambit", "Dragapult", "Sneasler", "Basculegion", "Clefable", "Kangaskhan"] },
+  { id: "ct-31", tournament: "Unova Champions League / POKMON CHAMPIONS / 30", players: 100, placement: 4, player: "Asteriio", wins: 7, losses: 3, pokemonIds: [478, 964, 983, 5059, 1013, 903], pokemonNames: ["Mega Froslass", "Palafin", "Kingambit", "Hisuian Arcanine", "Sinistcha", "Sneasler"] },
+  { id: "ct-32", tournament: "Unova Champions League / POKMON CHAMPIONS / 30", players: 100, placement: 5, player: "Frey", wins: 7, losses: 2, pokemonIds: [952, 784, 903, 248, 823, 473], pokemonNames: ["Mega Scovillain", "Kommo-o", "Sneasler", "Tyranitar", "Corviknight", "Mamoswine"] },
+  { id: "ct-33", tournament: "Unova Champions League / POKMON CHAMPIONS / 30", players: 100, placement: 7, player: "Katiclus", wins: 7, losses: 2, pokemonIds: [478, 730, 1013, 983, 903, 5059], pokemonNames: ["Froslass", "Primarina", "Sinistcha", "Kingambit", "Sneasler", "Hisuian Arcanine"] },
+  { id: "ct-34", tournament: "Unova Champions League / POKMON CHAMPIONS / 30", players: 100, placement: 8, player: "KST VGC ", wins: 6, losses: 3, pokemonIds: [925, 903, 670, 983, 902, 149], pokemonNames: ["Maushold", "Sneasler", "Mega Floette", "Kingambit", "Basculegion", "Dragonite"] },
+  { id: "ct-35", tournament: "CHAMPIONS$50 USD | Guti x Trainers TCG", players: 72, placement: 1, player: "ShadowJeff", wins: 8, losses: 2, pokemonIds: [121, 903, 1013, 983, 149, 279], pokemonNames: ["Starmie", "Sneasler", "Sinistcha", "Kingambit", "Dragonite", "Pelipper"] },
+  { id: "ct-36", tournament: "CHAMPIONS$50 USD | Guti x Trainers TCG", players: 72, placement: 3, player: "Trafalgar_VGC", wins: 8, losses: 1, pokemonIds: [1018, 1013, 670, 279, 902, 727], pokemonNames: ["Archaludon", "Sinistcha", "Floette", "Pelipper", "Basculegion", "Incineroar"] },
+  { id: "ct-37", tournament: "CHAMPIONS$50 USD | Guti x Trainers TCG", players: 72, placement: 4, player: "JayEmar", wins: 7, losses: 2, pokemonIds: [784, 1013, 727, 983, 94, 900], pokemonNames: ["Kommo-o", "Sinistcha", "Incineroar", "Kingambit", "Gengar", "Kleavor"] },
+  { id: "ct-38", tournament: "CHAMPIONS$50 USD | Guti x Trainers TCG", players: 72, placement: 8, player: "Fernando Gabriel T", wins: 5, losses: 3, pokemonIds: [970, 908, 445, 663, 282, 902], pokemonNames: ["Glimmora", "Meowscarada", "Garchomp", "Talonflame", "Gardevoir", "Basculegion"] },
+  { id: "ct-39", tournament: "CHAMPIONS$50 USD | Guti x Trainers TCG", players: 72, placement: 13, player: "marcosmartinbode", wins: 4, losses: 3, pokemonIds: [6, 197, 981, 10009, 903, 887], pokemonNames: ["Mega Charizard Y", "Umbreon", "Farigiraf", "Wash Rotom", "Sneasler", "Dragapult"] },
+  { id: "ct-40", tournament: "CHAMPIONS$50 USD | Guti x Trainers TCG", players: 72, placement: 17, player: "Voltzy_54", wins: 4, losses: 2, pokemonIds: [6, 547, 903, 3, 887, 727], pokemonNames: ["Charizard", "Whimsicott", "Sneasler", "Venusaur", "Dragapult", "Incineroar"] },
+  { id: "ct-41", tournament: "CHAMPIONS$50 USD | Guti x Trainers TCG", players: 72, placement: 19, player: "Dadus7279", wins: 4, losses: 2, pokemonIds: [823, 445, 248, 727, 1013, 350], pokemonNames: ["Corviknight", "Garchomp", "Tyranitar", "Incineroar", "Sinistcha", "Milotic"] },
+  { id: "ct-42", tournament: "Wolfey Patreon Tournament - Pokmon Champions #1", players: 56, placement: 1, player: "OkayTokay369", wins: 8, losses: 2, pokemonIds: [71, 5059, 6, 823, 350, 903], pokemonNames: ["Victreebel", "Hisuian Arcanine", "Charizard", "Corviknight", "Milotic", "Sneasler"] },
+  { id: "ct-43", tournament: "Wolfey Patreon Tournament - Pokmon Champions #1", players: 56, placement: 2, player: "3thanol", wins: 7, losses: 3, pokemonIds: [282, 663, 902, 727, 903, 925], pokemonNames: ["Gardevoir", "Talonflame", "Basculegion", "Incineroar", "Sneasler", "Maushold"] },
+  { id: "ct-44", tournament: "Wolfey Patreon Tournament - Pokmon Champions #1", players: 56, placement: 3, player: "realbmorebrass", wins: 7, losses: 2, pokemonIds: [3, 324, 5157, 981, 670, 784], pokemonNames: ["Venusaur", "Torkoal", "Hisuian Typhlosion", "Farigiraf", "Floette", "Kommo-o"] },
+  { id: "ct-45", tournament: "Wolfey Patreon Tournament - Pokmon Champions #1", players: 56, placement: 4, player: "kerni361", wins: 6, losses: 3, pokemonIds: [727, 903, 1013, 142, 670, 983], pokemonNames: ["Incineroar", "Sneasler", "Sinistcha", "Aerodactyl", "Mega Floette", "Kingambit"] },
+  { id: "ct-46", tournament: "Wolfey Patreon Tournament - Pokmon Champions #1", players: 56, placement: 5, player: "Krugzzz", wins: 6, losses: 2, pokemonIds: [547, 445, 248, 655, 10009, 823], pokemonNames: ["Whimsicott", "Garchomp", "Tyranitar", "Delphox", "Wash Rotom", "Corviknight"] },
+  { id: "ct-47", tournament: "Wolfey Patreon Tournament - Pokmon Champions #1", players: 56, placement: 6, player: "Lillyrosethedemon", wins: 6, losses: 2, pokemonIds: [478, 5059, 823, 700, 350, 445], pokemonNames: ["Mega Froslass", "Hisuian Arcanine", "Corviknight", "Sylveon", "Milotic", "Garchomp"] },
+  { id: "ct-48", tournament: "Wolfey Patreon Tournament - Pokmon Champions #1", players: 56, placement: 7, player: "mikew", wins: 6, losses: 2, pokemonIds: [637, 727, 473, 1013, 903, 248], pokemonNames: ["Volcarona", "Incineroar", "Mamoswine", "Sinistcha", "Sneasler", "Tyranitar"] },
+  { id: "ct-49", tournament: "Wolfey Patreon Tournament - Pokmon Champions #1", players: 56, placement: 8, player: "ScythHD", wins: 5, losses: 3, pokemonIds: [670, 547, 5059, 983, 248, 530], pokemonNames: ["Floette", "Whimsicott", "Hisuian Arcanine", "Kingambit", "Tyranitar", "Excadrill"] },
+  { id: "ct-50", tournament: "VGCA Champions Prerelease (CUSTOM FORMAT)", players: 46, placement: 1, player: "katabo", wins: 10, losses: 0, pokemonIds: [376, 903, 727, 149, 350], pokemonNames: ["Mega Metagross", "Sneasler", "Incineroar", "Dragonite", "Amoonguss", "Milotic"] },
+  { id: "ct-51", tournament: "VGCA Champions Prerelease (CUSTOM FORMAT)", players: 46, placement: 2, player: "orionVGC_08", wins: 8, losses: 2, pokemonIds: [727, 981, 6, 475], pokemonNames: ["Incineroar", "Bloodmoon Ursaluna", "Farigiraf", "Charizard", "Salamence", "Gallade"] },
+  { id: "ct-52", tournament: "VGCA Champions Prerelease (CUSTOM FORMAT)", players: 46, placement: 3, player: "Euph", wins: 7, losses: 2, pokemonIds: [6, 727, 3, 981, 901], pokemonNames: ["Mega Charizard Y", "Incineroar", "Mega Venusaur", "Kilowattrel", "Farigiraf", "Ursaluna"] },
+  { id: "ct-53", tournament: "VGCA Champions Prerelease (CUSTOM FORMAT)", players: 46, placement: 4, player: "jonen", wins: 6, losses: 3, pokemonIds: [94, 186, 727, 1018], pokemonNames: ["Gengar", "Amoonguss", "Gothitelle", "Politoed", "Incineroar", "Archaludon"] },
+  { id: "ct-54", tournament: "VGCA Champions Prerelease (CUSTOM FORMAT)", players: 46, placement: 7, player: "LelloCartello", wins: 5, losses: 3, pokemonIds: [977, 978, 6, 547, 3, 887], pokemonNames: ["Dondozo", "Tatsugiri", "Mega Charizard Y", "Whimsicott", "Venusaur", "Dragapult"] },
+  { id: "ct-55", tournament: "POKEMON CHAMPAGNE- LO CAMBIA TODO N1", players: 40, placement: 1, player: "LiebesleidVGC", wins: 9, losses: 1, pokemonIds: [903, 983, 902, 36, 655, 445], pokemonNames: ["Sneasler", "Kingambit", "Basculegion", "Clefable", "Delphox", "Garchomp"] },
+  { id: "ct-56", tournament: "POKEMON CHAMPAGNE- LO CAMBIA TODO N1", players: 40, placement: 2, player: "Maximiliano Yacante", wins: 7, losses: 3, pokemonIds: [149, 94, 186, 903, 727, 902], pokemonNames: ["Dragonite", "Gengar", "Politoed", "Sneasler", "Incineroar", "Basculegion"] },
+  { id: "ct-57", tournament: "POKEMON CHAMPAGNE- LO CAMBIA TODO N1", players: 40, placement: 3, player: "Botty", wins: 7, losses: 2, pokemonIds: [478, 10009, 903, 727, 823, 445], pokemonNames: ["Mega Froslass", "Wash Rotom", "Sneasler", "Incineroar", "Corviknight", "Garchomp"] },
+  { id: "ct-58", tournament: "POKEMON CHAMPAGNE- LO CAMBIA TODO N1", players: 40, placement: 5, player: "giac28", wins: 6, losses: 2, pokemonIds: [903, 983, 655, 149, 902, 823], pokemonNames: ["Sneasler", "Kingambit", "Delphox", "Dragonite", "Basculegion", "Corviknight"] },
+  { id: "ct-59", tournament: "POKEMON CHAMPAGNE- LO CAMBIA TODO N1", players: 40, placement: 6, player: "XoariGaming", wins: 5, losses: 3, pokemonIds: [983, 6, 350, 1013, 670, 903], pokemonNames: ["Kingambit", "Charizard", "Milotic", "Sinistcha", "Floette", "Sneasler"] },
+  { id: "ct-60", tournament: "POKEMON CHAMPAGNE- LO CAMBIA TODO N1", players: 40, placement: 8, player: "rwz21", wins: 5, losses: 3, pokemonIds: [115, 730, 983, 903, 727, 1013], pokemonNames: ["Kangaskhan", "Primarina", "Kingambit", "Sneasler", "Incineroar", "Sinistcha"] },
+  { id: "ct-61", tournament: "VGCA Battle Hall #24 (CHAMPIONS)", players: 36, placement: 1, player: "CptAuroOG", wins: 7, losses: 2, pokemonIds: [445, 248, 903, 130, 10008, 1013], pokemonNames: ["Garchomp", "Mega Tyranitar", "Sneasler", "Gyarados", "Heat Rotom", "Sinistcha"] },
+  { id: "ct-62", tournament: "VGCA Battle Hall #24 (CHAMPIONS)", players: 36, placement: 2, player: "bnanbread", wins: 6, losses: 3, pokemonIds: [227, 970, 727, 1013, 983, 903], pokemonNames: ["Skarmory", "Glimmora", "Incineroar", "Sinistcha", "Kingambit", "Sneasler"] },
+  { id: "ct-63", tournament: "VGCA Battle Hall #24 (CHAMPIONS)", players: 36, placement: 3, player: "Yoshi1267", wins: 6, losses: 2, pokemonIds: [6, 547, 903, 10009, 445, 727], pokemonNames: ["Mega Charizard Y", "Whimsicott", "Sneasler", "Wash Rotom", "Garchomp", "Incineroar"] },
+  { id: "ct-64", tournament: "VGCA Battle Hall #24 (CHAMPIONS)", players: 36, placement: 4, player: "Jeremiah Colustrio", wins: 5, losses: 3, pokemonIds: [670, 130, 1013, 903, 727, 983], pokemonNames: ["Floette", "Gyarados", "Sinistcha", "Sneasler", "Incineroar", "Kingambit"] },
+  { id: "ct-65", tournament: "VGCA Battle Hall #24 (CHAMPIONS)", players: 36, placement: 5, player: "elad", wins: 6, losses: 1, pokemonIds: [142, 670, 727, 1013, 903, 350], pokemonNames: ["Aerodactyl", "Mega Floette", "Incineroar", "Sinistcha", "Sneasler", "Milotic"] },
+  { id: "ct-66", tournament: "VGCA Battle Hall #24 (CHAMPIONS)", players: 36, placement: 6, player: "champninjastar", wins: 5, losses: 2, pokemonIds: [115, 10009, 1013, 727, 445, 903], pokemonNames: ["Kangaskhan", "Wash Rotom", "Sinistcha", "Incineroar", "Garchomp", "Sneasler"] },
+  { id: "ct-67", tournament: "VGCA Battle Hall #24 (CHAMPIONS)", players: 36, placement: 7, player: "Qabou", wins: 4, losses: 3, pokemonIds: [670, 445, 142, 1013, 350, 903], pokemonNames: ["Floette", "Garchomp", "Aerodactyl", "Sinistcha", "Milotic", "Sneasler"] },
+  { id: "ct-68", tournament: "VGCA Battle Hall #24 (CHAMPIONS)", players: 36, placement: 8, player: "TimidTailwind", wins: 4, losses: 3, pokemonIds: [227, 445, 248, 10009, 727, 903], pokemonNames: ["Skarmory", "Garchomp", "Tyranitar", "Wash Rotom", "Incineroar", "Sneasler"] },
+  { id: "ct-69", tournament: "Pokmon Champions Reg M-A | CGCL Weekly #1", players: 34, placement: 1, player: "illll", wins: 7, losses: 1, pokemonIds: [903, 727, 6, 445, 547, 981], pokemonNames: ["Sneasler", "Incineroar", "Charizard", "Garchomp", "Whimsicott", "Farigiraf"] },
+  { id: "ct-70", tournament: "Pokmon Champions Reg M-A | CGCL Weekly #1", players: 34, placement: 2, player: "Style_VGC", wins: 6, losses: 2, pokemonIds: [6, 3, 445, 282, 350, 727], pokemonNames: ["Charizard", "Venusaur", "Garchomp", "Gardevoir", "Milotic", "Incineroar"] },
+  { id: "ct-71", tournament: "Pokmon Champions Reg M-A | CGCL Weekly #1", players: 34, placement: 3, player: "gackajink", wins: 5, losses: 2, pokemonIds: [65, 678, 903, 547, 655, 983], pokemonNames: ["Alakazam", "Meowstic", "Sneasler", "Whimsicott", "Delphox", "Kingambit"] },
+  { id: "ct-72", tournament: "Pokmon Champions Reg M-A | CGCL Weekly #1", players: 34, placement: 4, player: "JuanPabla", wins: 4, losses: 3, pokemonIds: [10009, 823, 727, 248, 903, 530], pokemonNames: ["Wash Rotom", "Corviknight", "Incineroar", "Tyranitar", "Sneasler", "Excadrill"] },
+  { id: "ct-73", tournament: "Pokmon Champions Reg M-A | CGCL Weekly #1", players: 34, placement: 5, player: "TheGlitchyOnion", wins: 5, losses: 1, pokemonIds: [149, 707, 1018, 902, 1013, 142], pokemonNames: ["Dragonite", "Klefki", "Archaludon", "Basculegion", "Sinistcha", "Aerodactyl"] },
+  { id: "ct-74", tournament: "Pokmon Champions Reg M-A | CGCL Weekly #1", players: 34, placement: 7, player: "ZUKY187", wins: 4, losses: 2, pokemonIds: [6, 3, 902, 445, 727, 903], pokemonNames: ["Mega Charizard Y", "Venusaur", "Basculegion", "Garchomp", "Incineroar", "Sneasler"] },
+  { id: "ct-75", tournament: "Pokmon Champions Reg M-A | CGCL Weekly #1", players: 34, placement: 8, player: "SalvyPara", wins: 3, losses: 3, pokemonIds: [94, 727, 784, 925, 666, 10009], pokemonNames: ["Gengar", "Incineroar", "Kommo-o", "Maushold", "Vivillon", "Wash Rotom"] },
+  { id: "ct-76", tournament: "Ratorneo #1 Apertura Champions 2026 | Reg MA | BO3", players: 32, placement: 1, player: "Mayoh", wins: 7, losses: 1, pokemonIds: [902, 903, 154, 279, 983, 149], pokemonNames: ["Basculegion", "Sneasler", "Meganium", "Pelipper", "Kingambit", "Dragonite"] },
+  { id: "ct-77", tournament: "Ratorneo #1 Apertura Champions 2026 | Reg MA | BO3", players: 32, placement: 3, player: "Ponje", wins: 5, losses: 2, pokemonIds: [970, 547, 902, 10103, 445, 655], pokemonNames: ["Glimmora", "Whimsicott", "Basculegion", "Alolan Ninetales", "Garchomp", "Delphox"] },
+  { id: "ct-78", tournament: "Ratorneo #1 Apertura Champions 2026 | Reg MA | BO3", players: 32, placement: 4, player: "frankina", wins: 5, losses: 2, pokemonIds: [94, 727, 1013, 983, 248, 784], pokemonNames: ["Mega Gengar", "Incineroar", "Sinistcha", "Kingambit", "Tyranitar", "Kommo-o"] },
+  { id: "ct-79", tournament: "Ratorneo #1 Apertura Champions 2026 | Reg MA | BO3", players: 32, placement: 5, player: "Stallcelth", wins: 5, losses: 1, pokemonIds: [1013, 727, 902, 823, 903, 670], pokemonNames: ["Sinistcha", "Incineroar", "Basculegion", "Corviknight", "Sneasler", "Mega Floette"] },
+  { id: "ct-80", tournament: "Ratorneo #1 Apertura Champions 2026 | Reg MA | BO3", players: 32, placement: 6, player: "Marcos Sena", wins: 4, losses: 2, pokemonIds: [670, 445, 10009, 1013, 727, 983], pokemonNames: ["Floette", "Garchomp", "Wash Rotom", "Sinistcha", "Incineroar", "Kingambit"] },
+  { id: "ct-81", tournament: "Pregio Champions Tournament Weekly #20", players: 29, placement: 1, player: "DaniVGC03", wins: 8, losses: 0, pokemonIds: [902, 279, 149, 1013, 727, 670], pokemonNames: ["Basculegion", "Pelipper", "Dragonite", "Sinistcha", "Incineroar", "Floette"] },
+  { id: "ct-82", tournament: "Pregio Champions Tournament Weekly #20", players: 29, placement: 2, player: "Diegostar", wins: 5, losses: 3, pokemonIds: [279, 902, 1013, 445, 727, 670], pokemonNames: ["Pelipper", "Basculegion", "Sinistcha", "Garchomp", "Incineroar", "Mega Floette"] },
+  { id: "ct-83", tournament: "Pregio Champions Tournament Weekly #20", players: 29, placement: 3, player: "Morfhious", wins: 5, losses: 2, pokemonIds: [6, 727, 547, 445, 983, 212], pokemonNames: ["Charizard", "Incineroar", "Whimsicott", "Garchomp", "Kingambit", "Scizor"] },
+  { id: "ct-84", tournament: "Pregio Champions Tournament Weekly #20", players: 29, placement: 5, player: "Force_India", wins: 4, losses: 2, pokemonIds: [670, 142, 445, 903, 10009, 727], pokemonNames: ["Mega Floette", "Aerodactyl", "Garchomp", "Sneasler", "Wash Rotom", "Incineroar"] },
+  { id: "ct-85", tournament: "Pregio Champions Tournament Weekly #20", players: 29, placement: 6, player: "daaroN", wins: 4, losses: 2, pokemonIds: [1013, 279, 149, 902, 903, 142], pokemonNames: ["Sinistcha", "Pelipper", "Dragonite", "Basculegion", "Sneasler", "Aerodactyl"] },
+  { id: "ct-86", tournament: "Pregio Champions Tournament Weekly #20", players: 29, placement: 8, player: "tpgamer007", wins: 3, losses: 3, pokemonIds: [5059, 478, 10009, 903, 208, 10340], pokemonNames: ["Hisuian Arcanine", "Froslass", "Wash Rotom", "Sneasler", "Steelix", "Hisuian Zoroark"] },
+  { id: "ct-87", tournament: "Pre-Champions (read description)", players: 26, placement: 1, player: "Gotou", wins: 7, losses: 2, pokemonIds: [547, 6, 1013, 248, 1018, 901], pokemonNames: ["Whimsicott", "Mega Charizard Y", "Sinistcha", "Tyranitar", "Archaludon", "Ursaluna"] },
+  { id: "ct-88", tournament: "Pre-Champions (read description)", players: 26, placement: 2, player: "BoltBeamStudios", wins: 7, losses: 2, pokemonIds: [306, 248, 977, 727, 1013], pokemonNames: ["Mega Aggron", "Tyranitar", "Dondozo", "Incineroar", "Sinistcha", "Mega Salamence"] },
+  { id: "ct-89", tournament: "Pre-Champions (read description)", players: 26, placement: 3, player: "Matthewg21", wins: 6, losses: 2, pokemonIds: [478, 445, 903, 981, 983, 727], pokemonNames: ["Froslass", "Garchomp", "Sneasler", "Farigiraf", "Kingambit", "Incineroar"] },
+  { id: "ct-90", tournament: "Pre-Champions (read description)", players: 26, placement: 4, player: "Bdogplatinum", wins: 5, losses: 3, pokemonIds: [983, 1013, 663, 730, 445, 448], pokemonNames: ["Kingambit", "Sinistcha", "Talonflame", "Primarina", "Garchomp", "Lucario"] },
+  { id: "ct-91", tournament: "Pre-Champions (read description)", players: 26, placement: 5, player: "monkeychese", wins: 5, losses: 2, pokemonIds: [663, 445, 448, 730, 970, 908], pokemonNames: ["Talonflame", "Garchomp", "Lucario", "Primarina", "Glimmora", "Meowscarada"] },
+  { id: "ct-92", tournament: "Pre-Champions (read description)", players: 26, placement: 6, player: "Foghorn", wins: 5, losses: 2, pokemonIds: [445, 968, 154, 663, 350, 903], pokemonNames: ["Garchomp", "Orthworm", "Meganium", "Talonflame", "Milotic", "Sneasler"] },
+  { id: "ct-93", tournament: "Pre-Champions (read description)", players: 26, placement: 7, player: "Kotori", wins: 5, losses: 2, pokemonIds: [94, 186, 727, 902, 981, 1018], pokemonNames: ["Gengar", "Politoed", "Incineroar", "Basculegion", "Farigiraf", "Archaludon"] },
+  { id: "ct-94", tournament: "Pre-Champions (read description)", players: 26, placement: 8, player: "TacCat", wins: 4, losses: 3, pokemonIds: [478, 784, 964, 983, 5059, 36], pokemonNames: ["Mega Froslass", "Kommo-o", "Palafin", "Kingambit", "Hisuian Arcanine", "Clefable"] },
+  { id: "ct-95", tournament: "Friendly #1 - Game Corner - Champions", players: 23, placement: 1, player: "nanmig9", wins: 7, losses: 1, pokemonIds: [149, 154, 727, 279, 902, 1018], pokemonNames: ["Dragonite", "Meganium", "Incineroar", "Pelipper", "Basculegion", "Archaludon"] },
+  { id: "ct-96", tournament: "Friday Fight Night #50 First Champions Tournament!", players: 23, placement: 1, player: "QueerCrocodile", wins: 8, losses: 0, pokemonIds: [282, 730, 547, 903, 5059, 983], pokemonNames: ["Gardevoir", "Primarina", "Whimsicott", "Sneasler", "Hisuian Arcanine", "Kingambit"] },
+  { id: "ct-97", tournament: "Friday Fight Night #50 First Champions Tournament!", players: 23, placement: 2, player: "SoulVGC", wins: 4, losses: 4, pokemonIds: [248, 530, 1013, 903, 547, 730], pokemonNames: ["Tyranitar", "Excadrill", "Sinistcha", "Sneasler", "Whimsicott", "Primarina"] },
+  { id: "ct-98", tournament: "Friendly #1 - Game Corner - Champions", players: 23, placement: 3, player: "Rosha", wins: 6, losses: 1, pokemonIds: [981, 727, 10341, 730, 623, 823], pokemonNames: ["Farigiraf", "Incineroar", "Hisuian Decidueye", "Primarina", "Golurk", "Corviknight"] },
+  { id: "ct-99", tournament: "Friday Fight Night #50 First Champions Tournament!", players: 23, placement: 3, player: "Sekun", wins: 4, losses: 3, pokemonIds: [1018, 902, 279, 1013, 448, 445], pokemonNames: ["Archaludon", "Basculegion", "Pelipper", "Sinistcha", "Mega Lucario", "Garchomp"] },
+  { id: "ct-100", tournament: "Friendly #1 - Game Corner - Champions", players: 23, placement: 4, player: "tiagorsda", wins: 4, losses: 3, pokemonIds: [6, 903, 902, 445, 3, 324], pokemonNames: ["Charizard", "Sneasler", "Basculegion", "Garchomp", "Venusaur", "Torkoal"] },
+  { id: "ct-101", tournament: "Friday Fight Night #50 First Champions Tournament!", players: 23, placement: 4, player: "433", wins: 4, losses: 3, pokemonIds: [324, 475, 858, 925, 6080, 903], pokemonNames: ["Torkoal", "Gallade", "Hatterene", "Maushold", "Galarian Slowbro", "Sneasler"] },
+  { id: "ct-102", tournament: "Friendly #1 - Game Corner - Champions", players: 23, placement: 5, player: "Bloku", wins: 4, losses: 2, pokemonIds: [727, 282, 1013, 983, 142, 149], pokemonNames: ["Incineroar", "Gardevoir", "Sinistcha", "Kingambit", "Aerodactyl", "Dragonite"] },
+  { id: "ct-103", tournament: "Friday Fight Night #50 First Champions Tournament!", players: 23, placement: 5, player: "aitor645302", wins: 4, losses: 2, pokemonIds: [981, 727, 623, 324, 1013, 983], pokemonNames: ["Farigiraf", "Incineroar", "Golurk", "Torkoal", "Sinistcha", "Kingambit"] },
+  { id: "ct-104", tournament: "Friendly #1 - Game Corner - Champions", players: 23, placement: 6, player: "Erika Coelho", wins: 3, losses: 3, pokemonIds: [970, 727, 130, 1013, 445, 663], pokemonNames: ["Glimmora", "Incineroar", "Gyarados", "Sinistcha", "Garchomp", "Talonflame"] },
+  { id: "ct-105", tournament: "Friday Fight Night #50 First Champions Tournament!", players: 23, placement: 6, player: "Sydaster", wins: 4, losses: 2, pokemonIds: [823, 445, 903, 282, 149, 1013], pokemonNames: ["Corviknight", "Garchomp", "Sneasler", "Mega Gardevoir", "Dragonite", "Sinistcha"] },
+  { id: "ct-106", tournament: "Friendly #1 - Game Corner - Champions", players: 23, placement: 7, player: "Chikoratos", wins: 3, losses: 3, pokemonIds: [154, 727, 902, 925, 475, 142], pokemonNames: ["Meganium", "Incineroar", "Basculegion", "Maushold", "Gallade", "Aerodactyl"] },
+  { id: "ct-107", tournament: "Friday Fight Night #50 First Champions Tournament!", players: 23, placement: 7, player: "BreezyVGC", wins: 3, losses: 3, pokemonIds: [727, 981, 964, 1013, 903, 623], pokemonNames: ["Incineroar", "Farigiraf", "Palafin", "Sinistcha", "Sneasler", "Golurk"] },
+  { id: "ct-108", tournament: "Friendly #1 - Game Corner - Champions", players: 23, placement: 8, player: "tpgamer007", wins: 3, losses: 3, pokemonIds: [478, 903, 902, 983, 10340, 5059], pokemonNames: ["Froslass", "Sneasler", "Basculegion", "Kingambit", "Hisuian Zoroark", "Hisuian Arcanine"] },
+  { id: "ct-109", tournament: "Friday Fight Night #50 First Champions Tournament!", players: 23, placement: 8, player: "xBlankFate", wins: 2, losses: 3, pokemonIds: [282, 547, 727, 903, 445, 983], pokemonNames: ["Gardevoir", "Whimsicott", "Incineroar", "Sneasler", "Garchomp", "Kingambit"] },
+  { id: "ct-110", tournament: "The Drywall Series - CHAMPIONS", players: 21, placement: 1, player: "Nehzzy", wins: 5, losses: 1, pokemonIds: [149, 903, 983, 902, 655, 36], pokemonNames: ["Dragonite", "Sneasler", "Kingambit", "Basculegion", "Delphox", "Clefable"] },
+  { id: "ct-111", tournament: "Cel's Super Slam #15 Reg M-A DAY ONE EU TOUR", players: 21, placement: 1, player: "Lycopoky", wins: 7, losses: 1, pokemonIds: [530, 248, 1013, 149, 670, 350], pokemonNames: ["Mega Excadrill", "Tyranitar", "Sinistcha", "Dragonite", "Mega Floette", "Milotic"] },
+  { id: "ct-112", tournament: "The Drywall Series - CHAMPIONS", players: 21, placement: 2, player: "BrunoWillians", wins: 4, losses: 2, pokemonIds: [154, 6, 727, 903, 149, 730], pokemonNames: ["Meganium", "Charizard", "Incineroar", "Sneasler", "Dragonite", "Primarina"] },
+  { id: "ct-113", tournament: "Cel's Super Slam #15 Reg M-A DAY ONE EU TOUR", players: 21, placement: 2, player: "Divanosauro", wins: 6, losses: 2, pokemonIds: [149, 279, 730, 983, 1013, 903], pokemonNames: ["Dragonite", "Pelipper", "Primarina", "Kingambit", "Sinistcha", "Sneasler"] },
+  { id: "ct-114", tournament: "The Drywall Series - CHAMPIONS", players: 21, placement: 3, player: "MemesNDreams", wins: 4, losses: 1, pokemonIds: [448, 142, 445, 727, 10009, 248], pokemonNames: ["Mega Lucario", "Aerodactyl", "Garchomp", "Incineroar", "Wash Rotom", "Tyranitar"] },
+  { id: "ct-115", tournament: "Cel's Super Slam #15 Reg M-A DAY ONE EU TOUR", players: 21, placement: 3, player: "Gottkomplexe", wins: 5, losses: 2, pokemonIds: [94, 727, 983, 903, 547, 730], pokemonNames: ["Mega Gengar", "Incineroar", "Kingambit", "Sneasler", "Whimsicott", "Primarina"] },
+  { id: "ct-116", tournament: "The Drywall Series - CHAMPIONS", players: 21, placement: 4, player: "Shinyz672", wins: 3, losses: 2, pokemonIds: [670, 663, 727, 730, 925, 445], pokemonNames: ["Mega Floette", "Talonflame", "Incineroar", "Primarina", "Maushold", "Garchomp"] },
+  { id: "ct-117", tournament: "Cel's Super Slam #15 Reg M-A DAY ONE EU TOUR", players: 21, placement: 4, player: "DietDrBobb", wins: 4, losses: 3, pokemonIds: [970, 902, 547, 727, 983, 903], pokemonNames: ["Mega Glimmora", "Basculegion", "Whimsicott", "Incineroar", "Kingambit", "Sneasler"] },
+  { id: "ct-118", tournament: "The Drywall Series - CHAMPIONS", players: 21, placement: 5, player: "jamchi", wins: 3, losses: 1, pokemonIds: [547, 908, 903, 6, 445, 727], pokemonNames: ["Whimsicott", "Meowscarada", "Sneasler", "Charizard", "Garchomp", "Incineroar"] },
+  { id: "ct-119", tournament: "The Drywall Series - CHAMPIONS", players: 21, placement: 6, player: "2edilso", wins: 3, losses: 1, pokemonIds: [214, 248, 530, 547, 981, 727], pokemonNames: ["Heracross", "Tyranitar", "Excadrill", "Whimsicott", "Farigiraf", "Incineroar"] },
+  { id: "ct-120", tournament: "Cel's Super Slam #15 Reg M-A DAY ONE EU TOUR", players: 21, placement: 6, player: "Flygonkingvgc", wins: 3, losses: 3, pokemonIds: [324, 981, 5059, 700, 229, 497], pokemonNames: ["Torkoal", "Farigiraf", "Hisuian Arcanine", "Sylveon", "Houndoom", "Serperior"] },
+  { id: "ct-121", tournament: "The Drywall Series - CHAMPIONS", players: 21, placement: 7, player: "Goofball25", wins: 2, losses: 2, pokemonIds: [964, 94, 727, 700, 635, 547], pokemonNames: ["Palafin", "Gengar", "Incineroar", "Sylveon", "Hydreigon", "Whimsicott"] },
+  { id: "ct-122", tournament: "The Drywall Series - CHAMPIONS", players: 21, placement: 8, player: "gamesettex", wins: 2, losses: 2, pokemonIds: [727, 1013, 248, 530, 730, 149], pokemonNames: ["Incineroar", "Sinistcha", "Tyranitar", "Excadrill", "Primarina", "Dragonite"] },
+];

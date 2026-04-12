@@ -105,7 +105,7 @@ function resolveMegaForCalc(p: ChampionsPokemon, set: CommonSet): {
       };
     }
   }
-  // Palafin: Zero to Hero — damage calc assumes Hero Form (post-switch)
+  // Palafin: Zero to Hero  -  damage calc assumes Hero Form (post-switch)
   if (p.name === "Palafin" && set.ability === "Zero To Hero") {
     return {
       baseStats: { hp: 100, attack: 160, defense: 97, spAtk: 106, spDef: 87, speed: 100 },
@@ -113,7 +113,7 @@ function resolveMegaForCalc(p: ChampionsPokemon, set: CommonSet): {
       ability: set.ability,
     };
   }
-  // Aegislash: Stance Change — use Blade Form stats for attacking calcs
+  // Aegislash: Stance Change  -  use Blade Form stats for attacking calcs
   if (p.name === "Aegislash" && set.ability === "Stance Change") {
     return {
       baseStats: { hp: 60, attack: 140, defense: 50, spAtk: 140, spDef: 50, speed: 60 },
@@ -126,7 +126,7 @@ function resolveMegaForCalc(p: ChampionsPokemon, set: CommonSet): {
 /** Resolve form for defending (Aegislash stays in Shield Form) */
 function resolveDefenderForCalc(p: ChampionsPokemon, set: CommonSet): ReturnType<typeof resolveMegaForCalc> {
   const resolved = resolveMegaForCalc(p, set);
-  // Aegislash as defender uses Shield Form (high Def/SpDef) — override Blade stats
+  // Aegislash as defender uses Shield Form (high Def/SpDef)  -  override Blade stats
   if (p.name === "Aegislash" && set.ability === "Stance Change") {
     return { ...resolved, baseStats: p.baseStats };
   }

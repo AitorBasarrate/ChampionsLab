@@ -560,7 +560,7 @@ export function PokemonDetailModal({ pokemon, onClose }: PokemonDetailModalProps
                           if (best >= 2) { label = "2×"; bg = "bg-emerald-50 dark:bg-emerald-500/10"; textColor = "text-emerald-600 dark:text-emerald-400"; }
                           else if (best === 1) { label = "1×"; textColor = "text-gray-400 dark:text-gray-500"; }
                           else if (best > 0 && best < 1) { label = "½"; bg = "bg-red-50 dark:bg-red-500/10"; textColor = "text-red-500 dark:text-red-400"; }
-                          else { label = "—"; textColor = "text-gray-300 dark:text-gray-600"; }
+                          else { label = " - "; textColor = "text-gray-300 dark:text-gray-600"; }
                           return (
                             <div key={type} className={cn("flex flex-col items-center gap-0.5 py-1.5 rounded-lg", bg)}>
                               <span

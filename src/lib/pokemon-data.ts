@@ -8,7 +8,7 @@ import { ChampionsPokemon, Season } from "./types";
 export const SEASONS: Season[] = [
   {
     id: 1,
-    name: "Season M-1 — Regulation M-A",
+    name: "Season M-1  -  Regulation M-A",
     startDate: "2026-04-08",
     endDate: "2026-05-13",
     rosterAdditions: [],
@@ -154,8 +154,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "S",
-    "usageRate": 15
+    "tier": "B",
+    "usageRate": 10.5,
   },
   {
     "id": 6,
@@ -325,7 +325,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "A",
-    "usageRate": 11.7
+    "usageRate": 23.33,
   },
   {
     "id": 9,
@@ -468,8 +468,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 13.1
+    "tier": "B",
+    "usageRate": 3.8,
   },
   {
     "id": 15,
@@ -594,8 +594,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.5
+    "tier": "D",
+    "usageRate": 0.12,
   },
   {
     "id": 18,
@@ -703,8 +703,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.8
+    "tier": "D",
+    "usageRate": 0.1,
   },
   {
     "id": 24,
@@ -825,7 +825,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.4
+    "usageRate": 0.07,
   },
   {
     "id": 25,
@@ -934,7 +934,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 1
+    "usageRate": 0.15,
   },
   {
     "id": 26,
@@ -1048,8 +1048,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.6
+    "tier": "D",
+    "usageRate": 0.11,
   },
   {
     "id": 68,
@@ -1166,8 +1166,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.7
+    "tier": "D",
+    "usageRate": 0.39,
   },
   {
     "id": 168,
@@ -1283,7 +1283,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.5
+    "usageRate": 0.06,
   },
   {
     "id": 205,
@@ -1398,8 +1398,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.2
+    "tier": "D",
+    "usageRate": 0.04,
   },
   {
     "id": 308,
@@ -1547,8 +1547,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 7.1
+    "tier": "D",
+    "usageRate": 0.17,
   },
   {
     "id": 310,
@@ -1672,8 +1672,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 7.5
+    "tier": "D",
+    "usageRate": 0.64,
   },
   {
     "id": 319,
@@ -1799,8 +1799,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.9
+    "tier": "D",
+    "usageRate": 0.11,
   },
   {
     "id": 323,
@@ -1943,7 +1943,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "C",
-    "usageRate": 1.5
+    "usageRate": 0.84,
   },
   {
     "id": 354,
@@ -2082,8 +2082,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.5
+    "tier": "D",
+    "usageRate": 0.13,
   },
   {
     "id": 358,
@@ -2212,8 +2212,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.4
+    "tier": "D",
+    "usageRate": 0.36,
   },
   {
     "id": 362,
@@ -2341,8 +2341,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.6
+    "tier": "D",
+    "usageRate": 0.13,
   },
   {
     "id": 405,
@@ -2445,8 +2445,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.2
+    "tier": "D",
+    "usageRate": 0.1,
   },
   {
     "id": 407,
@@ -2549,8 +2549,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 7
+    "tier": "D",
+    "usageRate": 0.08,
   },
   {
     "id": 409,
@@ -2669,8 +2669,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.1
+    "tier": "D",
+    "usageRate": 0.1,
   },
   {
     "id": 411,
@@ -2784,8 +2784,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.7
+    "tier": "D",
+    "usageRate": 0.09,
   },
   {
     "id": 454,
@@ -2918,8 +2918,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.5
+    "tier": "D",
+    "usageRate": 0.2,
   },
   {
     "id": 505,
@@ -3008,7 +3008,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 1.5
+    "usageRate": 0.05,
   },
   {
     "id": 510,
@@ -3117,7 +3117,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.7
+    "usageRate": 0.18,
   },
   {
     "id": 512,
@@ -3211,7 +3211,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.4
+    "usageRate": 0.03,
   },
   {
     "id": 514,
@@ -3310,7 +3310,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.9
+    "usageRate": 0.04,
   },
   {
     "id": 516,
@@ -3406,7 +3406,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.6
+    "usageRate": 0.05,
   },
   {
     "id": 563,
@@ -3500,8 +3500,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.9
+    "tier": "D",
+    "usageRate": 0.23,
   },
   {
     "id": 579,
@@ -3617,8 +3617,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.3
+    "tier": "D",
+    "usageRate": 0.17,
   },
   {
     "id": 614,
@@ -3744,7 +3744,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.5
+    "usageRate": 0.11,
   },
   {
     "id": 671,
@@ -3834,8 +3834,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1
+    "tier": "D",
+    "usageRate": 0.05,
   },
   {
     "id": 675,
@@ -3966,8 +3966,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1
+    "tier": "D",
+    "usageRate": 0.08,
   },
   {
     "id": 683,
@@ -4060,8 +4060,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 3
+    "tier": "D",
+    "usageRate": 0.11,
   },
   {
     "id": 685,
@@ -4149,7 +4149,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.9
+    "usageRate": 0.03,
   },
   {
     "id": 695,
@@ -4263,8 +4263,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.6
+    "tier": "D",
+    "usageRate": 0.36,
   },
   {
     "id": 702,
@@ -4366,7 +4366,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.7
+    "usageRate": 0.06,
   },
   {
     "id": 713,
@@ -4465,8 +4465,99 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.5
+    "tier": "D",
+    "usageRate": 0.08,
+  },
+  {
+    "id": 5713,
+    "name": "Hisuian Avalugg",
+    "dexNumber": 713,
+    "types": [
+      "ice",
+      "rock"
+    ],
+    "baseStats": {
+      "hp": 95,
+      "attack": 127,
+      "defense": 184,
+      "spAtk": 34,
+      "spDef": 36,
+      "speed": 38
+    },
+    "abilities": [
+      {
+        "name": "Strong Jaw",
+        "description": "The Pokémon's strong jaw boosts the power of its biting moves.",
+        "isHidden": false
+      },
+      {
+        "name": "Ice Body",
+        "description": "The Pokémon gradually regains HP in snow.",
+        "isHidden": false
+      },
+      {
+        "name": "Sturdy",
+        "description": "The Pokémon cannot be knocked out by a single hit. One-hit KO moves also cannot knock it out.",
+        "isHidden": true
+      }
+    ],
+    "moves": [
+        {"name":"Avalanche","type":"ice","category":"physical","power":60,"accuracy":100,"pp":10,"description":"This move's power is doubled if the target has inflicted damage on the user in the same turn."},
+        {"name":"Blizzard","type":"ice","category":"special","power":110,"accuracy":70,"pp":5,"description":"A howling blizzard is summoned to strike opposing Pokémon. This may also leave the opposing Pokémon frozen."},
+        {"name":"Body Press","type":"fighting","category":"physical","power":80,"accuracy":100,"pp":10,"description":"The user attacks by slamming its body into the target. The higher the user's Defense stat, the greater the damage this move deals."},
+        {"name":"Body Slam","type":"normal","category":"physical","power":85,"accuracy":100,"pp":15,"description":"The user drops onto the target with its full body weight. This may also leave the target with paralysis."},
+        {"name":"Bulldoze","type":"ground","category":"physical","power":60,"accuracy":100,"pp":20,"description":"The user strikes everything around it by stomping down on the ground. This lowers the Speed stats of those hit."},
+        {"name":"Crunch","type":"dark","category":"physical","power":80,"accuracy":100,"pp":15,"description":"The user crunches up the target with sharp fangs. This may also lower the target's Defense stat."},
+        {"name":"Curse","type":"ghost","category":"status","power":null,"accuracy":null,"pp":10,"description":"A move that has different effects depending on whether the user is a Ghost type or not."},
+        {"name":"Double-Edge","type":"normal","category":"physical","power":120,"accuracy":100,"pp":15,"description":"A reckless life-risking tackle in which the user rushes the target. This also damages the user quite a lot."},
+        {"name":"Earthquake","type":"ground","category":"physical","power":100,"accuracy":100,"pp":10,"description":"The user sets off an earthquake that strikes every Pokémon around it."},
+        {"name":"Endure","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user endures any attack with at least 1 HP."},
+        {"name":"Facade","type":"normal","category":"physical","power":70,"accuracy":100,"pp":20,"description":"This move's power is doubled if the user is poisoned, burned, or paralyzed."},
+        {"name":"Flash Cannon","type":"steel","category":"special","power":80,"accuracy":100,"pp":10,"description":"The user gathers all its light energy and releases it at once. This may also lower the target's Sp. Def stat."},
+        {"name":"Giga Impact","type":"normal","category":"physical","power":150,"accuracy":90,"pp":5,"description":"The user charges at the target using every bit of its power. The user can't move on the next turn."},
+        {"name":"Head Smash","type":"rock","category":"physical","power":150,"accuracy":80,"pp":5,"description":"The user attacks the target with a hazardous full-power headbutt. The user also takes terrible damage."},
+        {"name":"Heavy Slam","type":"steel","category":"physical","power":null,"accuracy":100,"pp":10,"description":"The user slams into the target with its heavy body. The more the user outweighs the target, the greater the move's power."},
+        {"name":"High Horsepower","type":"ground","category":"physical","power":95,"accuracy":95,"pp":10,"description":"The user fiercely attacks the target using its entire body."},
+        {"name":"Hyper Beam","type":"normal","category":"special","power":150,"accuracy":90,"pp":5,"description":"The target is attacked with a powerful beam. The user can't move on the next turn."},
+        {"name":"Ice Beam","type":"ice","category":"special","power":90,"accuracy":100,"pp":10,"description":"The target is struck with an icy-cold beam of energy. This may also leave the target frozen."},
+        {"name":"Ice Fang","type":"ice","category":"physical","power":65,"accuracy":95,"pp":15,"description":"The user bites with cold-infused fangs. This may also make the target flinch or leave it frozen."},
+        {"name":"Ice Spinner","type":"ice","category":"physical","power":80,"accuracy":100,"pp":15,"description":"The user covers its feet in thin ice and twirls around, slamming into the target. This move's spinning motion also destroys the terrain."},
+        {"name":"Icicle Crash","type":"ice","category":"physical","power":85,"accuracy":90,"pp":10,"description":"The user attacks by crashing large icicles onto the target. This may also make the target flinch."},
+        {"name":"Icy Wind","type":"ice","category":"special","power":55,"accuracy":95,"pp":15,"description":"The user attacks with a gust of chilled air. This also lowers opposing Pokémon's Speed stats."},
+        {"name":"Iron Defense","type":"steel","category":"status","power":null,"accuracy":null,"pp":15,"description":"The user hardens its body's surface like iron, sharply boosting its Defense stat."},
+        {"name":"Iron Head","type":"steel","category":"physical","power":80,"accuracy":100,"pp":16,"description":"The user slams the target with its steel-hard head. This may also make the target flinch."},
+        {"name":"Mountain Gale","type":"ice","category":"physical","power":100,"accuracy":85,"pp":10,"description":"The user hurls giant chunks of ice at the target to inflict damage. This may also make the target flinch."},
+        {"name":"Power Gem","type":"rock","category":"special","power":80,"accuracy":100,"pp":20,"description":"The user attacks with a ray of light that sparkles as if it were made of gemstones."},
+        {"name":"Protect","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"This move enables the user to protect itself from all attacks."},
+        {"name":"Rest","type":"psychic","category":"status","power":null,"accuracy":null,"pp":5,"description":"The user goes to sleep for two turns. This fully restores the user's HP and cures any status conditions."},
+        {"name":"Rock Blast","type":"rock","category":"physical","power":25,"accuracy":90,"pp":10,"description":"The user hurls hard rocks at the target two to five times in a row."},
+        {"name":"Rock Slide","type":"rock","category":"physical","power":75,"accuracy":90,"pp":10,"description":"Large boulders are hurled at opposing Pokémon to inflict damage. This may also make the opposing Pokémon flinch."},
+        {"name":"Rock Tomb","type":"rock","category":"physical","power":60,"accuracy":95,"pp":15,"description":"The user hurls boulders at the target. This also lowers the target's Speed stat."},
+        {"name":"Sandstorm","type":"rock","category":"status","power":null,"accuracy":null,"pp":10,"description":"A five-turn sandstorm is summoned to hurt all combatants except Rock, Ground, and Steel types."},
+        {"name":"Scary Face","type":"normal","category":"status","power":null,"accuracy":100,"pp":10,"description":"The user frightens the target with a scary face to harshly lower its Speed stat."},
+        {"name":"Sleep Talk","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user randomly uses one of the moves it knows while asleep."},
+        {"name":"Snowscape","type":"ice","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user summons a snowstorm lasting five turns. This boosts the Defense stats of Ice types."},
+        {"name":"Stealth Rock","type":"rock","category":"status","power":null,"accuracy":null,"pp":20,"description":"The user lays a trap of levitating stones around the opposing team. The trap hurts opposing Pokémon that switch into battle."},
+        {"name":"Stone Edge","type":"rock","category":"physical","power":100,"accuracy":80,"pp":5,"description":"The user stabs the target from below with sharpened stones. Critical hits land more easily."},
+        {"name":"Substitute","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user creates a substitute for itself using some of its own HP."},
+        {"name":"Superpower","type":"fighting","category":"physical","power":120,"accuracy":100,"pp":5,"description":"The user attacks the target with great power. This also lowers the user's Attack and Defense stats."},
+        {"name":"Wide Guard","type":"rock","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user and its allies are protected from wide-ranging attacks for one turn."}
+      ],
+    "sprite": "/sprites/10245.png",
+    "officialArt": "/sprites/10245.png",
+    "generation": 6,
+    "forms": [],
+    "hasMega": false,
+    "recruitmentCost": null,
+    "homeCompatible": true,
+    "homeSource": [
+      "Scarlet/Violet",
+      "Legends Z-A",
+      "Legends: Arceus"
+    ],
+    "season": 1,
+    "tier": "D",
+    "usageRate": 0.07,
   },
   {
     "id": 758,
@@ -4582,8 +4673,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.2
+    "tier": "D",
+    "usageRate": 0.16,
   },
   {
     "id": 766,
@@ -4694,8 +4785,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.7
+    "tier": "D",
+    "usageRate": 0.19,
   },
   {
     "id": 841,
@@ -4790,8 +4881,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.8
+    "tier": "D",
+    "usageRate": 0.04,
   },
   {
     "id": 899,
@@ -4903,8 +4994,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.3
+    "tier": "D",
+    "usageRate": 0.12,
   },
   {
     "id": 939,
@@ -4992,8 +5083,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.7
+    "tier": "D",
+    "usageRate": 0.22,
   },
   {
     "id": 956,
@@ -5099,8 +5190,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.3
+    "tier": "D",
+    "usageRate": 0.29,
   },
   {
     "id": 10100,
@@ -5215,8 +5306,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
-    "usageRate": 0.6
+    "tier": "C",
+    "usageRate": 1.36,
   },
   {
     "id": 36,
@@ -5384,8 +5475,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 8.4
+    "tier": "C",
+    "usageRate": 3.24,
   },
   {
     "id": 38,
@@ -5500,8 +5591,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.7
+    "tier": "D",
+    "usageRate": 0.19,
   },
   {
     "id": 10103,
@@ -5613,7 +5704,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "B",
-    "usageRate": 3.8
+    "usageRate": 3.95,
   },
   {
     "id": 59,
@@ -5723,8 +5814,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.9
+    "tier": "B",
+    "usageRate": 3.65,
   },
   {
     "id": 5059,
@@ -5840,7 +5931,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "C",
-    "usageRate": 1.7
+    "usageRate": 1.43,
   },
   {
     "id": 65,
@@ -5978,7 +6069,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.4
+    "usageRate": 0.35,
   },
   {
     "id": 71,
@@ -6107,8 +6198,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.1
+    "tier": "D",
+    "usageRate": 0.19,
   },
   {
     "id": 80,
@@ -6264,8 +6355,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 14.9
+    "tier": "D",
+    "usageRate": 0.46,
   },
   {
     "id": 6080,
@@ -6407,7 +6498,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.7
+    "usageRate": 0.23,
   },
   {
     "id": 94,
@@ -6553,7 +6644,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "B",
-    "usageRate": 3.4
+    "usageRate": 9,
   },
   {
     "id": 115,
@@ -6696,8 +6787,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 15
+    "tier": "C",
+    "usageRate": 2.98,
   },
   {
     "id": 121,
@@ -6837,8 +6928,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.2
+    "tier": "C",
+    "usageRate": 3.37,
   },
   {
     "id": 127,
@@ -6967,8 +7058,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 12.9
+    "tier": "D",
+    "usageRate": 0.09,
   },
   {
     "id": 128,
@@ -7076,8 +7167,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.4
+    "tier": "D",
+    "usageRate": 0.05,
   },
   {
     "id": 10250,
@@ -7173,8 +7264,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Scarlet/Violet"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 3.5
+    "tier": "D",
+    "usageRate": 0.05,
   },
   {
     "id": 10251,
@@ -7277,8 +7368,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Scarlet/Violet"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.2
+    "tier": "D",
+    "usageRate": 0.21,
   },
   {
     "id": 10252,
@@ -7382,8 +7473,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Scarlet/Violet"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 3.8
+    "tier": "D",
+    "usageRate": 0.58,
   },
   {
     "id": 130,
@@ -7524,8 +7615,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.8
+    "tier": "B",
+    "usageRate": 4.4,
   },
   {
     "id": 132,
@@ -7582,7 +7673,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 1
+    "usageRate": 0.3,
   },
   {
     "id": 134,
@@ -7688,8 +7779,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 3.9
+    "tier": "D",
+    "usageRate": 0.12,
   },
   {
     "id": 135,
@@ -7796,7 +7887,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.8
+    "usageRate": 0.24,
   },
   {
     "id": 136,
@@ -7900,8 +7991,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.8
+    "tier": "D",
+    "usageRate": 0.05,
   },
   {
     "id": 142,
@@ -8037,8 +8128,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.2
+    "tier": "A",
+    "usageRate": 12.75,
   },
   {
     "id": 143,
@@ -8174,8 +8265,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 13.2
+    "tier": "D",
+    "usageRate": 0.76,
   },
   {
     "id": 149,
@@ -8331,8 +8422,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 9.2
+    "tier": "B",
+    "usageRate": 12,
   },
   {
     "id": 154,
@@ -8469,7 +8560,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "B",
-    "usageRate": 7.1
+    "usageRate": 4.7,
   },
   {
     "id": 157,
@@ -8577,8 +8668,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.6
+    "tier": "D",
+    "usageRate": 0.15,
   },
   {
     "id": 5157,
@@ -8690,8 +8781,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 8.7
+    "tier": "C",
+    "usageRate": 2.46,
   },
   {
     "id": 160,
@@ -8848,8 +8939,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "S",
-    "usageRate": 15.3
+    "tier": "C",
+    "usageRate": 0.87,
   },
   {
     "id": 181,
@@ -8986,8 +9077,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 3.7
+    "tier": "D",
+    "usageRate": 0.34,
   },
   {
     "id": 184,
@@ -9105,8 +9196,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 6.2
+    "tier": "C",
+    "usageRate": 1.08,
   },
   {
     "id": 186,
@@ -9214,8 +9305,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.7
+    "tier": "B",
+    "usageRate": 4.25,
   },
   {
     "id": 196,
@@ -9330,7 +9421,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.5
+    "usageRate": 0.1,
   },
   {
     "id": 197,
@@ -9448,8 +9539,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.5
+    "tier": "D",
+    "usageRate": 0.27,
   },
   {
     "id": 199,
@@ -9586,8 +9677,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2
+    "tier": "D",
+    "usageRate": 0.3,
   },
   {
     "id": 6199,
@@ -9734,7 +9825,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.4
+    "usageRate": 0.39,
   },
   {
     "id": 208,
@@ -9878,8 +9969,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 3
+    "tier": "D",
+    "usageRate": 0.24,
   },
   {
     "id": 212,
@@ -10021,8 +10112,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.4
+    "tier": "C",
+    "usageRate": 3.11,
   },
   {
     "id": 214,
@@ -10166,8 +10257,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 13.4
+    "tier": "D",
+    "usageRate": 0.16,
   },
   {
     "id": 227,
@@ -10295,8 +10386,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.3
+    "tier": "C",
+    "usageRate": 1.12,
   },
   {
     "id": 229,
@@ -10439,8 +10530,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 6.3
+    "tier": "D",
+    "usageRate": 0.07,
   },
   {
     "id": 248,
@@ -10605,7 +10696,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "A",
-    "usageRate": 14.4
+    "usageRate": 16.25,
   },
   {
     "id": 279,
@@ -10709,8 +10800,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.3
+    "tier": "A",
+    "usageRate": 15,
   },
   {
     "id": 282,
@@ -10868,8 +10959,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.1
+    "tier": "B",
+    "usageRate": 7.8,
   },
   {
     "id": 302,
@@ -11034,8 +11125,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 7.6
+    "tier": "C",
+    "usageRate": 2.59,
   },
   {
     "id": 306,
@@ -11194,8 +11285,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
-    "usageRate": 0.6
+    "tier": "C",
+    "usageRate": 1.26,
   },
   {
     "id": 324,
@@ -11303,8 +11394,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 14.8
+    "tier": "B",
+    "usageRate": 5.4,
   },
   {
     "id": 334,
@@ -11441,8 +11532,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.2
+    "tier": "D",
+    "usageRate": 0.62,
   },
   {
     "id": 350,
@@ -11554,8 +11645,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 13.6
+    "tier": "B",
+    "usageRate": 9.75,
   },
   {
     "id": 351,
@@ -11631,7 +11722,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.9
+    "usageRate": 0.05,
   },
   {
     "id": 359,
@@ -11764,31 +11855,6 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
           }
         ],
         "isMega": true
-      },
-      {
-        "name": "Mega Absol Z",
-        "sprite": "/sprites/oa-10307.png",
-        "types": [
-          "dark",
-          "ghost"
-        ],
-        "baseStats": {
-          "hp": 65,
-          "attack": 140,
-          "defense": 65,
-          "spAtk": 130,
-          "spDef": 65,
-          "speed": 100
-        },
-        "abilities": [
-          {
-            "name": "Spectral Doom",
-            "description": "Dark and Ghost-type moves gain 30% power. Moves bypass Screens and Substitute.",
-            "isChampions": false
-          }
-        ],
-        "isMega": true,
-        "hidden": true
       }
     ],
     "hasMega": true,
@@ -11802,8 +11868,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 6.7
+    "tier": "D",
+    "usageRate": 0.1,
   },
   {
     "id": 376,
@@ -12794,8 +12860,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": null
+    "tier": "C",
+    "usageRate": 5.8,
   },
   {
     "id": 389,
@@ -12914,8 +12980,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.8
+    "tier": "D",
+    "usageRate": 0.1,
   },
   {
     "id": 392,
@@ -13050,8 +13116,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 13.8
+    "tier": "D",
+    "usageRate": 0.25,
   },
   {
     "id": 395,
@@ -13172,8 +13238,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.7
+    "tier": "D",
+    "usageRate": 0.78,
   },
   {
     "id": 428,
@@ -13327,7 +13393,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "C",
-    "usageRate": 1.6
+    "usageRate": 1.05,
   },
   {
     "id": 442,
@@ -13430,7 +13496,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.5
+    "usageRate": 0.22,
   },
   {
     "id": 445,
@@ -13547,30 +13613,6 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
           }
         ],
         "isMega": true
-      },
-      {
-        "name": "Mega Garchomp Z",
-        "sprite": "/sprites/oa-10058.png",
-        "types": [
-          "dragon"
-        ],
-        "baseStats": {
-          "hp": 108,
-          "attack": 150,
-          "defense": 105,
-          "spAtk": 140,
-          "spDef": 95,
-          "speed": 102
-        },
-        "abilities": [
-          {
-            "name": "Earth Sovereign",
-            "description": "Ground and Dragon-type moves ignore immunities. On Mega Evolution, summons a sandstorm.",
-            "isChampions": false
-          }
-        ],
-        "isMega": true,
-        "hidden": true
       }
     ],
     "hasMega": true,
@@ -13586,7 +13628,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "S",
-    "usageRate": 18.1
+    "usageRate": 36,
   },
   {
     "id": 448,
@@ -13733,31 +13775,6 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
           }
         ],
         "isMega": true
-      },
-      {
-        "name": "Mega Lucario Z",
-        "sprite": "/sprites/oa-10448.png",
-        "types": [
-          "fighting",
-          "steel"
-        ],
-        "baseStats": {
-          "hp": 70,
-          "attack": 155,
-          "defense": 78,
-          "spAtk": 130,
-          "spDef": 80,
-          "speed": 112
-        },
-        "abilities": [
-          {
-            "name": "Aura Maximizer",
-            "description": "Fighting and Steel-type moves gain 30% power. Special Attack is raised by one stage on Mega Evolution.",
-            "isChampions": false
-          }
-        ],
-        "isMega": true,
-        "hidden": true
       }
     ],
     "hasMega": true,
@@ -13772,8 +13789,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.1
+    "tier": "C",
+    "usageRate": 1.71,
   },
   {
     "id": 450,
@@ -13870,8 +13887,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.8
+    "tier": "D",
+    "usageRate": 0.21,
   },
   {
     "id": 460,
@@ -14009,8 +14026,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.3
+    "tier": "D",
+    "usageRate": 0.54,
   },
   {
     "id": 461,
@@ -14131,7 +14148,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.3
+    "usageRate": 0.74,
   },
   {
     "id": 464,
@@ -14275,8 +14292,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.4
+    "tier": "D",
+    "usageRate": 0.5,
   },
   {
     "id": 470,
@@ -14381,8 +14398,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.9
+    "tier": "D",
+    "usageRate": 0.07,
   },
   {
     "id": 471,
@@ -14486,8 +14503,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1
+    "tier": "D",
+    "usageRate": 0.4,
   },
   {
     "id": 472,
@@ -14613,8 +14630,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 12.9
+    "tier": "D",
+    "usageRate": 0.25,
   },
   {
     "id": 475,
@@ -14798,7 +14815,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "C",
-    "usageRate": 1.8
+    "usageRate": 1.47,
   },
   {
     "id": 478,
@@ -14939,8 +14956,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "S",
-    "usageRate": 19.5
+    "tier": "B",
+    "usageRate": 8.2,
   },
   {
     "id": 479,
@@ -15025,8 +15042,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 14.6
+    "tier": "D",
+    "usageRate": 0.04,
   },
   {
     "id": 10008,
@@ -15113,8 +15130,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 8.9
+    "tier": "C",
+    "usageRate": 2.13,
   },
   {
     "id": 10009,
@@ -15201,8 +15218,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.1
+    "tier": "A",
+    "usageRate": 17.5,
   },
   {
     "id": 10010,
@@ -15289,8 +15306,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.6
+    "tier": "D",
+    "usageRate": 0.7,
   },
   {
     "id": 10011,
@@ -15377,8 +15394,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.8
+    "tier": "D",
+    "usageRate": 0.07,
   },
   {
     "id": 10012,
@@ -15465,8 +15482,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.2
+    "tier": "D",
+    "usageRate": 0.38,
   },
   {
     "id": 497,
@@ -15563,8 +15580,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.8
+    "tier": "D",
+    "usageRate": 0.32,
   },
   {
     "id": 500,
@@ -15713,8 +15730,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 6.6
+    "tier": "D",
+    "usageRate": 0.2,
   },
   {
     "id": 503,
@@ -15821,7 +15838,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "B",
-    "usageRate": 7.7
+    "usageRate": 7.7,
   },
   {
     "id": 10336,
@@ -15934,8 +15951,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 8.1
+    "tier": "D",
+    "usageRate": 0.33,
   },
   {
     "id": 530,
@@ -16064,8 +16081,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.3
+    "tier": "B",
+    "usageRate": 7.4,
   },
   {
     "id": 531,
@@ -16209,8 +16226,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 7.1
+    "tier": "D",
+    "usageRate": 0.07,
   },
   {
     "id": 534,
@@ -16322,7 +16339,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "C",
-    "usageRate": 2.1
+    "usageRate": 1.22,
   },
   {
     "id": 547,
@@ -16424,7 +16441,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "A",
-    "usageRate": 8.9
+    "usageRate": 26.67,
   },
   {
     "id": 553,
@@ -16558,8 +16575,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.8
+    "tier": "D",
+    "usageRate": 0.26,
   },
   {
     "id": 569,
@@ -16663,7 +16680,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.4
+    "usageRate": 0.03,
   },
   {
     "id": 571,
@@ -16774,8 +16791,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 7.1
+    "tier": "D",
+    "usageRate": 0.09,
   },
   {
     "id": 10340,
@@ -16889,8 +16906,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
-    "usageRate": 0.6
+    "tier": "C",
+    "usageRate": 1.92,
   },
   {
     "id": 584,
@@ -16981,8 +16998,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.2
+    "tier": "D",
+    "usageRate": 0.56,
   },
   {
     "id": 587,
@@ -17074,8 +17091,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 6
+    "tier": "D",
+    "usageRate": 0.08,
   },
   {
     "id": 618,
@@ -17173,8 +17190,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.7
+    "tier": "D",
+    "usageRate": 0.06,
   },
   {
     "id": 6618,
@@ -17267,8 +17284,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.5
+    "tier": "D",
+    "usageRate": 0.03,
   },
   {
     "id": 623,
@@ -17422,8 +17439,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.9
+    "tier": "C",
+    "usageRate": 2.33,
   },
   {
     "id": 635,
@@ -17542,8 +17559,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.2
+    "tier": "C",
+    "usageRate": 2.85,
   },
   {
     "id": 637,
@@ -17646,7 +17663,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "C",
-    "usageRate": 2.2
+    "usageRate": 2.72,
   },
   {
     "id": 652,
@@ -17803,8 +17820,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4
+    "tier": "D",
+    "usageRate": 0.68,
   },
   {
     "id": 655,
@@ -17947,7 +17964,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "B",
-    "usageRate": 4.4
+    "usageRate": 7,
   },
   {
     "id": 658,
@@ -18081,8 +18098,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 14.9
+    "tier": "C",
+    "usageRate": 1.4,
   },
   {
     "id": 660,
@@ -18191,8 +18208,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4
+    "tier": "D",
+    "usageRate": 0.11,
   },
   {
     "id": 663,
@@ -18289,7 +18306,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "B",
-    "usageRate": 6.3
+    "usageRate": 8.6,
   },
   {
     "id": 666,
@@ -18383,7 +18400,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "C",
-    "usageRate": 2
+    "usageRate": 0.8,
   },
   {
     "id": 676,
@@ -18463,7 +18480,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.8
+    "usageRate": 0.04,
   },
   {
     "id": 678,
@@ -18596,8 +18613,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 3.6
+    "tier": "C",
+    "usageRate": 1.33,
   },
   {
     "id": 10678,
@@ -18727,8 +18744,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 3.6
+    "tier": "D",
+    "usageRate": 0.12,
   },
   {
     "id": 681,
@@ -18814,8 +18831,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.5
+    "tier": "B",
+    "usageRate": 4.85,
   },
   {
     "id": 693,
@@ -18905,8 +18922,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.4
+    "tier": "D",
+    "usageRate": 0.09,
   },
   {
     "id": 697,
@@ -19016,8 +19033,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.6
+    "tier": "D",
+    "usageRate": 0.11,
   },
   {
     "id": 699,
@@ -19120,7 +19137,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.4
+    "usageRate": 0.09,
   },
   {
     "id": 700,
@@ -19221,8 +19238,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 14.7
+    "tier": "B",
+    "usageRate": 5.8,
   },
   {
     "id": 701,
@@ -19372,8 +19389,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 13.1
+    "tier": "C",
+    "usageRate": 0.91,
   },
   {
     "id": 707,
@@ -19463,8 +19480,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.2
+    "tier": "D",
+    "usageRate": 0.52,
   },
   {
     "id": 711,
@@ -19575,8 +19592,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2
+    "tier": "D",
+    "usageRate": 0.04,
   },
   {
     "id": 715,
@@ -19690,8 +19707,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.4
+    "tier": "D",
+    "usageRate": 0.31,
   },
   {
     "id": 724,
@@ -19804,8 +19821,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.6
+    "tier": "D",
+    "usageRate": 0.06,
   },
   {
     "id": 10341,
@@ -19918,7 +19935,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.5
+    "usageRate": 0.37,
   },
   {
     "id": 727,
@@ -20042,7 +20059,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "S",
-    "usageRate": 18.9
+    "usageRate": 53,
   },
   {
     "id": 730,
@@ -20151,8 +20168,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.9
+    "tier": "B",
+    "usageRate": 6.2,
   },
   {
     "id": 733,
@@ -20255,8 +20272,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.9
+    "tier": "D",
+    "usageRate": 0.06,
   },
   {
     "id": 740,
@@ -20394,8 +20411,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.6
+    "tier": "C",
+    "usageRate": 1.99,
   },
   {
     "id": 745,
@@ -20503,8 +20520,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.8
+    "tier": "D",
+    "usageRate": 0.48,
   },
   {
     "id": 748,
@@ -20606,8 +20623,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 3.5
+    "tier": "D",
+    "usageRate": 0.15,
   },
   {
     "id": 750,
@@ -20702,8 +20719,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 13.1
+    "tier": "D",
+    "usageRate": 0.33,
   },
   {
     "id": 752,
@@ -20800,8 +20817,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
-    "usageRate": 0.6
+    "tier": "C",
+    "usageRate": 0.94,
   },
   {
     "id": 763,
@@ -21536,7 +21553,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "A",
-    "usageRate": 8.1
+    "usageRate": 8.1,
   },
   {
     "id": 765,
@@ -21651,8 +21668,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.5
+    "tier": "C",
+    "usageRate": 1.57,
   },
   {
     "id": 778,
@@ -21753,8 +21770,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.8
+    "tier": "C",
+    "usageRate": 1.64,
   },
   {
     "id": 780,
@@ -21896,8 +21913,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4
+    "tier": "C",
+    "usageRate": 1.85,
   },
   {
     "id": 784,
@@ -22026,8 +22043,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 14.1
+    "tier": "B",
+    "usageRate": 4.55,
   },
   {
     "id": 823,
@@ -22134,7 +22151,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "B",
-    "usageRate": 7.6
+    "usageRate": 6.6,
   },
   {
     "id": 844,
@@ -22232,8 +22249,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.9
+    "tier": "D",
+    "usageRate": 0.09,
   },
   {
     "id": 855,
@@ -22324,8 +22341,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 2.6
+    "tier": "D",
+    "usageRate": 0.07,
   },
   {
     "id": 858,
@@ -22434,8 +22451,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 9.6
+    "tier": "C",
+    "usageRate": 1.5,
   },
   {
     "id": 866,
@@ -22579,8 +22596,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 5.5
+    "tier": "D",
+    "usageRate": 0.14,
   },
   {
     "id": 867,
@@ -22690,8 +22707,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4
+    "tier": "D",
+    "usageRate": 0.18,
   },
   {
     "id": 869,
@@ -22785,8 +22802,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 14.1
+    "tier": "D",
+    "usageRate": 0.22,
   },
   {
     "id": 877,
@@ -22892,7 +22909,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "D",
-    "usageRate": 0.9
+    "usageRate": 0.08,
   },
   {
     "id": 887,
@@ -23006,8 +23023,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "S",
-    "usageRate": 24.8
+    "tier": "B",
+    "usageRate": 4.1,
   },
   {
     "id": 900,
@@ -23114,8 +23131,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.4
+    "tier": "D",
+    "usageRate": 0.6,
   },
   {
     "id": 901,
@@ -23850,12 +23867,12 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": null
+    "tier": "D",
+    "usageRate": 1.4,
   },
   {
     "id": 902,
-    "name": "Basculegion",
+    "name": "Basculegion-M",
     "dexNumber": 902,
     "types": [
       "water",
@@ -23952,7 +23969,108 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "A",
-    "usageRate": 12.4
+    "usageRate": 20,
+  },
+  {
+    "id": 10902,
+    "name": "Basculegion-F",
+    "dexNumber": 902,
+    "types": [
+      "water",
+      "ghost"
+    ],
+    "baseStats": {
+      "hp": 120,
+      "attack": 92,
+      "defense": 65,
+      "spAtk": 100,
+      "spDef": 75,
+      "speed": 78
+    },
+    "abilities": [
+      {
+        "name": "Swift Swim",
+        "description": "Doubles Speed during rain.",
+        "isHidden": false
+      },
+      {
+        "name": "Adaptability",
+        "description": "Powers up moves of the same type as the Pokémon.",
+        "isHidden": false
+      },
+      {
+        "name": "Mold Breaker",
+        "description": "Moves can be used on the target regardless of its Abilities.",
+        "isHidden": true
+      }
+    ],
+    "moves": [
+        {"name":"Agility","type":"psychic","category":"status","power":null,"accuracy":null,"pp":30,"description":"The user relaxes and lightens its body to move faster. This sharply boosts its Speed stat."},
+        {"name":"Aqua Jet","type":"water","category":"physical","power":40,"accuracy":100,"pp":20,"description":"The user lunges at the target to inflict damage, moving at blinding speed. This move always goes first."},
+        {"name":"Bite","type":"dark","category":"physical","power":60,"accuracy":100,"pp":25,"description":"The target is bitten with viciously sharp fangs. This may also make the target flinch."},
+        {"name":"Blizzard","type":"ice","category":"special","power":110,"accuracy":70,"pp":5,"description":"A howling blizzard is summoned to strike opposing Pokémon. This may also leave the opposing Pokémon frozen."},
+        {"name":"Chilling Water","type":"water","category":"special","power":50,"accuracy":100,"pp":20,"description":"The user attacks the target by showering it with water that's so cold it saps the target's power. This also lowers the target's Attack stat."},
+        {"name":"Confuse Ray","type":"ghost","category":"status","power":null,"accuracy":100,"pp":10,"description":"The target is exposed to a sinister ray that causes confusion."},
+        {"name":"Crunch","type":"dark","category":"physical","power":80,"accuracy":100,"pp":15,"description":"The user crunches up the target with sharp fangs. This may also lower the target's Defense stat."},
+        {"name":"Double-Edge","type":"normal","category":"physical","power":120,"accuracy":100,"pp":15,"description":"A reckless life-risking tackle in which the user rushes the target. This also damages the user quite a lot."},
+        {"name":"Endeavor","type":"normal","category":"physical","power":null,"accuracy":100,"pp":5,"description":"The user inflicts damage by cutting down the target's HP to roughly equal the user's HP."},
+        {"name":"Endure","type":"normal","category":"status","power":null,"accuracy":null,"pp":20,"description":"During the turn this move is used if the user takes damage from a move that would knock it out it will endure the hit with 1 HP. With each consecutive use this move's chance of success becomes 1/3 of what it was before."},
+        {"name":"Facade","type":"normal","category":"physical","power":70,"accuracy":100,"pp":20,"description":"This move's power is doubled if the user is poisoned, burned, or paralyzed."},
+        {"name":"Flail","type":"normal","category":"physical","power":null,"accuracy":100,"pp":15,"description":"The user flails about aimlessly to attack. The less HP the user has, the greater the move's power."},
+        {"name":"Flip Turn","type":"water","category":"physical","power":60,"accuracy":100,"pp":20,"description":"After making its attack, the user rushes back to switch places with a party Pokémon in waiting."},
+        {"name":"Giga Impact","type":"normal","category":"physical","power":150,"accuracy":90,"pp":5,"description":"The user charges at the target using every bit of its power. The user can't move on the next turn."},
+        {"name":"Head Smash","type":"rock","category":"physical","power":150,"accuracy":80,"pp":5,"description":"The user attacks the target with a hazardous full-power headbutt. This also damages the user terribly."},
+        {"name":"Hex","type":"ghost","category":"special","power":65,"accuracy":100,"pp":10,"description":"This relentless attack does massive damage to a target affected by status conditions."},
+        {"name":"Hydro Pump","type":"water","category":"special","power":110,"accuracy":80,"pp":5,"description":"The target is blasted by a huge volume of water launched under great pressure."},
+        {"name":"Hyper Beam","type":"normal","category":"special","power":150,"accuracy":90,"pp":5,"description":"The target is attacked with a powerful beam. The user can't move on the next turn."},
+        {"name":"Ice Beam","type":"ice","category":"special","power":90,"accuracy":100,"pp":10,"description":"The target is struck with an icy-cold beam of energy. This may also leave the target frozen."},
+        {"name":"Ice Fang","type":"ice","category":"physical","power":65,"accuracy":95,"pp":15,"description":"The user bites with cold-infused fangs. This may also make the target flinch or leave it frozen."},
+        {"name":"Icy Wind","type":"ice","category":"special","power":55,"accuracy":95,"pp":15,"description":"The user attacks with a gust of chilled air. This also lowers opposing Pokémon's Speed stats."},
+        {"name":"Last Respects","type":"ghost","category":"physical","power":50,"accuracy":100,"pp":10,"description":"The user attacks to avenge its allies. The more defeated allies there are in the user's party, the greater the move's power."},
+        {"name":"Liquidation","type":"water","category":"physical","power":85,"accuracy":100,"pp":10,"description":"The user slams into the target using a full-force blast of water. This may also lower the target's Defense stat."},
+        {"name":"Mud Shot","type":"ground","category":"special","power":55,"accuracy":95,"pp":15,"description":"The user attacks by hurling a blob of mud at the target. This also lowers the target's Speed stat."},
+        {"name":"Muddy Water","type":"water","category":"special","power":90,"accuracy":85,"pp":10,"description":"The user attacks by shooting muddy water at opposing Pokémon. This may also lower their accuracy."},
+        {"name":"Night Shade","type":"ghost","category":"special","power":null,"accuracy":100,"pp":15,"description":"The user makes the target see a frightening mirage. It inflicts damage equal to the user's level."},
+        {"name":"Outrage","type":"dragon","category":"physical","power":120,"accuracy":100,"pp":10,"description":"The user rampages and attacks for two to three turns. The user then becomes confused."},
+        {"name":"Pain Split","type":"normal","category":"status","power":null,"accuracy":null,"pp":20,"description":"The user adds its HP to the target's HP, then equally splits the combined HP between the target and itself."},
+        {"name":"Phantom Force","type":"ghost","category":"physical","power":90,"accuracy":100,"pp":10,"description":"The user vanishes somewhere, then strikes the target on the next turn. This move hits even if the target protects itself."},
+        {"name":"Protect","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"This move enables the user to protect itself from all attacks. Its chance of failing rises if it is used in succession."},
+        {"name":"Psychic Fangs","type":"psychic","category":"physical","power":85,"accuracy":100,"pp":10,"description":"The user attacks by biting the target with its psychic capabilities. This move can also break barriers, such as Light Screen and Reflect."},
+        {"name":"Rain Dance","type":"water","category":"status","power":null,"accuracy":null,"pp":5,"description":"The user summons a heavy rain that falls for five turns, powering up Water-type attacks. The rain also lowers the power of Fire-type attacks."},
+        {"name":"Rest","type":"psychic","category":"status","power":null,"accuracy":null,"pp":5,"description":"The user goes to sleep for two turns. This fully restores the user's HP and cures any status conditions."},
+        {"name":"Scale Shot","type":"dragon","category":"physical","power":25,"accuracy":90,"pp":20,"description":"The user attacks by shooting scales two to five times in a row. This move boosts the user's Speed stat but lowers its Defense stat."},
+        {"name":"Scary Face","type":"normal","category":"status","power":null,"accuracy":100,"pp":10,"description":"The user frightens the target with a scary face to harshly lower its Speed stat."},
+        {"name":"Shadow Ball","type":"ghost","category":"special","power":80,"accuracy":100,"pp":15,"description":"The user attacks by hurling a shadowy blob at the target. This may also lower the target's Sp. Def stat."},
+        {"name":"Sleep Talk","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user randomly uses one of the moves it knows. This move can only be used while the user is asleep."},
+        {"name":"Snowscape","type":"ice","category":"status","power":0,"accuracy":null,"pp":10,"description":"The user summons a snowstorm lasting five turns. This boosts the Defense stats of Ice types."},
+        {"name":"Soak","type":"water","category":"status","power":null,"accuracy":100,"pp":20,"description":"The user shoots a torrent of water that changes the target's type to Water."},
+        {"name":"Spite","type":"ghost","category":"status","power":null,"accuracy":100,"pp":10,"description":"The user unleashes its grudge on the move last used by the target by cutting 4 PP from it."},
+        {"name":"Substitute","type":"normal","category":"status","power":null,"accuracy":null,"pp":10,"description":"The user creates a substitute for itself using some of its own HP. The substitute serves as the user's decoy."},
+        {"name":"Surf","type":"water","category":"special","power":90,"accuracy":100,"pp":15,"description":"The user attacks everything around it by swamping its surroundings with a giant wave."},
+        {"name":"Thrash","type":"normal","category":"physical","power":120,"accuracy":100,"pp":10,"description":"The user rampages and attacks for two to three turns. The user then becomes confused."},
+        {"name":"Uproar","type":"normal","category":"special","power":90,"accuracy":100,"pp":10,"description":"The user attacks in an uproar for three turns. During that time, no Pokémon can fall asleep."},
+        {"name":"Water Pulse","type":"water","category":"special","power":60,"accuracy":100,"pp":20,"description":"The user attacks the target with a pulsing blast of water. This may also confuse the target."},
+        {"name":"Waterfall","type":"water","category":"physical","power":80,"accuracy":100,"pp":15,"description":"The user charges at the target and may make it flinch."},
+        {"name":"Wave Crash","type":"water","category":"physical","power":120,"accuracy":100,"pp":10,"description":"The user shrouds itself in water and slams into the target with its whole body to inflict damage. This also damages the user quite a lot."},
+        {"name":"Whirlpool","type":"water","category":"special","power":35,"accuracy":85,"pp":15,"description":"The user traps the target inside a violent, swirling whirlpool that inflicts damage for four to five turns."},
+        {"name":"Zen Headbutt","type":"psychic","category":"physical","power":80,"accuracy":90,"pp":15,"description":"The user focuses its willpower to its head and attacks the target. This may also make the target flinch."}
+      ],
+    "sprite": "/sprites/10902.png",
+    "officialArt": "/sprites/10902.png",
+    "generation": 8,
+    "forms": [],
+    "hasMega": false,
+    "recruitmentCost": null,
+    "homeCompatible": true,
+    "homeSource": [
+      "Scarlet/Violet",
+      "Legends Z-A",
+      "Legends: Arceus",
+      "Pokémon GO"
+    ],
+    "season": 1,
+    "tier": "C",
+    "usageRate": 1.29,
   },
   {
     "id": 903,
@@ -24064,8 +24182,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 12.7
+    "tier": "S",
+    "usageRate": 43,
   },
   {
     "id": 908,
@@ -24175,8 +24293,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 7.5
+    "tier": "C",
+    "usageRate": 2.06,
   },
   {
     "id": 914,
@@ -24280,8 +24398,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
-    "usageRate": 1.2
+    "tier": "D",
+    "usageRate": 0.27,
   },
   {
     "id": 923,
@@ -25072,7 +25190,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "B",
-    "usageRate": 6.4
+    "usageRate": 11.25,
   },
   {
     "id": 934,
@@ -25173,8 +25291,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 15
+    "tier": "D",
+    "usageRate": 0.44,
   },
   {
     "id": 936,
@@ -25274,8 +25392,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 14.8
+    "tier": "D",
+    "usageRate": 0.72,
   },
   {
     "id": 937,
@@ -25375,8 +25493,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 8.9
+    "tier": "D",
+    "usageRate": 0.42,
   },
   {
     "id": 952,
@@ -25499,8 +25617,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 4.8
+    "tier": "C",
+    "usageRate": 1.15,
   },
   {
     "id": 959,
@@ -25597,8 +25715,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 8.3
+    "tier": "D",
+    "usageRate": 0.66,
   },
   {
     "id": 964,
@@ -25695,8 +25813,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.8
+    "tier": "B",
+    "usageRate": 3.5,
   },
   {
     "id": 968,
@@ -25781,7 +25899,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "C",
-    "usageRate": 1.3
+    "usageRate": 1.78,
   },
   {
     "id": 970,
@@ -25897,8 +26015,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 11.5
+    "tier": "B",
+    "usageRate": 5,
   },
   {
     "id": 977,
@@ -26353,8 +26471,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": null
+    "tier": "D",
+    "usageRate": 1.3,
   },
   {
     "id": 978,
@@ -26747,8 +26865,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Legends Z-A",
       "Pokémon GO"
     ],
-    "tier": "S",
-    "usageRate": null,
+    "tier": "D",
+    "usageRate": 1.3,
     "recruitmentCost": null
   },
   {
@@ -26870,7 +26988,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "A",
-    "usageRate": 9.1
+    "usageRate": 13.5,
   },
   {
     "id": 983,
@@ -26973,7 +27091,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "season": 1,
     "tier": "S",
-    "usageRate": 22.9
+    "usageRate": 33,
   },
   {
     "id": 1013,
@@ -27052,8 +27170,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Legends Z-A"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 9.8
+    "tier": "S",
+    "usageRate": 30,
   },
   {
     "id": 1018,
@@ -27152,8 +27270,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Legends Z-A"
     ],
     "season": 1,
-    "tier": "S",
-    "usageRate": 17.2
+    "tier": "A",
+    "usageRate": 14.25,
   },
   {
     "id": 1019,
@@ -27252,8 +27370,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Legends Z-A"
     ],
     "season": 1,
-    "tier": "A",
-    "usageRate": 10.4
+    "tier": "D",
+    "usageRate": 0.28,
   },
   {
     "id": 473,
@@ -27365,7 +27483,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Scarlet/Violet",
       "Legends Z-A"
     ],
-    "usageRate": 2.5
+    "usageRate": 2.2,
   },
   {
     "id": 609,
@@ -27487,14 +27605,14 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "hasMega": true,
     "season": 1,
-    "tier": "B",
+    "tier": "C",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
       "Scarlet/Violet",
       "Legends Z-A"
     ],
-    "usageRate": 5.1
+    "usageRate": 1.01,
   },
   {
     "id": 670,
@@ -27596,14 +27714,14 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "hasMega": true,
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
       "Scarlet/Violet",
       "Legends Z-A"
     ],
-    "usageRate": 7.8
+    "usageRate": 18.75,
   },
   {
     "id": 706,
@@ -27710,14 +27828,14 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "C",
+    "tier": "D",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
       "Scarlet/Violet",
       "Legends Z-A"
     ],
-    "usageRate": 2.2
+    "usageRate": 0.12,
   },
   {
     "id": 5706,
@@ -27818,8 +27936,8 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Legends: Arceus"
     ],
     "season": 1,
-    "tier": "B",
-    "usageRate": 2.8
+    "tier": "C",
+    "usageRate": 1.19,
   },
   {
     "id": 709,
@@ -27935,14 +28053,14 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "B",
+    "tier": "D",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
       "Scarlet/Violet",
       "Legends Z-A"
     ],
-    "usageRate": 5.3
+    "usageRate": 0.08,
   },
   {
     "id": 842,
@@ -28036,14 +28154,14 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "B",
+    "tier": "D",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
       "Scarlet/Violet",
       "Legends Z-A"
     ],
-    "usageRate": 6.2
+    "usageRate": 0.06,
   },
   {
     "id": 861,
@@ -28602,14 +28720,14 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "C",
+    "tier": "D",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
       "Scarlet/Violet",
       "Legends Z-A"
     ],
-    "usageRate": 2.9
+    "usageRate": 0.14,
   }
 ];
 export function getPokemonBySeason(season: number): ChampionsPokemon[] {

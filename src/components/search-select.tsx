@@ -19,6 +19,8 @@ export interface SearchSelectOption {
   suggested?: boolean;
   /** Group header (options with the same group are grouped) */
   group?: string;
+  /** Optional full description shown on info toggle */
+  description?: string;
 }
 
 interface SearchSelectProps {
@@ -104,7 +106,7 @@ export function SearchSelect({
     };
   }, [open]);
 
-  // Close on scroll of parent containers (modal scroll) — but NOT when scrolling inside the dropdown
+  // Close on scroll of parent containers (modal scroll)  -  but NOT when scrolling inside the dropdown
   // On mobile, keyboard appearance triggers scroll/resize events, so add a grace period
   useEffect(() => {
     if (!open) return;
@@ -195,7 +197,7 @@ export function SearchSelect({
         <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform", open && "rotate-180")} />
       </button>
 
-      {/* Portal dropdown — renders at document root to escape modal overflow */}
+      {/* Portal dropdown  -  renders at document root to escape modal overflow */}
       {typeof document !== "undefined" && createPortal(
         <AnimatePresence>
           {open && pos && (
@@ -249,46 +251,55 @@ export function SearchSelect({
                     const isSelected = opt.value === value;
                     const isHighlighted = i === highlightIdx;
                     return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onMouseEnter={() => setHighlightIdx(i)}
-                        onClick={() => {
-                          onChange(opt.value);
-                          setOpen(false);
-                        }}
-                        className={cn(
-                          "w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors",
-                          isHighlighted && "bg-violet-50",
-                          isSelected && "bg-violet-100/70 font-semibold"
-                        )}
-                      >
-                        {/* Checkmark */}
-                        <div className="w-4 shrink-0">
-                          {isSelected && <Check className="w-4 h-4 text-violet-600" />}
-                        </div>
+                      <div key={opt.value}>
+                        <button
+                          type="button"
+                          onMouseEnter={() => setHighlightIdx(i)}
+                          onClick={() => {
+                            onChange(opt.value);
+                            setOpen(false);
+                          }}
+                          className={cn(
+                            "w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors",
+                            isHighlighted && "bg-violet-50",
+                            isSelected && "bg-violet-100/70 font-semibold"
+                          )}
+                        >
+                          {/* Checkmark */}
+                          <div className="w-4 shrink-0">
+                            {isSelected && <Check className="w-4 h-4 text-violet-600" />}
+                          </div>
 
-                        {/* Badge */}
-                        {opt.badge && (
-                          <span
-                            className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded text-white/90 shrink-0"
-                            style={{ backgroundColor: opt.badgeColor || "#888" }}
-                          >
-                            {opt.badge}
-                          </span>
-                        )}
+                          {/* Badge */}
+                          {opt.badge && (
+                            <span
+                              className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded text-white/90 shrink-0"
+                              style={{ backgroundColor: opt.badgeColor || "#888" }}
+                            >
+                              {opt.badge}
+                            </span>
+                          )}
 
-                        {/* Label + sub */}
-                        <div className="flex-1 min-w-0">
-                          <span className="truncate block">{opt.label}</span>
-                          {opt.sub && <span className="text-[10px] text-muted-foreground truncate block">{opt.sub}</span>}
-                        </div>
+                          {/* Label + sub */}
+                          <div className="flex-1 min-w-0">
+                            <span className="truncate block">{opt.label}</span>
+                            {opt.sub && <span className="text-[10px] text-muted-foreground truncate block">{opt.sub}</span>}
+                          </div>
 
-                        {/* Suggested star */}
-                        {opt.suggested && (
-                          <span className="text-[10px] text-amber-500 font-bold shrink-0">★</span>
+                          {/* Suggested star */}
+                          {opt.suggested && (
+                            <span className="text-[10px] text-amber-500 font-bold shrink-0">★</span>
+                          )}
+                        </button>
+                        {/* Description shown on hover */}
+                        {opt.description && isHighlighted && (
+                          <div className="px-3 pb-2 ml-[26px] mr-2">
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                              {opt.description}
+                            </p>
+                          </div>
                         )}
-                      </button>
+                      </div>
                     );
                   })
                 )}

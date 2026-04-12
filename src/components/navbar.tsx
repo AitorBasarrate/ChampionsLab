@@ -65,7 +65,7 @@ export function Navbar() {
               </div>
             </Link>
 
-            {/* Desktop Nav — all items, ≥1140px */}
+            {/* Desktop Nav  -  all items, ≥1140px */}
             <nav className="hidden desktop:flex items-center gap-1">
               {NAV_ITEMS.map((item) => {
                 const isActive = pathname === item.href;
@@ -98,7 +98,7 @@ export function Navbar() {
               </a>
             </nav>
 
-            {/* Tablet Nav — primary items only, 800–1139px */}
+            {/* Tablet Nav  -  primary items only, 800–1139px */}
             <nav className="tablet-nav items-center gap-1">
               {PRIMARY_NAV.map((item) => {
                 const isActive = pathname === item.href;
@@ -123,7 +123,7 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile nav panel — visibility controlled by body.mobile-open class (set by inline script in layout) */}
+        {/* Mobile nav panel  -  visibility controlled by body.mobile-open class (set by inline script in layout) */}
         <nav className="mobile-nav-panel border-t border-gray-200/60 px-4 py-3 space-y-1">
           {/* All items shown < 800px, only secondary shown 800–1139px */}
           {NAV_ITEMS.map((item) => {

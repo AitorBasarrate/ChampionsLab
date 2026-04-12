@@ -43,6 +43,7 @@ import {
   type SavedTeam,
 } from "@/lib/storage";
 import { USAGE_DATA } from "@/lib/usage-data";
+import { CHAMPIONS_TOURNAMENT_TEAMS } from "@/lib/simulation-data";
 
 // ── Build best available set for a pokemon ──────────────────────────────
 
@@ -174,6 +175,20 @@ function runFullSimulation(
     const pokemon = t.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter(Boolean) as ChampionsPokemon[];
     if (pokemon.length >= 4) {
       oppTeams.push({ name: t.name, pokemon, sets: t.sets.slice(0, pokemon.length), archetype: t.archetype });
+    }
+  }
+
+  // Add real tournament teams from Champions data (auto-fill sets from USAGE_DATA)
+  const tournamentFilter =
+    opponentPool === "s-tier" ? CHAMPIONS_TOURNAMENT_TEAMS.filter(t => t.placement <= 2) :
+    opponentPool === "a-tier" ? CHAMPIONS_TOURNAMENT_TEAMS.filter(t => t.placement <= 4) :
+    [...CHAMPIONS_TOURNAMENT_TEAMS];
+
+  for (const ct of tournamentFilter) {
+    const pokemon = ct.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter(Boolean) as ChampionsPokemon[];
+    if (pokemon.length >= 4) {
+      const sets = pokemon.map(p => bestAvailableSet(p));
+      oppTeams.push({ name: `${ct.player} (${ct.tournament.slice(0, 30)})`, pokemon, sets, archetype: "tournament" });
     }
   }
 
@@ -372,7 +387,7 @@ export default function BattleBotPage() {
   const [selectedSets, setSelectedSets] = useState<CommonSet[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
   const [result, setResult] = useState<FullSimResult | null>(null);
-  const [iterations, setIterations] = useState(100);
+  const [iterations, setIterations] = useState(200);
   const [opponentPool, setOpponentPool] = useState("prebuilt");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -807,7 +822,7 @@ export default function BattleBotPage() {
               <div>
                 <label className="text-xs text-muted-foreground block mb-1.5">Battles per matchup</label>
                 <div className="grid grid-cols-5 gap-1.5">
-                  {[50, 100, 200, 500, 1000].map(n => (
+                  {[100, 200, 300, 850, 1250].map(n => (
                     <button
                       key={n}
                       onClick={() => setIterations(n)}
@@ -829,11 +844,11 @@ export default function BattleBotPage() {
                   onChange={(e) => setOpponentPool(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl glass border border-gray-200 dark:border-gray-200/10 text-sm bg-transparent focus:outline-none focus:border-violet-500/50"
                 >
-                  <option value="s-tier">S-Tier Only ({PREBUILT_TEAMS.filter(t => t.tier === "S").length} teams)</option>
-                  <option value="a-tier">S + A Tier ({PREBUILT_TEAMS.filter(t => t.tier === "S" || t.tier === "A").length} teams)</option>
-                  <option value="prebuilt">All Meta Teams ({PREBUILT_TEAMS.length} teams)</option>
-                  <option value="random-100">Meta + 100 Random ({PREBUILT_TEAMS.length + 100})</option>
-                  <option value="gauntlet">GAUNTLET - Meta + 200 Random ({PREBUILT_TEAMS.length + 200})</option>
+                  <option value="s-tier">S-Tier + Top Tournament ({PREBUILT_TEAMS.filter(t => t.tier === "S").length + CHAMPIONS_TOURNAMENT_TEAMS.filter(t => t.placement <= 2).length} teams)</option>
+                  <option value="a-tier">S/A Tier + Top 4 Tournament ({PREBUILT_TEAMS.filter(t => t.tier === "S" || t.tier === "A").length + CHAMPIONS_TOURNAMENT_TEAMS.filter(t => t.placement <= 4).length} teams)</option>
+                  <option value="prebuilt">All Meta + All Tournament ({PREBUILT_TEAMS.length + CHAMPIONS_TOURNAMENT_TEAMS.length} teams)</option>
+                  <option value="random-100">Full Meta + 100 Random ({PREBUILT_TEAMS.length + CHAMPIONS_TOURNAMENT_TEAMS.length + 100})</option>
+                  <option value="gauntlet">GAUNTLET - Full Meta + 200 Random ({PREBUILT_TEAMS.length + CHAMPIONS_TOURNAMENT_TEAMS.length + 200})</option>
                 </select>
               </div>
 
@@ -1640,9 +1655,10 @@ export default function BattleBotPage() {
                             ...sortedMoves.map((m) => ({
                               value: m.name,
                               label: m.name,
-                              sub: `${m.type} · ${m.category}${m.power ? ` · ${m.power}bp` : ""}`,
+                              sub: `${m.type} · ${m.category}${m.power ? ` · ${m.power}bp` : ""}${m.accuracy ? ` · ${m.accuracy}%` : ""} · ${m.pp}pp`,
                               badge: m.type.slice(0, 3),
                               badgeColor: `${TYPE_COLORS[m.type]}AA`,
+                              description: m.description || undefined,
                             })),
                           ];
                           return (

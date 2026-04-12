@@ -103,7 +103,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <LazyParticles />
-        {/* Pure HTML hamburger — works instantly, no React hydration needed */}
+        {/* Pure HTML hamburger  -  works instantly, no React hydration needed */}
         <button
           id="mobile-nav-toggle"
           className="mobile-nav-btn"

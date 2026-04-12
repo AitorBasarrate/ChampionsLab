@@ -6,8 +6,8 @@ import Image from "next/image";
 import { LastUpdated } from "@/components/last-updated";
 import {
   Plus, X, Download, Upload, Copy, Trash2, Shield, Zap,
-  ChevronDown, Check, AlertTriangle, Sparkles, Star,
-  TrendingUp, Users, Brain, Target, Award, Minus, Settings2,
+  ChevronDown, ChevronUp, Check, AlertTriangle, Sparkles, Star,
+  Users, Brain, Target, Award, Minus, Settings2,
   Save, FolderOpen, Share2, SlidersHorizontal,
 } from "lucide-react";
 import { POKEMON_SEED, STAT_PRESETS } from "@/lib/pokemon-data";
@@ -29,16 +29,11 @@ import {
   ITEMS,
   getAllNatures,
   getAllItems,
-  predictMetaTeams,
-  TOURNAMENT_TEAMS,
-  TOURNAMENT_USAGE,
-  CORE_PAIRS,
   type NatureName,
   type PrebuiltTeam,
   type TeammateSuggestion,
   type TeamAnalysis,
   type SlotSuggestion,
-  type MetaTeamPrediction,
   getTypeImmunity,
   calculateStats,
   isItemAvailable,
@@ -49,6 +44,10 @@ import {
   serializeTeam,
   type SavedTeam, type SavedTeamSlot,
 } from "@/lib/storage";
+import {
+  CHAMPIONS_TOURNAMENT_TEAMS,
+  type ChampionsTournamentTeam,
+} from "@/lib/simulation-data";
 import { deflateRaw, inflateRaw } from "pako";
 import QRCode from "qrcode";
 
@@ -146,9 +145,16 @@ export default function TeamBuilderPage() {
   const [shuffledTeams, setShuffledTeams] = useState<PrebuiltTeam[]>([]);
   const [showShare, setShowShare] = useState(false);
   const [shareImageUrl, setShareImageUrl] = useState<string | null>(null);
+  const [showMoreTournament, setShowMoreTournament] = useState(false);
+  const [showMoreCurated, setShowMoreCurated] = useState(false);
 
-  // Engine-predicted meta teams (computed once)
-  const metaTeams = useMemo(() => predictMetaTeams(), []);
+  // Tournament teams filtered to active roster, sorted by placement
+  const tournamentTeams = useMemo(() => {
+    const validIds = new Set(POKEMON_SEED.filter(p => !p.hidden).map(p => p.id));
+    return CHAMPIONS_TOURNAMENT_TEAMS
+      .filter(t => t.pokemonIds.every(id => validIds.has(id)))
+      .sort((a, b) => a.placement - b.placement || b.players - a.players);
+  }, []);
 
   // Shuffle suggested teams on mount
   useEffect(() => {
@@ -701,52 +707,40 @@ export default function TeamBuilderPage() {
     setSelectedSlotIndex(0);
   };
 
-  const loadMetaTeam = (meta: MetaTeamPrediction) => {
-    trackEvent("load_meta_team", "team_builder", meta.name);
+  const loadTournamentTeam = (team: ChampionsTournamentTeam) => {
+    trackEvent("load_tournament_team", "team_builder", team.player);
     const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z");
-    const newSlots = meta.pokemonIds.map((id) => {
+    const newSlots = team.pokemonIds.map((id, idx) => {
       const pokemon = POKEMON_SEED.find(p => p.id === id);
       if (!pokemon) return createEmptySlot();
-      const sets = suggestSets(pokemon, []);
-      const bestSet = sets.length > 0 ? sets[0].set : null;
-      // Auto-assign mega if the Pokémon has a Mega set
+      const isMegaName = team.pokemonNames[idx]?.startsWith("Mega ");
+      const usageSets = USAGE_DATA[pokemon.id] ?? [];
+      // Pick mega set if team lists a mega, otherwise first set
+      const set = isMegaName
+        ? usageSets.find(s => s.name?.toLowerCase().includes("mega") || isMegaItem(s.item)) || usageSets[0]
+        : usageSets[0];
       let isMega = false;
       let megaFormIndex = 0;
-      if (pokemon.hasMega) {
-        const usageSets = USAGE_DATA[pokemon.id] ?? [];
-        const megaSet = usageSets.find(s => isMegaItem(s.item));
-        if (megaSet) {
-          isMega = true;
-          const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
-          const idx = megaForms.findIndex(f => f.abilities.some(a => a.name === megaSet.ability));
-          megaFormIndex = idx >= 0 ? idx : 0;
-          const megaAbility = megaForms[megaFormIndex]?.abilities?.[0]?.name;
-          return {
-            pokemon,
-            ability: megaAbility ?? megaSet.ability,
-            nature: megaSet.nature,
-            moves: megaSet.moves,
-            statPoints: megaSet.sp ? { ...megaSet.sp } : { ...EMPTY_STAT_POINTS },
-            item: megaSet.item,
-            isMega: true,
-            megaFormIndex,
-          } as TeamSlot;
-        }
+      if (isMegaName && pokemon.hasMega) {
+        isMega = true;
+        const megaForms = pokemon.forms?.filter(f => f.isMega && !f.hidden) ?? [];
+        const idx = set ? megaForms.findIndex(f => f.abilities.some(a => a.name === set.ability)) : -1;
+        megaFormIndex = idx >= 0 ? idx : 0;
       }
       return {
         pokemon,
-        ability: bestSet?.ability ?? pokemon.abilities[0]?.name,
-        nature: bestSet?.nature ?? "Adamant",
-        moves: bestSet?.moves ?? pokemon.moves.slice(0, 4).map(m => m.name),
-        statPoints: bestSet?.sp ?? { ...EMPTY_STAT_POINTS },
-        item: bestSet?.item && isItemAvailable(bestSet.item) ? bestSet.item : undefined,
+        ability: set?.ability ?? pokemon.abilities[0]?.name,
+        nature: set?.nature ?? "Adamant",
+        moves: set?.moves ?? pokemon.moves.slice(0, 4).map(m => m.name),
+        statPoints: set?.sp ? { ...set.sp } : { ...EMPTY_STAT_POINTS },
+        item: set?.item && isItemAvailable(set.item) ? set.item : undefined,
         isMega,
         megaFormIndex,
       } as TeamSlot;
     });
     while (newSlots.length < 6) newSlots.push(createEmptySlot());
     setSlots(newSlots);
-    setTeamName(meta.name);
+    setTeamName(`${team.player} - ${team.tournament}`);
     setCurrentTeamId(undefined);
     setSelectedSlotIndex(0);
   };
@@ -852,7 +846,7 @@ export default function TeamBuilderPage() {
     setShowPokemonPicker(true);
   };
 
-  // Coverage calculation — resolve mega types per slot
+  // Coverage calculation  -  resolve mega types per slot
   const ATE_ABILITIES: Record<string, PokemonType> = {
     Aerilate: "flying", Pixilate: "fairy", Refrigerate: "ice",
     Galvanize: "electric", Dragonize: "dragon",
@@ -891,6 +885,8 @@ export default function TeamBuilderPage() {
         // -ate abilities convert Normal moves to the ability's type
         let moveType = moveData.type as PokemonType;
         if (ateType && moveType === "normal") moveType = ateType;
+        // Freeze Dry is super effective vs Water regardless of type chart
+        if (moveName === "Freeze Dry" && defType === "water") return true;
         const eff = TYPE_CHART[moveType]?.[defType] ?? 1;
         return eff >= 2;
       });
@@ -1373,7 +1369,7 @@ export default function TeamBuilderPage() {
                   return (
                     <div key={type} className="text-center space-y-0.5">
                       <span className="block w-full py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[type]}AA` }}>{type.slice(0, 3)}</span>
-                      <span className={cn("block text-[10px] font-bold", se > 0 ? "text-green-600" : "text-muted-foreground/40")}>{se > 0 ? `${se}×` : "—"}</span>
+                      <span className={cn("block text-[10px] font-bold", se > 0 ? "text-green-600" : "text-muted-foreground/40")}>{se > 0 ? `${se}×` : " - "}</span>
                     </div>
                   );
                 })}
@@ -1679,10 +1675,11 @@ export default function TeamBuilderPage() {
                             ...sortedMoves.map((m) => ({
                               value: m.name,
                               label: m.name,
-                              sub: `${m.type} · ${m.category}${m.power ? ` · ${m.power}bp` : ""}`,
+                              sub: `${m.type} · ${m.category}${m.power ? ` · ${m.power}bp` : ""}${m.accuracy ? ` · ${m.accuracy}%` : ""} · ${m.pp}pp`,
                               badge: m.type.slice(0, 3),
                               badgeColor: `${TYPE_COLORS[m.type]}AA`,
                               suggested: suggestedNames.includes(m.name),
+                              description: m.description || undefined,
                             })),
                           ];
                           return (
@@ -1961,12 +1958,13 @@ export default function TeamBuilderPage() {
                       : editPkm.types;
                     const allTypes = getAllTypes();
                     // offensive: best effectiveness from selected moves
-                    const selectedMoveTypes = editSlotData.moves
+                    const selectedMoveData = editSlotData.moves
                       .filter(Boolean)
                       .map(mName => editPkm.moves.find(m => m.name === mName))
-                      .filter((m): m is NonNullable<typeof m> => m != null && m.category !== "status")
-                      .map(m => m.type);
+                      .filter((m): m is NonNullable<typeof m> => m != null && m.category !== "status");
+                    const selectedMoveTypes = selectedMoveData.map(m => m.type);
                     const uniqueMoveTypes = [...new Set(selectedMoveTypes)];
+                    const hasFreezeDry = selectedMoveData.some(m => m.name === "Freeze Dry");
                     return (
                       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Defensive */}
@@ -2003,6 +2001,8 @@ export default function TeamBuilderPage() {
                                 const eff = getMatchup(mt, [type as PokemonType]);
                                 if (eff > best) best = eff;
                               }
+                              // Freeze Dry is always SE vs Water
+                              if (hasFreezeDry && type === "water" && best < 2) best = 2;
                               let label = "";
                               let bg = "bg-gray-50 dark:bg-gray-200/5";
                               let textColor = "text-gray-300 dark:text-gray-600";
@@ -2039,50 +2039,48 @@ export default function TeamBuilderPage() {
 
         </div>
 
-        {/* ══ RIGHT COLUMN: Meta Teams + Curated Teams ══ */}
+        {/* ══ RIGHT COLUMN: Tournament Teams + Curated Teams ══ */}
         <div className="space-y-6 order-3" data-right-col>
-          {/* ── Engine Predicted Meta ── */}
+          {/* ── Tournament Teams ── */}
           <div className="glass rounded-2xl p-5 border border-gray-200/60">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-amber-500" />
-              <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Engine Predicted Meta</span>
-              <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 border border-amber-200">⚡ LIVE</span>
+              <Award className="w-4 h-4 text-amber-500" />
+              <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Tournament Teams</span>
+              <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-amber-50 text-amber-700 border border-amber-200">{tournamentTeams.length} teams</span>
             </h3>
-            <p className="text-[10px] text-muted-foreground mb-3">{TOURNAMENT_TEAMS.length} tournaments · {TOURNAMENT_USAGE.length} usage entries · {CORE_PAIRS.length} core pairs · 2M+ battle engine</p>
-            <div className="space-y-3">
-              {metaTeams.map((meta) => (
-                <button key={meta.id} onClick={() => loadMetaTeam(meta)} className="w-full text-left p-3 rounded-xl glass border border-gray-200/40 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className={cn("px-1.5 py-0.5 text-[9px] font-bold uppercase rounded", meta.confidence >= 80 ? "bg-emerald-100 text-emerald-700" : meta.confidence >= 60 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{meta.confidence}%</span>
-                      <h4 className="text-xs font-semibold">{meta.name}</h4>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className={cn("text-[9px] font-medium", meta.recentTrend === "rising" ? "text-emerald-600" : meta.recentTrend === "falling" ? "text-red-500" : "text-gray-500")}>{meta.recentTrend === "rising" ? "↑" : meta.recentTrend === "falling" ? "↓" : "→"}</span>
-                      <span className="text-[9px] text-muted-foreground">{meta.metaShare}%</span>
-                    </div>
+            <p className="text-[10px] text-muted-foreground mb-3">Real teams from Champions tournaments. Click to load with competitive sets.</p>
+            <div className="space-y-2">
+              {tournamentTeams.slice(0, showMoreTournament ? tournamentTeams.length : 6).map((team) => (
+                <button key={team.id} onClick={() => loadTournamentTeam(team)} className="w-full text-left p-3 rounded-xl glass border border-gray-200/40 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", team.placement <= 1 ? "bg-amber-100 text-amber-700" : team.placement <= 2 ? "bg-gray-200 text-gray-700" : "bg-gray-100 text-gray-600")}>
+                      {team.placement === 1 ? "\uD83E\uDD47" : team.placement === 2 ? "\uD83E\uDD48" : `#${team.placement}`}
+                    </span>
+                    <h4 className="text-xs font-semibold truncate flex-1">{team.player}</h4>
+                    <span className="text-[9px] text-emerald-600 font-medium">{team.wins}W-{team.losses}L</span>
                   </div>
-                  <div className="flex gap-1 mb-2">
-                    {meta.pokemonIds.map((id, pidx) => { const p = POKEMON_SEED.find(pk => pk.id === id); if (!p) return null; const megaForms = p.forms?.filter(f => f.isMega && !f.hidden) ?? []; const useSets = USAGE_DATA[p.id] ?? []; const isMegaItem = (item: string) => item.endsWith("ite") || item.endsWith("ite X") || item.endsWith("ite Y") || item.endsWith("ite Z"); const megaSet = p.hasMega ? useSets.find(s => isMegaItem(s.item)) : null; const hasMegaSet = !!megaSet; const isFirstMega = hasMegaSet && !meta.pokemonIds.slice(0, pidx).some(prevId => { const pp = POKEMON_SEED.find(pk => pk.id === prevId); return pp?.hasMega && (USAGE_DATA[prevId] ?? []).some(s => isMegaItem(s.item)); }); const resolvedMegaForm = (() => { if (!isFirstMega || megaForms.length === 0) return null; if (megaForms.length === 1) return megaForms[0]; if (megaSet) { const suffix = megaSet.item.match(/ ([XYZ])$/)?.[1]; if (suffix) { return megaForms.find(f => f.name.endsWith(` ${suffix}`)) ?? megaForms[0]; } const matched = megaForms.find(f => f.abilities.some(a => a.name === megaSet.ability)); if (matched) return matched; } return megaForms[0]; })(); const megaSprite = resolvedMegaForm ? resolvedMegaForm.sprite : p.sprite; const megaName = resolvedMegaForm ? resolvedMegaForm.name : p.name; return <div key={id} className="flex flex-col items-center relative"><Image src={megaSprite} alt={megaName} width={32} height={32} className="rounded" unoptimized />{isFirstMega && <span className="absolute -top-1 -right-1 px-0.5 text-[6px] font-bold bg-amber-500 text-white rounded">M</span>}<span className="text-[7px] text-muted-foreground mt-0.5 truncate w-9 text-center">{megaName.length > 10 ? p.name : megaName}</span></div>; })}
+                  <p className="text-[10px] text-muted-foreground mb-1.5 truncate">{team.tournament}</p>
+                  <div className="flex gap-1">
+                    {team.pokemonIds.map(id => { const p = POKEMON_SEED.find(pk => pk.id === id); return p ? <Image key={id} src={p.sprite} alt={p.name} width={26} height={26} className="rounded" unoptimized /> : null; })}
                   </div>
-                  {meta.corePairs.length > 0 && <div className="flex flex-wrap gap-1 mb-1.5">{meta.corePairs.map(cp => <span key={cp} className="px-1.5 py-0.5 text-[8px] rounded bg-emerald-50 text-emerald-600 font-medium">{cp}</span>)}</div>}
-                  <div className="space-y-0">
-                    {meta.reasoning.slice(0, 3).map((reason, ri) => <p key={ri} className="text-[9px] text-muted-foreground flex items-start gap-1"><span className="text-emerald-400 mt-px shrink-0">•</span>{reason}</p>)}
-                  </div>
-                  {meta.historicalWins > 0 && <div className="mt-1.5 flex items-center gap-1"><Award className="w-3 h-3 text-amber-500" /><span className="text-[9px] text-amber-600 font-medium">{meta.historicalWins} win{meta.historicalWins > 1 ? "s" : ""}</span></div>}
-                  <div className="mt-2 text-[9px] text-emerald-600 font-medium">Click to load with auto sets →</div>
                 </button>
               ))}
             </div>
+            {tournamentTeams.length > 6 && (
+              <button onClick={() => setShowMoreTournament(!showMoreTournament)} className="w-full mt-3 py-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors flex items-center justify-center gap-1">
+                {showMoreTournament ? <>Show Less <ChevronUp className="w-3.5 h-3.5" /></> : <>Show All {tournamentTeams.length} Teams <ChevronDown className="w-3.5 h-3.5" /></>}
+              </button>
+            )}
           </div>
 
           {/* ── Curated Teams ── */}
           <div className="glass rounded-2xl p-5 border border-gray-200/60">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
               <Star className="w-4 h-4 text-amber-500" /> Curated Teams
+              <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-gray-100 text-gray-600">{shuffledTeams.length} teams</span>
             </h3>
             <div className="space-y-2">
-              {shuffledTeams.map((team) => (
+              {shuffledTeams.slice(0, showMoreCurated ? shuffledTeams.length : 6).map((team) => (
                 <button key={team.id} onClick={() => loadPrebuiltTeam(team)} className="w-full text-left p-3 rounded-xl glass border border-transparent hover:border-emerald-300 transition-all">
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className={cn("px-1.5 py-0.5 text-[9px] font-bold uppercase rounded", team.tier === "S" ? "bg-amber-100 text-amber-700" : team.tier === "A" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{team.tier}</span>
@@ -2096,6 +2094,11 @@ export default function TeamBuilderPage() {
                 </button>
               ))}
             </div>
+            {shuffledTeams.length > 6 && (
+              <button onClick={() => setShowMoreCurated(!showMoreCurated)} className="w-full mt-3 py-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors flex items-center justify-center gap-1">
+                {showMoreCurated ? <>Show Less <ChevronUp className="w-3.5 h-3.5" /></> : <>Show All {shuffledTeams.length} Teams <ChevronDown className="w-3.5 h-3.5" /></>}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -2385,7 +2388,7 @@ export default function TeamBuilderPage() {
                               "text-[10px] font-mono w-8 tabular-nums shrink-0 text-right transition-colors",
                               pickerStatFilters[key] > 0 ? "font-bold" : "text-gray-400 dark:text-gray-500"
                             )} style={pickerStatFilters[key] > 0 ? { color } : undefined}>
-                              {pickerStatFilters[key] > 0 ? `≥${pickerStatFilters[key]}` : "—"}
+                              {pickerStatFilters[key] > 0 ? `≥${pickerStatFilters[key]}` : " - "}
                             </span>
                           </div>
                         ))}

@@ -171,7 +171,7 @@ export function calculateDamage(
     if (moveCalc.name === "Grass Knot" || moveCalc.name === "Low Kick") {
       bp = 80;
     } else {
-      // Fixed damage moves like Super Fang — deals 50% of target's CURRENT HP
+      // Fixed damage moves like Super Fang  -  deals 50% of target's CURRENT HP
       const currentHP = Math.floor(defStats.hp * ((defender.currentHPPercent ?? 100) / 100));
       const fixedDmg = Math.max(1, Math.floor(currentHP / 2));
       return {

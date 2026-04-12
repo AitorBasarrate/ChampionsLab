@@ -999,7 +999,7 @@ function aiChooseAction(
     }
     
     // Tactical switching: evaluate matchup quality
-    // Skip switching logic for very low HP mons — they're already doomed,
+    // Skip switching logic for very low HP mons  -  they're already doomed,
     // better to let them attack and get value before going down (Focus Sash, Endure, etc.)
     const hpPercent = mon.currentHP / mon.maxHP * 100;
     if (switchScore < 0 && hpPercent > 15) {
@@ -1110,7 +1110,7 @@ function applySwitch(state: BattleState, sideIndex: 1 | 2, slot: 0 | 1, excludeF
     leaving.set = { ...leaving.set, ability: "Imposter" };
   }
 
-  // Find benched alive Pokémon — exclude mons that just switched out this turn
+  // Find benched alive Pokémon  -  exclude mons that just switched out this turn
   const excluded = excludeFromBench ?? [];
   const bench = team.filter(p =>
     p.isAlive && !p.isFainted &&
@@ -2083,7 +2083,7 @@ export function simulateBattle(
       }
     }
   }
-  // Intimidate on entry (skip Imposter-transformed mons — Imposter already consumed entry trigger)
+  // Intimidate on entry (skip Imposter-transformed mons  -  Imposter already consumed entry trigger)
   for (let s = 0; s < 2; s++) {
     const active = s === 0 ? state.active1 : state.active2;
     const opponents = s === 0 ? state.active2 : state.active1;
@@ -2471,7 +2471,7 @@ export function simulateBattleWithLog(
       }
     }
   }
-  // Intimidate on entry (skip Imposter-transformed mons — Imposter already consumed entry trigger)
+  // Intimidate on entry (skip Imposter-transformed mons  -  Imposter already consumed entry trigger)
   for (let s = 0; s < 2; s++) {
     const active = s === 0 ? state.active1 : state.active2;
     const opponents = s === 0 ? state.active2 : state.active1;
@@ -3076,7 +3076,7 @@ export function runTeamTestSimulation(
 ): TeamTestDetailedResult {
   onProgress?.(0);
 
-  // ── Phase 1: Lead Combo Analysis — Two-Pass (0-70%) ───────────────────
+  // ── Phase 1: Lead Combo Analysis  -  Two-Pass (0-70%) ───────────────────
   // Pass 1: Screen every lead combo with a solid sample size.
   // Pass 2: Re-test the top combos with 2× more battles for precision.
   // The overall win rate is derived from the aggregate of all battles.
@@ -3210,7 +3210,7 @@ export function runTeamTestSimulation(
     const topAvg = leadCombos.slice(0, 3).reduce((a, c) => a + c.winRate, 0) / Math.min(3, leadCombos.length);
     const bottomAvg = leadCombos.slice(-3).reduce((a, c) => a + c.winRate, 0) / Math.min(3, leadCombos.length);
     if (topAvg - bottomAvg > 15) {
-      insights.push(`Lead choice matters a lot here — ${Math.round(topAvg - bottomAvg)}% gap between best and worst`);
+      insights.push(`Lead choice matters a lot here  -  ${Math.round(topAvg - bottomAvg)}% gap between best and worst`);
     }
   }
   if (pokemonImpact.length > 0) {
@@ -3233,9 +3233,9 @@ export function runTeamTestSimulation(
     insights.push("Prioritize setting up speed control on turn 1");
   }
   if (overallWinRate >= 60) {
-    insights.push("Strong matchup — focus on consistent play and don't overextend");
+    insights.push("Strong matchup  -  focus on consistent play and don't overextend");
   } else if (overallWinRate <= 40) {
-    insights.push("Tough matchup — look for surprise leads or alternate game plans");
+    insights.push("Tough matchup  -  look for surprise leads or alternate game plans");
   }
   onProgress?.(100);
 

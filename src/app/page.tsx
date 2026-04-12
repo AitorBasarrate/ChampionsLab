@@ -55,7 +55,7 @@ export default function HomePage() {
   const [statFilters, setStatFilters] = useState<StatFilters>({ ...EMPTY_STAT_FILTERS });
   const [selectedPokemon, setSelectedPokemon] = useState<ChampionsPokemon | null>(null);
 
-  // Pokémon Champions release countdown — April 8, 2026 12:00 JST (03:00 UTC)
+  // Pokémon Champions release countdown  -  April 8, 2026 12:00 JST (03:00 UTC)
   const RELEASE_DATE = new Date("2026-04-08T03:00:00Z");
   const [countdown, setCountdown] = useState<{ d: number; h: number; m: number; s: number } | null>(null);
   const [released, setReleased] = useState(false);
@@ -283,7 +283,7 @@ export default function HomePage() {
                   Pokémon Champions is HERE!
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                  The wait is over! Go have a blast on Nintendo Switch — and when you&apos;re ready to dominate the competitive scene, we&apos;ve got your back. Let&apos;s become Champions together!
+                  The wait is over! Go have a blast on Nintendo Switch  -  and when you&apos;re ready to dominate the competitive scene, we&apos;ve got your back. Let&apos;s become Champions together!
                 </p>
                 <div className="flex justify-center">
                   <a
@@ -481,7 +481,7 @@ export default function HomePage() {
                       "text-[11px] font-mono w-9 tabular-nums text-right transition-colors",
                       statFilters[key] > 0 ? "font-bold" : "text-gray-400 dark:text-gray-500"
                     )} style={statFilters[key] > 0 ? { color } : undefined}>
-                      {statFilters[key] > 0 ? `≥${statFilters[key]}` : "—"}
+                      {statFilters[key] > 0 ? `≥${statFilters[key]}` : " - "}
                     </span>
                   </div>
                 ))}
@@ -502,7 +502,7 @@ export default function HomePage() {
                     "text-[11px] font-mono w-9 tabular-nums text-right transition-colors",
                     statFilters.bst > 0 ? "font-bold text-gray-600 dark:text-gray-300" : "text-gray-400 dark:text-gray-500"
                   )}>
-                    {statFilters.bst > 0 ? `≥${statFilters.bst}` : "—"}
+                    {statFilters.bst > 0 ? `≥${statFilters.bst}` : " - "}
                   </span>
                 </div>
               </div>

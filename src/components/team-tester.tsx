@@ -556,7 +556,7 @@ export default function TeamTester() {
               </div>
             </div>
 
-            {/* Best Lead Combos — Full Width with Detailed Cards */}
+            {/* Best Lead Combos  -  Full Width with Detailed Cards */}
             {result.leadCombos.length > 0 && (
               <div className="glass rounded-2xl p-5 border border-gray-200/60">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -686,7 +686,7 @@ export default function TeamTester() {
               </div>
             )}
 
-            {/* Pokémon Impact + Matchup Insights — Side by Side */}
+            {/* Pokémon Impact + Matchup Insights  -  Side by Side */}
             <div className="grid lg:grid-cols-2 gap-5">
               {/* Pokémon Impact Analysis */}
               {result.pokemonImpact.length > 0 && (
@@ -1184,9 +1184,10 @@ export default function TeamTester() {
                               ...sortedMoves.map((m) => ({
                                 value: m.name,
                                 label: m.name,
-                                sub: `${m.type} · ${m.category}${m.power ? ` · ${m.power}bp` : ""}`,
+                                sub: `${m.type} · ${m.category}${m.power ? ` · ${m.power}bp` : ""}${m.accuracy ? ` · ${m.accuracy}%` : ""} · ${m.pp}pp`,
                                 badge: m.type.slice(0, 3),
                                 badgeColor: `${TYPE_COLORS[m.type]}AA`,
+                                description: m.description || undefined,
                               })),
                             ];
                             return (
@@ -1616,7 +1617,7 @@ function TeamPanel({
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// STRATEGY FLOWCHART — Clean vertical VGC decision tree
+// STRATEGY FLOWCHART  -  Clean vertical VGC decision tree
 // ══════════════════════════════════════════════════════════════════════════
 
 import {
@@ -1662,7 +1663,7 @@ function StrategyFlowchart({
 
   return (
     <div className="flex flex-col items-center gap-0">
-      {/* Strategy + Win Condition — compact row */}
+      {/* Strategy + Win Condition  -  compact row */}
       <div className="grid sm:grid-cols-2 gap-2 w-full max-w-lg mb-4">
         <div className="px-3 py-1.5 rounded-lg bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-[10px] text-center">
           <span className="font-semibold text-violet-700 dark:text-violet-300">Strategy: </span>
@@ -1745,7 +1746,7 @@ function StrategyFlowchart({
                   </div>
                 </div>
 
-                {/* Turn children — clean vertical flow */}
+                {/* Turn children  -  clean vertical flow */}
                 {turnNode.children.map((child) => (
                   <FlowNode key={child.id} node={child} onSpriteClick={handleSpriteClick} />
                 ))}
@@ -1776,7 +1777,7 @@ function StrategyFlowchart({
   );
 }
 
-/** Single flowchart node — clean card with optional children */
+/** Single flowchart node  -  clean card with optional children */
 function FlowNode({ node, onSpriteClick }: { node: StrategyNodeData; onSpriteClick: (name: string) => void }) {
   const arrow = <div className="w-px h-3 mx-auto bg-gray-300 dark:bg-gray-600" />;
   const style = getNodeStyle(node);
@@ -1848,7 +1849,7 @@ function FlowNode({ node, onSpriteClick }: { node: StrategyNodeData; onSpriteCli
         )}
       </div>
 
-      {/* Children — nested but compact */}
+      {/* Children  -  nested but compact */}
       {node.children.length > 0 && node.children.map(child => (
         <FlowNode key={child.id} node={child} onSpriteClick={onSpriteClick} />
       ))}

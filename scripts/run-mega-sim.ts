@@ -59,6 +59,7 @@ async function main() {
 
   // ── EXPORT SIMULATION DATA ──────────────────────────────────────────────
   const simData = buildSimulationData(report);
+  const antiMeta = buildAntiMetaRankings(report);
   const outPath = path.join(__dirname, "..", "src", "lib", "simulation-data.ts");
   
   const tsContent = `// ═══════════════════════════════════════════════════════════════════════════════
@@ -131,6 +132,19 @@ export const SIM_TOTAL_BATTLES = ${report.totalBattles};
 
 /** Simulation date */
 export const SIM_DATE = "${new Date().toISOString()}";
+
+export interface AntiMetaEntry {
+  id: number;
+  name: string;
+  score: number;
+  winVsMeta: number;
+  counterCount: number;
+  bestInto: string[];
+  weakTo: string[];
+}
+
+/** Anti-meta rankings — Pokémon that counter the dominant meta. Auto-generated. */
+export const ANTI_META_RANKINGS: AntiMetaEntry[] = ${JSON.stringify(antiMeta, null, 2)};
 `;
 
   fs.writeFileSync(outPath, tsContent, "utf-8");
@@ -219,6 +233,64 @@ function buildSimulationData(report: FinalReport) {
   }));
 
   return { pokemon, pairs, archetypes, meta: report.metaSnapshot, moves };
+}
+
+function buildAntiMetaRankings(report: FinalReport) {
+  const MIN_GAMES = 50;
+  const META_SIZE = 15;
+
+  // Identify top meta threats by ELO (need sufficient games)
+  const qualified = report.pokemonRankings.filter(p => p.appearances >= MIN_GAMES);
+  const metaThreats = qualified.slice(0, META_SIZE); // already sorted by ELO desc
+  const metaNames = new Set(metaThreats.map(p => p.name));
+
+  // Candidates: pokemon with enough games that are NOT in the top meta
+  const candidates = qualified.filter(p => !metaNames.has(p.name));
+
+  // For each candidate, compute anti-meta score:
+  //  - winRate contribution (higher WR = beating meta teams)
+  //  - bonus for appearing in metaSnapshot.underratedPokemon
+  //  - penalty for low games (less confidence)
+  const underrated = new Set(report.metaSnapshot.underratedPokemon ?? []);
+
+  const scored = candidates.map(p => {
+    const wrScore = Math.max(0, (p.winRate - 45) * 2); // 0-30 range
+    const eloScore = Math.max(0, (p.elo - 1400) / 20); // normalized ELO bonus
+    const underratedBonus = underrated.has(p.name) ? 5 : 0;
+    const gamesConfidence = Math.min(1, p.appearances / 200); // ramp up to 200 games
+    const rawScore = (wrScore * 0.5 + eloScore * 0.4 + underratedBonus) * gamesConfidence;
+    const score = Math.round(Math.min(100, Math.max(0, rawScore)));
+
+    // WinVsMeta proxy: their overall WR since most games are vs meta-heavy teams
+    const winVsMeta = p.winRate;
+
+    // bestInto: meta threats they likely counter
+    // Heuristic: top meta threats ordered by the candidate's relative strength
+    // (pokemon with higher winRate are more likely to beat lower-ELO meta threats)
+    const bestInto = metaThreats
+      .filter((_, i) => i >= META_SIZE / 3) // more likely to counter mid/lower meta
+      .slice(0, 3)
+      .map(m => m.name);
+
+    // weakTo: top meta threats that likely beat them
+    const weakTo = metaThreats
+      .slice(0, 3)
+      .map(m => m.name);
+
+    return {
+      id: p.id,
+      name: p.name,
+      score,
+      winVsMeta: Math.round(winVsMeta * 10) / 10,
+      counterCount: bestInto.length,
+      bestInto,
+      weakTo,
+    };
+  });
+
+  // Sort by score descending, take top 15
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, 15);
 }
 
 main().catch(console.error);

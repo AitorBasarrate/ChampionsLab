@@ -14,7 +14,7 @@ const REGION_MAP: Record<string, EventRegion> = {
   europe: 'EU',
   latinamerica: 'LA',
   oceania: 'OC',
-  middleeast: 'EU', // Cape Town etc. — maps to EU like official docs
+  middleeast: 'EU', // Cape Town etc.  -  maps to EU like official docs
   virtual: 'ONLINE',
 };
 

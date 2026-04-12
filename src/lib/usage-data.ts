@@ -413,14 +413,12 @@ export const USAGE_DATA: Record<number, CommonSet[]> = {
     { name: "Mixed Attacker", nature: "Naive", ability: "Shell Armor", item: "Life Orb", moves: ["Razor Shell", "Sacred Sword", "Ice Beam", "Protect"], sp: { hp: 0, attack: 20, defense: 0, spAtk: 14, spDef: 0, speed: 32 } },
     { name: "Bulky Support", nature: "Bold", ability: "Torrent", item: "Sitrus Berry", moves: ["Surf", "Ice Beam", "Helping Hand", "Protect"], sp: { hp: 32, attack: 0, defense: 20, spAtk: 14, spDef: 0, speed: 0 } },
   ],
-
-  // Excadrill (id: 530)
+  // Excadrill (id: 530) – Pikalytics Champions Tournaments real data
   530: [
-    { name: "Sand Rush", nature: "Jolly", ability: "Sand Rush", item: "Life Orb", moves: ["Earthquake", "Iron Head", "Rock Slide", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
-    { name: "Mold Breaker", nature: "Jolly", ability: "Mold Breaker", item: "Focus Sash", moves: ["Earthquake", "Iron Head", "Rock Slide", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
-    { name: "Mega Piercing", nature: "Jolly", ability: "Piercing Drill", item: "Excadrite", moves: ["Earthquake", "Iron Head", "Rock Slide", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
-    { name: "Choice Scarf", nature: "Jolly", ability: "Mold Breaker", item: "Choice Scarf", moves: ["Earthquake", "Iron Head", "Rock Slide", "Rapid Spin"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
-    { name: "Assault Vest", nature: "Adamant", ability: "Sand Rush", item: "Assault Vest", moves: ["Earthquake", "Iron Head", "Rock Slide", "Rapid Spin"], sp: { hp: 20, attack: 32, defense: 2, spAtk: 0, spDef: 12, speed: 0 } },
+    { name: "Sand Rush Lead", nature: "Jolly", ability: "Sand Rush", item: "Focus Sash", moves: ["Iron Head", "High Horsepower", "Rock Slide", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Offensive Sand", nature: "Adamant", ability: "Sand Rush", item: "Focus Sash", moves: ["Iron Head", "Earthquake", "Rock Slide", "Protect"], sp: { hp: 4, attack: 32, defense: 0, spAtk: 0, spDef: 0, speed: 30 } },
+    { name: "Swords Dance", nature: "Jolly", ability: "Sand Rush", item: "White Herb", moves: ["Iron Head", "High Horsepower", "Swords Dance", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Mega Excadrill", nature: "Jolly", ability: "Sand Rush", item: "Excadrite", moves: ["Iron Head", "High Horsepower", "Rock Slide", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
   ],
 
   // Audino (id: 531)
@@ -567,14 +565,12 @@ export const USAGE_DATA: Record<number, CommonSet[]> = {
     { name: "Trick Room", nature: "Brave", ability: "Overgrow", item: "Life Orb", moves: ["Spirit Shackle", "Leaf Blade", "Sucker Punch", "Protect"], sp: { hp: 32, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 0 } },
     { name: "Choice Band", nature: "Jolly", ability: "Long Reach", item: "Choice Band", moves: ["Spirit Shackle", "Leaf Blade", "Brave Bird", "U-turn"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
   ],
-
-  // Incineroar (id: 727)
+  // Incineroar (id: 727) – Pikalytics Champions Tournaments real data
   727: [
-    { name: "Intimidate Support", nature: "Careful", ability: "Intimidate", item: "Sitrus Berry", moves: ["Flare Blitz", "Darkest Lariat", "Fake Out", "Protect"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 0, spDef: 32, speed: 0 } },
-    { name: "Assault Vest", nature: "Adamant", ability: "Intimidate", item: "Assault Vest", moves: ["Flare Blitz", "Darkest Lariat", "Fake Out", "Leech Life"], sp: { hp: 32, attack: 20, defense: 0, spAtk: 0, spDef: 14, speed: 0 } },
-    { name: "Offensive", nature: "Adamant", ability: "Intimidate", item: "Choice Band", moves: ["Flare Blitz", "Darkest Lariat", "Leech Life", "Close Combat"], sp: { hp: 20, attack: 32, defense: 2, spAtk: 0, spDef: 12, speed: 0 } },
-    { name: "Parting Shot Pivot", nature: "Careful", ability: "Intimidate", item: "Safety Goggles", moves: ["Fake Out", "Darkest Lariat", "Parting Shot", "Protect"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 0, spDef: 32, speed: 0 } },
-    { name: "Fast Fake Out", nature: "Jolly", ability: "Intimidate", item: "Focus Sash", moves: ["Fake Out", "Flare Blitz", "Darkest Lariat", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Standard Support", nature: "Careful", ability: "Intimidate", item: "Sitrus Berry", moves: ["Fake Out", "Parting Shot", "Flare Blitz", "Throat Chop"], sp: { hp: 32, attack: 4, defense: 12, spAtk: 0, spDef: 16, speed: 2 } },
+    { name: "Chople Pivot", nature: "Adamant", ability: "Intimidate", item: "Chople Berry", moves: ["Fake Out", "Parting Shot", "Flare Blitz", "Darkest Lariat"], sp: { hp: 32, attack: 16, defense: 8, spAtk: 0, spDef: 8, speed: 2 } },
+    { name: "Shuca Berry", nature: "Careful", ability: "Intimidate", item: "Shuca Berry", moves: ["Fake Out", "Parting Shot", "Flare Blitz", "Throat Chop"], sp: { hp: 32, attack: 4, defense: 14, spAtk: 0, spDef: 14, speed: 2 } },
+    { name: "Offensive Lariat", nature: "Adamant", ability: "Intimidate", item: "Lum Berry", moves: ["Fake Out", "Parting Shot", "Flare Blitz", "Darkest Lariat"], sp: { hp: 20, attack: 24, defense: 4, spAtk: 0, spDef: 4, speed: 14 } },
   ],
 
   // Crabominable (id: 740)
@@ -665,22 +661,25 @@ export const USAGE_DATA: Record<number, CommonSet[]> = {
     { name: "Focus Sash", nature: "Jolly", ability: "Sharpness", item: "Focus Sash", moves: ["Stone Axe", "X-Scissor", "Quick Attack", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
     { name: "Swords Dance", nature: "Jolly", ability: "Swarm", item: "Focus Sash", moves: ["Swords Dance", "Stone Axe", "X-Scissor", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
   ],
-
-  // Basculegion (id: 902)
+  // Basculegion-M (id: 902) – Pikalytics Champions Tournaments real data
   902: [
-    { name: "Last Respects Sweeper", nature: "Adamant", ability: "Swift Swim", item: "Choice Band", moves: ["Last Respects", "Wave Crash", "Aqua Jet", "Shadow Ball"], sp: { hp: 4, attack: 32, defense: 0, spAtk: 0, spDef: 0, speed: 30 } },
-    { name: "Physical Attacker", nature: "Adamant", ability: "Swift Swim", item: "Life Orb", moves: ["Wave Crash", "Last Respects", "Aqua Jet", "Protect"], sp: { hp: 4, attack: 32, defense: 0, spAtk: 0, spDef: 0, speed: 30 } },
-    { name: "Special Swift Swim", nature: "Modest", ability: "Swift Swim", item: "Choice Specs", moves: ["Hydro Pump", "Shadow Ball", "Ice Beam", "Surf"], sp: { hp: 4, attack: 0, defense: 0, spAtk: 32, spDef: 0, speed: 30 } },
-    { name: "Adaptability Wallbreaker", nature: "Adamant", ability: "Adaptability", item: "Life Orb", moves: ["Wave Crash", "Last Respects", "Shadow Ball", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
-    { name: "Focus Sash Lead", nature: "Jolly", ability: "Swift Swim", item: "Focus Sash", moves: ["Last Respects", "Wave Crash", "Shadow Ball", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Scarf Nuke", nature: "Adamant", ability: "Adaptability", item: "Choice Scarf", moves: ["Last Respects", "Wave Crash", "Aqua Jet", "Flip Turn"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Mystic Water", nature: "Adamant", ability: "Swift Swim", item: "Mystic Water", moves: ["Last Respects", "Wave Crash", "Aqua Jet", "Protect"], sp: { hp: 4, attack: 32, defense: 0, spAtk: 0, spDef: 0, speed: 30 } },
+    { name: "Rain Sweeper", nature: "Jolly", ability: "Swift Swim", item: "Choice Scarf", moves: ["Last Respects", "Wave Crash", "Flip Turn", "Aqua Jet"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
   ],
 
-  // Sneasler (id: 903)
+  // Basculegion-F (id: 10902)
+  10902: [
+    { name: "Special Swift Swim", nature: "Modest", ability: "Swift Swim", item: "Choice Specs", moves: ["Hydro Pump", "Shadow Ball", "Ice Beam", "Surf"], sp: { hp: 4, attack: 0, defense: 0, spAtk: 32, spDef: 0, speed: 30 } },
+    { name: "Adaptability Wallbreaker", nature: "Modest", ability: "Adaptability", item: "Life Orb", moves: ["Hydro Pump", "Shadow Ball", "Ice Beam", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
+    { name: "Rain Sweeper", nature: "Timid", ability: "Swift Swim", item: "Life Orb", moves: ["Hydro Pump", "Shadow Ball", "Muddy Water", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
+    { name: "Focus Sash Lead", nature: "Timid", ability: "Swift Swim", item: "Focus Sash", moves: ["Hydro Pump", "Shadow Ball", "Ice Beam", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
+  ],
+  // Sneasler (id: 903) – Pikalytics Champions Tournaments real data
   903: [
-    { name: "Fast Attacker", nature: "Jolly", ability: "Poison Touch", item: "Life Orb", moves: ["Close Combat", "Dire Claw", "Fake Out", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
-    { name: "Choice Band", nature: "Jolly", ability: "Poison Touch", item: "Choice Band", moves: ["Close Combat", "Dire Claw", "U-turn", "Shadow Claw"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
-    { name: "Focus Sash Lead", nature: "Jolly", ability: "Pressure", item: "Focus Sash", moves: ["Close Combat", "Dire Claw", "Fake Out", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
-    { name: "Swords Dance", nature: "Jolly", ability: "Poison Touch", item: "Focus Sash", moves: ["Swords Dance", "Close Combat", "Dire Claw", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Unburden Sweeper", nature: "Jolly", ability: "Unburden", item: "White Herb", moves: ["Close Combat", "Dire Claw", "Fake Out", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Sash Lead", nature: "Jolly", ability: "Unburden", item: "Focus Sash", moves: ["Close Combat", "Dire Claw", "Fake Out", "Protect"], sp: { hp: 0, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 32 } },
+    { name: "Coaching Support", nature: "Jolly", ability: "Unburden", item: "White Herb", moves: ["Close Combat", "Dire Claw", "Coaching", "Protect"], sp: { hp: 4, attack: 30, defense: 0, spAtk: 0, spDef: 0, speed: 32 } },
   ],
 
   // Meowscarada (id: 908)
@@ -741,29 +740,25 @@ export const USAGE_DATA: Record<number, CommonSet[]> = {
     { name: "Endure", nature: "Timid", ability: "Toxic Debris", item: "Power Herb", moves: ["Meteor Beam", "Sludge Wave", "Endure", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
     { name: "Mega Toxic Crystal", nature: "Timid", ability: "Toxic Crystallize", item: "Glimmorite", moves: ["Power Gem", "Sludge Wave", "Earth Power", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
   ],
-
-  // Kingambit (id: 983)
+  // Kingambit (id: 983) – Pikalytics Champions Tournaments real data
   983: [
-    { name: "Supreme Overlord", nature: "Adamant", ability: "Supreme Overlord", item: "Black Glasses", moves: ["Kowtow Cleave", "Sucker Punch", "Iron Head", "Protect"], sp: { hp: 32, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 0 } },
-    { name: "Assault Vest", nature: "Adamant", ability: "Defiant", item: "Assault Vest", moves: ["Kowtow Cleave", "Sucker Punch", "Iron Head", "Low Kick"], sp: { hp: 32, attack: 32, defense: 0, spAtk: 0, spDef: 2, speed: 0 } },
-    { name: "Defiant Lead", nature: "Adamant", ability: "Defiant", item: "Lum Berry", moves: ["Kowtow Cleave", "Iron Head", "Sucker Punch", "Protect"], sp: { hp: 32, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 0 } },
-    { name: "Swords Dance", nature: "Adamant", ability: "Supreme Overlord", item: "Sitrus Berry", moves: ["Swords Dance", "Kowtow Cleave", "Sucker Punch", "Protect"], sp: { hp: 32, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 0 } },
+    { name: "Swords Dance", nature: "Adamant", ability: "Defiant", item: "Black Glasses", moves: ["Sucker Punch", "Kowtow Cleave", "Swords Dance", "Protect"], sp: { hp: 32, attack: 32, defense: 0, spAtk: 0, spDef: 0, speed: 2 } },
+    { name: "Iron Head Set", nature: "Adamant", ability: "Defiant", item: "Black Glasses", moves: ["Sucker Punch", "Iron Head", "Kowtow Cleave", "Protect"], sp: { hp: 32, attack: 24, defense: 4, spAtk: 0, spDef: 4, speed: 2 } },
+    { name: "Chople Tank", nature: "Adamant", ability: "Defiant", item: "Chople Berry", moves: ["Sucker Punch", "Kowtow Cleave", "Iron Head", "Protect"], sp: { hp: 32, attack: 20, defense: 8, spAtk: 0, spDef: 4, speed: 2 } },
+    { name: "Low Kick Coverage", nature: "Jolly", ability: "Defiant", item: "Black Glasses", moves: ["Sucker Punch", "Kowtow Cleave", "Low Kick", "Protect"], sp: { hp: 20, attack: 32, defense: 0, spAtk: 0, spDef: 0, speed: 14 } },
   ],
-
-  // Sinistcha (id: 1013)
+  // Sinistcha (id: 1013) – Pikalytics Champions Tournaments real data
   1013: [
-    { name: "Trick Room Tank", nature: "Quiet", ability: "Hospitality", item: "Sitrus Berry", moves: ["Matcha Gotcha", "Shadow Ball", "Trick Room", "Protect"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 0 } },
-    { name: "Calm Mind", nature: "Bold", ability: "Hospitality", item: "Leftovers", moves: ["Calm Mind", "Matcha Gotcha", "Shadow Ball", "Protect"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
-    { name: "Choice Specs", nature: "Modest", ability: "Hospitality", item: "Choice Specs", moves: ["Matcha Gotcha", "Shadow Ball", "Energy Ball", "Calm Mind"], sp: { hp: 4, attack: 0, defense: 0, spAtk: 32, spDef: 0, speed: 30 } },
-    { name: "Support", nature: "Calm", ability: "Hospitality", item: "Sitrus Berry", moves: ["Matcha Gotcha", "Endure", "Trick Room", "Protect"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 0, spDef: 32, speed: 0 } },
+    { name: "Trick Room Support", nature: "Relaxed", ability: "Hospitality", item: "Sitrus Berry", moves: ["Matcha Gotcha", "Rage Powder", "Trick Room", "Life Dew"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
+    { name: "Offensive TR", nature: "Quiet", ability: "Hospitality", item: "Sitrus Berry", moves: ["Matcha Gotcha", "Rage Powder", "Trick Room", "Shadow Ball"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 0 } },
+    { name: "Bulky Redirect", nature: "Bold", ability: "Hospitality", item: "Leftovers", moves: ["Matcha Gotcha", "Rage Powder", "Strength Sap", "Protect"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
+    { name: "Mental Herb TR", nature: "Relaxed", ability: "Hospitality", item: "Mental Herb", moves: ["Matcha Gotcha", "Rage Powder", "Trick Room", "Life Dew"], sp: { hp: 32, attack: 0, defense: 20, spAtk: 0, spDef: 14, speed: 0 } },
   ],
-
-  // Archaludon (id: 1018)
+  // Archaludon (id: 1018) – Pikalytics Champions Tournaments real data
   1018: [
-    { name: "Stamina Tank", nature: "Bold", ability: "Stamina", item: "Leftovers", moves: ["Brick Break", "Flash Cannon", "Electro Shot", "Protect"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
-    { name: "Offensive", nature: "Modest", ability: "Stalwart", item: "Life Orb", moves: ["Flash Cannon", "Electro Shot", "Dragon Pulse", "Protect"], sp: { hp: 4, attack: 0, defense: 0, spAtk: 32, spDef: 0, speed: 30 } },
-    { name: "Assault Vest", nature: "Modest", ability: "Stamina", item: "Assault Vest", moves: ["Flash Cannon", "Electro Shot", "Dragon Pulse", "Brick Break"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 0 } },
-    { name: "Rain Sweeper", nature: "Modest", ability: "Stalwart", item: "Life Orb", moves: ["Electro Shot", "Flash Cannon", "Dragon Pulse", "Protect"], sp: { hp: 0, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 32 } },
+    { name: "Rain Electro Shot", nature: "Modest", ability: "Stamina", item: "Leftovers", moves: ["Electro Shot", "Flash Cannon", "Draco Meteor", "Protect"], sp: { hp: 32, attack: 0, defense: 4, spAtk: 28, spDef: 0, speed: 2 } },
+    { name: "Magnet Attacker", nature: "Modest", ability: "Stamina", item: "Magnet", moves: ["Electro Shot", "Flash Cannon", "Protect", "Snarl"], sp: { hp: 20, attack: 0, defense: 4, spAtk: 32, spDef: 0, speed: 10 } },
+    { name: "Bulky Stamina", nature: "Calm", ability: "Stamina", item: "Leftovers", moves: ["Electro Shot", "Flash Cannon", "Body Press", "Protect"], sp: { hp: 32, attack: 0, defense: 14, spAtk: 12, spDef: 8, speed: 0 } },
   ],
 
   // Hydrapple (id: 1019)
@@ -918,12 +913,11 @@ export const USAGE_DATA: Record<number, CommonSet[]> = {
     { name: "Iron Defense Press", nature: "Impish", ability: "Purifying Salt", item: "Leftovers", moves: ["Iron Defense","Body Press","Salt Cure","Recover"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
     { name: "AV Attacker", nature: "Adamant", ability: "Purifying Salt", item: "Assault Vest", moves: ["Salt Cure","Rock Slide","Body Press","Heavy Slam"], sp: { hp: 32, attack: 32, defense: 2, spAtk: 0, spDef: 0, speed: 0 } },
   ],
-
-  // Farigiraf (id: 981)
+  // Farigiraf (id: 981) – Pikalytics Champions Tournaments real data
   981: [
-    { name: "TR Support", nature: "Quiet", ability: "Armor Tail", item: "Sitrus Berry", moves: ["Hyper Voice","Psychic","Trick Room","Protect"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 0 } },
-    { name: "Nasty Plot", nature: "Modest", ability: "Armor Tail", item: "Throat Spray", moves: ["Hyper Voice","Psyshock","Nasty Plot","Protect"], sp: { hp: 20, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 12 } },
-    { name: "Support", nature: "Bold", ability: "Armor Tail", item: "Sitrus Berry", moves: ["Psychic","Helping Hand","Trick Room","Protect"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
+    { name: "Trick Room Lead", nature: "Relaxed", ability: "Armor Tail", item: "Sitrus Berry", moves: ["Trick Room", "Hyper Voice", "Psychic", "Helping Hand"], sp: { hp: 32, attack: 0, defense: 20, spAtk: 12, spDef: 2, speed: 0 } },
+    { name: "Mental Herb TR", nature: "Quiet", ability: "Armor Tail", item: "Mental Herb", moves: ["Trick Room", "Hyper Voice", "Psychic", "Protect"], sp: { hp: 32, attack: 0, defense: 2, spAtk: 32, spDef: 0, speed: 0 } },
+    { name: "Imprison Lead", nature: "Relaxed", ability: "Armor Tail", item: "Colbur Berry", moves: ["Trick Room", "Imprison", "Hyper Voice", "Protect"], sp: { hp: 32, attack: 0, defense: 20, spAtk: 4, spDef: 10, speed: 0 } },
   ],
 
   // Heat Rotom (id: 10008)
@@ -1252,12 +1246,11 @@ export const USAGE_DATA: Record<number, CommonSet[]> = {
     {"name":"Choice Specs","nature":"Modest","ability":"Flash Fire","item":"Choice Specs","moves":["Heat Wave","Shadow Ball","Overheat","Energy Ball"],"sp":{"hp":0,"attack":0,"defense":2,"spAtk":32,"spDef":0,"speed":32}},
     {"name":"WoW Support","nature":"Timid","ability":"Flash Fire","item":"Sitrus Berry","moves":["Shadow Ball","Will-O-Wisp","Heat Wave","Protect"],"sp":{"hp":20,"attack":0,"defense":14,"spAtk":0,"spDef":0,"speed":32}},
   ],
-
-  // Floette (id: 670)
+  // Floette (id: 670) – Pikalytics Champions Tournaments real data
   670: [
-    {"name":"Mega Eternal Bloom","nature":"Timid","ability":"Eternal Bloom","item":"Floettite","moves":["Moonblast","Dazzling Gleam","Psychic","Protect"],"sp":{"hp":0,"attack":0,"defense":2,"spAtk":32,"spDef":0,"speed":32}},
-    {"name":"Calm Mind","nature":"Timid","ability":"Flower Veil","item":"Sitrus Berry","moves":["Moonblast","Calm Mind","Psychic","Protect"],"sp":{"hp":20,"attack":0,"defense":14,"spAtk":0,"spDef":0,"speed":32}},
-    {"name":"Support","nature":"Bold","ability":"Flower Veil","item":"Light Clay","moves":["Moonblast","Light Screen","Helping Hand","Protect"],"sp":{"hp":32,"attack":0,"defense":2,"spAtk":0,"spDef":32,"speed":0}},
+    { name: "Mega Calm Mind", nature: "Bold", ability: "Flower Veil", item: "Floettite", moves: ["Calm Mind", "Moonblast", "Dazzling Gleam", "Protect"], sp: { hp: 32, attack: 0, defense: 20, spAtk: 12, spDef: 2, speed: 0 } },
+    { name: "Mega Offensive", nature: "Modest", ability: "Flower Veil", item: "Floettite", moves: ["Moonblast", "Dazzling Gleam", "Calm Mind", "Protect"], sp: { hp: 20, attack: 0, defense: 4, spAtk: 32, spDef: 2, speed: 8 } },
+    { name: "Mega Draining Kiss", nature: "Bold", ability: "Flower Veil", item: "Floettite", moves: ["Calm Mind", "Draining Kiss", "Dazzling Gleam", "Protect"], sp: { hp: 32, attack: 0, defense: 32, spAtk: 0, spDef: 2, speed: 0 } },
   ],
 
   // Goodra (id: 706)

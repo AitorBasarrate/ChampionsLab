@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   TrendingUp, TrendingDown, Award, Shield, Zap, Target, Brain,
   ChevronDown, ChevronUp, X, Swords, Users, Star, Crown, Flame,
-  BarChart3, ArrowRight, Sparkles, Timer, Search, Info, Filter,
+  BarChart3, ArrowRight, Sparkles, Timer, Search, Info, Filter, Trophy,
 } from "lucide-react";
 import { POKEMON_SEED } from "@/lib/pokemon-data";
 import { TYPE_COLORS, type PokemonType } from "@/lib/types";
@@ -35,7 +35,10 @@ import {
 } from "@/lib/engine";
 import {
   SIM_POKEMON, SIM_PAIRS, SIM_ARCHETYPES, SIM_META,
-  SIM_TOTAL_BATTLES, SIM_MOVES,
+  SIM_TOTAL_BATTLES, SIM_MOVES, ANTI_META_RANKINGS, ANTI_META_TEAMS,
+  CHAMPIONS_TOURNAMENT_USAGE, CHAMPIONS_TOURNAMENT_TOTAL_TEAMS, CHAMPIONS_TOURNAMENT_COUNT,
+  CHAMPIONS_TOURNAMENT_TEAMS,
+  type ChampionsTournamentTeam,
 } from "@/lib/simulation-data";
 
 // ── ROSTER FILTER: exclude hidden Pokemon from all meta calculations ──────
@@ -47,6 +50,8 @@ for (const p of POKEMON_SEED.filter(p => !p.hidden)) {
 }
 // Filtered tournament teams: only teams where ALL Pokemon are in the active roster
 const _VALID_TOURNAMENT_TEAMS = TOURNAMENT_TEAMS.filter(t => t.pokemonIds.every(id => _VALID_IDS.has(id)));
+// Champions tournament teams (from Limitless scrape)
+const _VALID_CHAMPIONS_TEAMS = CHAMPIONS_TOURNAMENT_TEAMS.filter(t => t.pokemonIds.every(id => _VALID_IDS.has(id)));
 // Filtered core pairs
 const _VALID_CORE_PAIRS = CORE_PAIRS.filter(c => _VALID_IDS.has(c.pokemon1) && _VALID_IDS.has(c.pokemon2));
 // Filtered tournament usage
@@ -153,11 +158,17 @@ function getPokemonByName(name: string) {
   // Direct match first
   const direct = POKEMON_SEED.find(p => p.name === name);
   if (direct) return direct;
+  // Match by showdownName (e.g. "Rotom-Wash" → "Wash Rotom")
+  const byShowdown = POKEMON_SEED.find(p => p.showdownName === name);
+  if (byShowdown) return byShowdown;
   // Handle mega names: "Mega Greninja" → look up "Greninja"
   if (name.startsWith("Mega ")) {
     const baseName = name.replace(/^Mega /, "").replace(/ [XYZ]$/, "");
     return POKEMON_SEED.find(p => p.name === baseName);
   }
+  // Handle gendered forms: "Basculegion" → "Basculegion-M", "Indeedee" → "Indeedee-M", etc.
+  const maleForm = POKEMON_SEED.find(p => p.name === `${name}-M`);
+  if (maleForm) return maleForm;
   return undefined;
 }
 
@@ -202,7 +213,9 @@ type ModalType =
   | { kind: "archetype"; name: string }
   | { kind: "move"; name: string }
   | { kind: "core"; pair: string }
-  | { kind: "prebuilt"; id: string };
+  | { kind: "prebuilt"; id: string }
+  | { kind: "tournament-team"; id: string }
+  | { kind: "anti-meta"; id: string };
 
 export default function MetaPage() {
   const [activeTab, setActiveTabRaw] = useState<ActiveTab>("overview");
@@ -216,6 +229,13 @@ export default function MetaPage() {
   const metaTeams = useMemo(() => predictMetaTeams(), []);
   const topUsage = useMemo(() => getTopUsagePokemon(40), []);
   const trends = useMemo(() => getMetaTrends(), []);
+
+  // ── Official Usage "Show More" state ──────────────────────────
+  const [showAllOfficial, setShowAllOfficial] = useState(false);
+
+  // ── Teams tab "Show More" states ───────────────────────────────
+  const [showAllTournament, setShowAllTournament] = useState(false);
+  const [showAllCurated, setShowAllCurated] = useState(false);
 
   // ── Speed Tiers state ─────────────────────────────────────────
   const [speedSearch, setSpeedSearch] = useState("");
@@ -301,6 +321,21 @@ export default function MetaPage() {
     return trickRoomMode ? sorted.reverse() : sorted;
   }, [speedEntries, speedSearch, speedTypeFilter, showMegas, trickRoomMode]);
 
+  // Pre-compute original rank for each entry (before search/type filtering)
+  const speedOriginalRank = useMemo(() => {
+    let base = speedEntries;
+    if (!showMegas) base = base.filter(e => !e.isMega);
+    const sorted = [...base].sort((a, b) => {
+      const diff = b.baseSpeed - a.baseSpeed;
+      if (diff !== 0) return diff;
+      return (b.isMega ? 1 : 0) - (a.isMega ? 1 : 0);
+    });
+    const ordered = trickRoomMode ? sorted.reverse() : sorted;
+    const map = new Map<string, number>();
+    ordered.forEach((e, i) => map.set(e.key, i + 1));
+    return map;
+  }, [speedEntries, showMegas, trickRoomMode]);
+
   // Speed tier bracket definitions
   const SPEED_BRACKETS = trickRoomMode
     ? [
@@ -347,8 +382,7 @@ export default function MetaPage() {
           <LastUpdated page="meta" />
         </div>
         <p className="text-muted-foreground mt-2 text-sm max-w-2xl">
-          Deep competitive analysis powered by the <span className="font-semibold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Champions Lab Advanced VGC Battle Engine</span> - <span className="font-semibold text-foreground">{SIM_TOTAL_BATTLES > 0 ? SIM_TOTAL_BATTLES.toLocaleString() : "2,000,000+"}  simulated battles</span> with full damage calc, ELO rankings,
-          win-rate matrices across {_VALID_TOURNAMENT_TEAMS.length} tournament teams, {_VALID_TOURNAMENT_USAGE.length} usage entries, and {_VALID_CORE_PAIRS.length} core pair combinations.
+          Usage stats, teams, and core pairs from ranked ladder data and {CHAMPIONS_TOURNAMENT_COUNT} community tournaments ({CHAMPIONS_TOURNAMENT_TOTAL_TEAMS.toLocaleString()} teams).
         </p>
         <div className="flex items-center gap-4 mt-3">
           <a href="/battle-bot" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-300 hover:border-amber-400 transition-colors">
@@ -357,7 +391,7 @@ export default function MetaPage() {
           </a>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200">
             <Award className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="text-xs font-medium text-emerald-700">{_VALID_TOURNAMENT_TEAMS.length} Tournament Results</span>
+            <span className="text-xs font-medium text-emerald-700">{_VALID_CHAMPIONS_TEAMS.length} Tournament Results</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-50 border border-cyan-200">
             <Swords className="w-3.5 h-3.5 text-cyan-600" />
@@ -367,8 +401,8 @@ export default function MetaPage() {
       </motion.div>
 
       {/* Tab Navigation */}
-      <div className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-8 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-1 pb-1 w-max">
+      <div className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-8 overflow-visible scrollbar-hide" style={{ overflowX: "auto", overflowY: "visible" }}>
+        <div className="flex gap-1 pb-1 pt-1 w-max">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -376,7 +410,7 @@ export default function MetaPage() {
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap shrink-0",
               activeTab === tab.id
-                ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-200"
+                ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-sm shadow-emerald-200/50"
                 : "glass glass-hover text-muted-foreground hover:text-foreground"
             )}
           >
@@ -391,104 +425,426 @@ export default function MetaPage() {
       {activeTab === "overview" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
 
-          {/* ═══ 1. ENGINE PREDICTED META TEAMS (Hero Section) ═══ */}
-          <div className="glass rounded-2xl p-6 border-2 border-emerald-300/80 bg-gradient-to-br from-emerald-50/60 via-white to-cyan-50/60 shadow-lg shadow-emerald-100/50">
+          {/* ═══ 1. REAL USAGE DATA (Hero Section) ═══ */}
+          <div className="glass rounded-2xl p-6 border-2 border-amber-300/80 bg-gradient-to-br from-amber-50/60 via-white to-yellow-50/60 shadow-lg shadow-amber-100/50">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-xl font-extrabold flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-emerald-500" /> Engine Predicted Meta Teams
+                <Crown className="w-6 h-6 text-amber-500" /> Pokémon Champions Usage Rankings
               </h2>
-              <span className="px-3 py-1 text-[10px] font-bold uppercase rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Live Predictions</span>
+              <span className="px-3 py-1 text-[10px] font-bold uppercase rounded-full bg-amber-100 text-amber-700 border border-amber-200">Real Game Data</span>
             </div>
             <p className="text-sm text-muted-foreground mb-5">
-              Our ML engine analyzed 2,000,000 battles, 250 tournament results, and 40+ core pairs to predict what teams you&apos;ll face at your next event. Click any team for full breakdown.
+              Live usage data from Pokémon Champions ranked doubles ladder and community tournaments. These are the Pokémon real players are picking right now.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {metaTeams.map(meta => (
-                <MetaTeamCard key={meta.id} meta={meta} expanded={expandedTeam === meta.id} onToggle={() => setExpandedTeam(expandedTeam === meta.id ? null : meta.id)} />
-              ))}
+            <div className="space-y-1.5">
+              {_VALID_TOURNAMENT_USAGE
+                .sort((a, b) => b.usageRate - a.usageRate)
+                .slice(0, 20).map((p, i) => {
+                const pokemon = POKEMON_SEED.find(pk => pk.id === p.pokemonId);
+                const maxUsage = _VALID_TOURNAMENT_USAGE.sort((a, b) => b.usageRate - a.usageRate)[0]?.usageRate || 53;
+                return (
+                  <div key={p.pokemonId} className="flex items-center gap-2 group cursor-pointer" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
+                    <span className={cn("text-xs font-bold w-6 text-center rounded py-0.5", i < 3 ? "bg-amber-100 text-amber-700" : i < 10 ? "bg-gray-100 text-gray-700" : "text-muted-foreground")}>{i + 1}</span>
+                    {pokemon && <Image src={pokemon.sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
+                    <span className="text-xs font-semibold w-28 truncate">{p.name}</span>
+                    {pokemon && <div className="flex gap-0.5">{pokemon.types.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t]}AA` }}>{t.slice(0, 3)}</span>)}</div>}
+                    <div className="flex-1 relative h-5 bg-gray-100 rounded overflow-hidden">
+                      <div className={cn("absolute inset-y-0 left-0 rounded opacity-80 group-hover:opacity-100 transition-opacity", i < 3 ? "bg-gradient-to-r from-amber-400 to-orange-400" : i < 10 ? "bg-gradient-to-r from-orange-300 to-red-300" : "bg-gradient-to-r from-gray-300 to-gray-400")} style={{ width: `${(p.usageRate / maxUsage) * 100}%` }} />
+                      <div className="absolute inset-0 flex items-center px-2">
+                        <span className="text-[10px] font-bold text-white drop-shadow-sm">{p.usageRate}%</span>
+                      </div>
+                    </div>
+                    <span className={cn("text-[10px] font-bold w-12 text-right", p.winRate >= 53 ? "text-green-600" : p.winRate >= 50 ? "text-gray-700" : "text-red-600")}>{p.winRate}% WR</span>
+                  </div>
+                );
+              })}
             </div>
+            <button onClick={() => setActiveTab("pokemon")} className="mt-4 text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
+              View full {_VALID_TOURNAMENT_USAGE.length} Pokémon rankings <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
 
-          {/* ═══ 2. ML ENGINE INSIGHTS ═══ */}
-          <div className="glass rounded-2xl p-6 border border-emerald-200/60">
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <Brain className="w-5 h-5 text-emerald-500" /> ML Engine Insights
-              <span className="text-xs font-normal text-muted-foreground ml-2">from 2,000,000 simulated battles</span>
-            </h2>
-            <div className="space-y-3">
-              {ML_INSIGHTS.map((insight, i) => (
-                <div key={i} className={cn(
-                  "p-3 rounded-xl border flex items-start gap-3",
-                  insight.type === "meta" ? "bg-emerald-50 border-emerald-200" :
-                  insight.type === "synergy" ? "bg-emerald-50 border-emerald-200" :
-                  insight.type === "counter" ? "bg-amber-50 border-amber-200" :
-                  "bg-cyan-50 border-cyan-200"
-                )}>
-                  <span className={cn(
-                    "px-2 py-0.5 text-[10px] font-bold uppercase rounded flex-shrink-0",
-                    insight.type === "meta" ? "bg-emerald-100 text-emerald-700" :
-                    insight.type === "synergy" ? "bg-emerald-100 text-emerald-700" :
-                    insight.type === "counter" ? "bg-amber-100 text-amber-700" :
-                    "bg-cyan-100 text-cyan-700"
-                  )}>{insight.type}</span>
-                  <p className="text-sm text-foreground flex-1">{insight.text}</p>
-                  <span className="text-[10px] text-muted-foreground flex-shrink-0">{insight.confidence}% conf</span>
-                </div>
-              ))}
+          {/* ═══ 2. TOURNAMENT TEAMS (Real Results) ═══ */}
+          <div className="glass rounded-2xl p-6 border-2 border-amber-200/80 bg-gradient-to-br from-amber-50/30 via-white to-yellow-50/30">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-extrabold flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-500" /> Tournament Winning Teams
+              </h2>
+              <span className="px-3 py-1 text-[10px] font-bold uppercase rounded-full bg-amber-100 text-amber-700 border border-amber-200">{_VALID_CHAMPIONS_TEAMS.length} Real Teams</span>
             </div>
+            <p className="text-sm text-muted-foreground mb-5">
+              Top-placing teams from Pokémon Champions community tournaments. Click any team for full breakdown with sets.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[..._VALID_CHAMPIONS_TEAMS].sort((a, b) => a.placement - b.placement || b.players - a.players).slice(0, 8).map(team => {
+                const teamPokemon = team.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
+                return (
+                  <div key={team.id} className="p-4 rounded-xl border hover:shadow-md transition-all cursor-pointer bg-white/60 border-amber-200/60 hover:border-amber-300" onClick={() => setModal({ kind: "tournament-team", id: team.id })}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded", team.placement === 1 ? "bg-amber-100 text-amber-700" : team.placement === 2 ? "bg-gray-200 text-gray-700" : "bg-gray-100 text-gray-600")}>
+                        {team.placement === 1 ? "🥇" : team.placement === 2 ? "🥈" : `#${team.placement}`}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate">{team.player}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{team.tournament}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-emerald-600">{team.wins}W-{team.losses}L</span>
+                        <p className="text-[9px] text-muted-foreground">{team.players} players</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {teamPokemon.map(p => (
+                        <div key={p.id} className="flex flex-col items-center">
+                          <Image src={p.sprite} alt={p.name} width={30} height={30} className="rounded" unoptimized />
+                          <span className="text-[7px] truncate w-10 text-center text-muted-foreground">{p.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <button onClick={() => setActiveTab("teams")} className="mt-4 text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
+              View all {_VALID_CHAMPIONS_TEAMS.length} tournament teams <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
 
-          {/* ═══ 2.5 ENGINE QUALITY ═══ */}
-          <div className="glass rounded-2xl p-5 border border-emerald-200/60 bg-gradient-to-r from-emerald-50/40 to-cyan-50/40">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-emerald-500" /> Battle Engine Quality
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="text-center p-3 bg-white/60 rounded-xl">
-                <p className="text-2xl font-extrabold font-heading text-emerald-700">10.7</p>
-                <p className="text-[10px] text-muted-foreground">Avg Turns/Battle</p>
-                <p className="text-[9px] text-emerald-600 font-medium">VGC Realistic ✓</p>
-              </div>
-              <div className="text-center p-3 bg-white/60 rounded-xl">
-                <p className="text-2xl font-extrabold font-heading text-cyan-700">23.1%</p>
-                <p className="text-[10px] text-muted-foreground">Protect Usage</p>
-                <p className="text-[9px] text-emerald-600 font-medium">Pro-level ✓</p>
-              </div>
-              <div className="text-center p-3 bg-white/60 rounded-xl">
-                <p className="text-2xl font-extrabold font-heading text-emerald-700">8.7%</p>
-                <p className="text-[10px] text-muted-foreground">Switch Rate</p>
-                <p className="text-[9px] text-emerald-600 font-medium">VGC Realistic ✓</p>
-              </div>
-              <div className="text-center p-3 bg-white/60 rounded-xl">
-                <p className="text-2xl font-extrabold font-heading text-amber-700">98.1%</p>
-                <p className="text-[10px] text-muted-foreground">Move Coverage</p>
-                <p className="text-[9px] text-emerald-600 font-medium">Complete ✓</p>
-              </div>
-            </div>
-          </div>
-
-          {/* ═══ 3. QUICK STATS GRID ═══ */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Top 5 ML Pokemon */}
-            <div className="glass rounded-2xl p-5 border border-gray-200/60">
+          {/* ═══ 3. TOURNAMENT CORE PAIRS + TYPE DISTRIBUTION (2-col real data) ═══ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Tournament Core Pairs */}
+            <div className="glass rounded-2xl p-5 border border-amber-200/60">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Crown className="w-4 h-4 text-amber-500" /> Top ML Pokémon
+                <Users className="w-4 h-4 text-amber-500" /> Tournament Core Pairs
               </h3>
               <div className="space-y-2">
-                {ML_POKEMON_RANKINGS.slice(0, 5).map((p, i) => {
+                {_VALID_CORE_PAIRS
+                  .sort((a, b) => b.winRate - a.winRate).slice(0, 6).map(cp => {
+                  const p1 = POKEMON_SEED.find(p => p.id === cp.pokemon1);
+                  const p2 = POKEMON_SEED.find(p => p.id === cp.pokemon2);
+                  return (
+                    <div key={cp.name} className="p-2.5 rounded-xl bg-amber-50/50 border border-amber-100 cursor-pointer hover:border-amber-300 transition-colors" onClick={() => setModal({ kind: "core", pair: cp.name })}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {p1 && <Image src={p1.sprite} alt={p1.name} width={24} height={24} className="rounded" unoptimized />}
+                          <span className="text-[10px] text-muted-foreground">+</span>
+                          {p2 && <Image src={p2.sprite} alt={p2.name} width={24} height={24} className="rounded" unoptimized />}
+                          <span className="text-xs font-semibold">{cp.name}</span>
+                        </div>
+                        <span className={cn("text-xs font-bold", cp.winRate >= 55 ? "text-green-600" : "text-gray-700")}>{cp.winRate}%</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{cp.usage}% usage · {cp.synergy}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              <button onClick={() => setActiveTab("cores")} className="mt-3 text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
+                View all {_VALID_CORE_PAIRS.length} core pairs <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            {/* Type Distribution (real data) */}
+            <div className="glass rounded-2xl p-5 border border-gray-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Star className="w-4 h-4 text-emerald-500" /> Meta Type Distribution
+              </h3>
+              {(() => {
+                const typeCounts: Record<string, { count: number; totalWr: number }> = {};
+                topUsage.slice(0, 30).forEach(u => {
+                  const pkm = POKEMON_SEED.find(p => p.id === u.pokemonId);
+                  if (pkm) pkm.types.forEach(t => {
+                    if (!typeCounts[t]) typeCounts[t] = { count: 0, totalWr: 0 };
+                    typeCounts[t].count++;
+                    typeCounts[t].totalWr += u.winRate;
+                  });
+                });
+                const sorted = Object.entries(typeCounts).sort((a, b) => b[1].count - a[1].count);
+                const maxCount = sorted[0]?.[1].count || 1;
+                return (
+                  <div className="grid grid-cols-3 gap-2">
+                    {sorted.slice(0, 12).map(([type, data]) => (
+                      <div key={type} className="p-2 rounded-xl border border-gray-200 text-center" style={{ backgroundColor: `${TYPE_COLORS[type as PokemonType]}10` }}>
+                        <div className="w-6 h-6 rounded-md mx-auto mb-0.5 flex items-center justify-center text-white text-[8px] font-bold uppercase" style={{ backgroundColor: TYPE_COLORS[type as PokemonType] }}>{type.slice(0, 3)}</div>
+                        <p className="text-[10px] font-bold capitalize">{type}</p>
+                        <p className="text-sm font-extrabold">{data.count}</p>
+                        <p className={cn("text-[9px] font-medium", (data.totalWr / data.count) >= 52 ? "text-green-600" : "text-gray-500")}>
+                          {(data.totalWr / data.count).toFixed(1)}% WR
+                        </p>
+                        <div className="mt-0.5 h-1 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${(data.count / maxCount) * 100}%`, backgroundColor: TYPE_COLORS[type as PokemonType] }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* ═══ 3b. ARCHETYPES + CURATED TEAMS (2-col) ═══ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Archetype Rankings */}
+            <div className="glass rounded-2xl p-5 border border-gray-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-cyan-500" /> Archetype Rankings
+              </h3>
+              <div className="space-y-2">
+                {ML_ARCHETYPES.slice(0, 8).map((a, i) => (
+                  <div key={a.name} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-all" onClick={() => setModal({ kind: "archetype", name: a.name })}>
+                    <span className={cn("w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center", i < 2 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600")}>{i + 1}</span>
+                    <span className="text-xs font-semibold flex-1">{a.name}</span>
+                    <div className="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className={cn("h-full rounded-full", a.wr >= 60 ? "bg-green-400" : a.wr >= 52 ? "bg-emerald-400" : "bg-gray-400")} style={{ width: `${a.wr}%` }} />
+                    </div>
+                    <span className={cn("text-xs font-bold w-10 text-right", a.wr >= 60 ? "text-green-600" : a.wr >= 52 ? "text-emerald-600" : "text-gray-700")}>{a.wr}%</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setActiveTab("matchups")} className="mt-3 text-xs text-cyan-600 hover:text-cyan-700 font-medium flex items-center gap-1">
+                View matchup details <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            {/* Curated Teams */}
+            <div className="glass rounded-2xl p-5 border border-gray-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Award className="w-4 h-4 text-amber-500" /> Curated Teams
+              </h3>
+              <div className="space-y-2">
+                {_VALID_PREBUILT_TEAMS.slice(0, 5).map(team => (
+                  <div key={team.id} className="p-2.5 rounded-xl bg-gray-50 border border-gray-200 cursor-pointer hover:border-emerald-300 hover:shadow-sm transition-all" onClick={() => setModal({ kind: "prebuilt", id: team.id })}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded uppercase", team.tier === "S" ? "bg-amber-100 text-amber-700" : team.tier === "A" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{team.tier}</span>
+                      <span className="text-xs font-semibold truncate flex-1">{team.name}</span>
+                      <span className="text-[9px] text-muted-foreground capitalize">{team.archetype}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      {team.pokemonIds.map(id => {
+                        const p = POKEMON_SEED.find(pk => pk.id === id);
+                        return p ? <Image key={id} src={p.sprite} alt={p.name} width={24} height={24} className="rounded" unoptimized /> : null;
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setActiveTab("teams")} className="mt-3 text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
+                View all teams <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* ═══ 4. COUNTER MATCHUPS + KEY MOVES (2-col) ═══ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Counter Matchups */}
+            <div className="glass rounded-2xl p-5 border border-gray-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Target className="w-4 h-4 text-red-500" /> Key Counter Matchups
+              </h3>
+              <div className="space-y-2">
+                {(() => { const filtered = ARCHETYPE_MATCHUPS.filter(m => Math.abs(m.winRate1 - 50) >= 3).sort((a, b) => Math.abs(b.winRate1 - 50) - Math.abs(a.winRate1 - 50)).slice(0, 6); return filtered.length > 0 ? filtered : ARCHETYPE_MATCHUPS.sort((a, b) => Math.abs(b.winRate1 - 50) - Math.abs(a.winRate1 - 50)).slice(0, 6); })().map((m, i) => {
+                  const dominant = m.winRate1 >= 55;
+                  const winner = dominant ? m.archetype1 : m.archetype2;
+                  const loser = dominant ? m.archetype2 : m.archetype1;
+                  const wr = dominant ? m.winRate1 : 100 - m.winRate1;
+                  return (
+                    <div key={i} className="p-2.5 rounded-xl bg-gray-50 border border-gray-200 cursor-pointer hover:shadow-md transition-all" onClick={() => setModal({ kind: "archetype", name: winner })}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-green-600">{winner}</span>
+                        <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs font-bold text-red-600">{loser}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div className={cn("h-full rounded-full", wr >= 65 ? "bg-green-400" : "bg-emerald-400")} style={{ width: `${wr}%` }} />
+                        </div>
+                        <span className="text-xs font-bold text-green-600">{wr.toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <button onClick={() => setActiveTab("matchups")} className="mt-3 text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
+                View full matchup matrix <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            {/* Top Moves */}
+            <div className="glass rounded-2xl p-5 border border-gray-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-500" /> Highest Win-Rate Moves
+              </h3>
+              <div className="space-y-2">
+                {ML_BEST_MOVES.slice(0, 8).map((m, i) => (
+                  <div key={m.name} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setModal({ kind: "move", name: m.name })}>
+                    <span className={cn("w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center", i < 3 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600")}>{i + 1}</span>
+                    <span className="text-xs font-semibold flex-1">{m.name}</span>
+                    <span className={cn("text-xs font-bold", m.wr >= 65 ? "text-green-600" : m.wr >= 60 ? "text-emerald-600" : "text-gray-700")}>{m.wr}%</span>
+                    <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400" style={{ width: `${m.wr}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setActiveTab("moves")} className="mt-3 text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
+                View all move analysis <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* ═══ 5. META TRENDS (2-col) ═══ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="glass rounded-2xl p-5 border border-emerald-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-emerald-500" /> Rising in the Meta
+              </h3>
+              <div className="space-y-2">
+                {trends.risers.map(p => {
+                  const pokemon = POKEMON_SEED.find(pk => pk.id === p.pokemonId);
+                  return (
+                    <div key={p.pokemonId} className="flex items-center gap-2 p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
+                      {pokemon && <Image src={pokemon.sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold">{p.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{p.usageRate}% usage</p>
+                      </div>
+                      <span className="text-xs font-bold text-emerald-600">{p.winRate}%</span>
+                      <TrendingUp className="w-3 h-3 text-emerald-500" />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="glass rounded-2xl p-5 border border-red-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <TrendingDown className="w-4 h-4 text-red-500" /> Falling in the Meta
+              </h3>
+              <div className="space-y-2">
+                {trends.fallers.length > 0 ? trends.fallers.map(p => {
+                  const pokemon = POKEMON_SEED.find(pk => pk.id === p.pokemonId);
+                  return (
+                    <div key={p.pokemonId} className="flex items-center gap-2 p-2 rounded-lg bg-red-50/50 border border-red-100 cursor-pointer hover:bg-red-100/50 transition-colors" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
+                      {pokemon && <Image src={pokemon.sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold">{p.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{p.usageRate}% usage</p>
+                      </div>
+                      <span className="text-xs font-bold text-red-600">{p.winRate}%</span>
+                      <TrendingDown className="w-3 h-3 text-red-500" />
+                    </div>
+                  );
+                }) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-3">
+                      <TrendingDown className="w-6 h-6 text-red-300" />
+                    </div>
+                    <p className="text-sm font-semibold text-muted-foreground">No Pokémon falling</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">The meta is stable — all used Pokémon are above 50% win rate</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ═══ 6. ML ENGINE ANALYSIS (2-col: Predictions + Insights) ═══ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* ML Predicted Meta Teams */}
+            <div className="glass rounded-2xl p-5 border border-emerald-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-500" /> Engine Predicted Meta
+                <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-emerald-100 text-emerald-700">ML</span>
+              </h3>
+              <p className="text-[10px] text-muted-foreground mb-3">Teams predicted from 2M simulated battles + tournament data</p>
+              <div className="space-y-2">
+                {metaTeams.slice(0, 4).map(meta => (
+                  <div key={meta.id} className="p-3 rounded-xl bg-gray-50 border border-gray-200 cursor-pointer hover:border-emerald-300 hover:shadow-sm transition-all" onClick={() => setExpandedTeam(expandedTeam === meta.id ? null : meta.id)}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", meta.confidence >= 80 ? "bg-emerald-100 text-emerald-700" : meta.confidence >= 60 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{meta.confidence}%</span>
+                        <span className="text-xs font-semibold">{meta.name}</span>
+                      </div>
+                      <span className="text-[9px] text-muted-foreground">{meta.metaShare}% share</span>
+                    </div>
+                    <div className="flex gap-1">
+                      {meta.pokemonIds.map(id => { const p = POKEMON_SEED.find(pk => pk.id === id); return p ? <Image key={id} src={p.sprite} alt={p.name} width={24} height={24} className="rounded" unoptimized /> : null; })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ML Insights + Engine Stats */}
+            <div className="space-y-4">
+              <div className="glass rounded-2xl p-5 border border-emerald-200/60">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-emerald-500" /> ML Engine Insights
+                  <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-emerald-100 text-emerald-700">ML</span>
+                </h3>
+                <div className="space-y-2">
+                  {ML_INSIGHTS.slice(0, 4).map((insight, i) => (
+                    <div key={i} className={cn(
+                      "p-2.5 rounded-xl border flex items-start gap-2",
+                      insight.type === "meta" || insight.type === "synergy" ? "bg-emerald-50/50 border-emerald-100" :
+                      insight.type === "counter" ? "bg-amber-50/50 border-amber-100" : "bg-cyan-50/50 border-cyan-100"
+                    )}>
+                      <span className={cn(
+                        "px-1.5 py-0.5 text-[8px] font-bold uppercase rounded flex-shrink-0",
+                        insight.type === "meta" || insight.type === "synergy" ? "bg-emerald-100 text-emerald-700" :
+                        insight.type === "counter" ? "bg-amber-100 text-amber-700" : "bg-cyan-100 text-cyan-700"
+                      )}>{insight.type}</span>
+                      <p className="text-[11px] text-foreground flex-1 leading-snug">{insight.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Engine Quality compact */}
+              <div className="glass rounded-2xl p-4 border border-emerald-200/60 bg-gradient-to-r from-emerald-50/30 to-cyan-50/30">
+                <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-emerald-500" /> Battle Engine Quality
+                </h3>
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="text-center">
+                    <p className="text-sm font-extrabold text-emerald-700">10.7</p>
+                    <p className="text-[8px] text-muted-foreground">Turns/Battle</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-extrabold text-cyan-700">23.1%</p>
+                    <p className="text-[8px] text-muted-foreground">Protect Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-extrabold text-emerald-700">8.7%</p>
+                    <p className="text-[8px] text-muted-foreground">Switch Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-extrabold text-amber-700">98.1%</p>
+                    <p className="text-[8px] text-muted-foreground">Move Coverage</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ═══ 7. ML DEEP DIVE (2-col: Rankings + Cores) ═══ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* ML Pokemon Rankings */}
+            <div className="glass rounded-2xl p-5 border border-gray-200/60">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-red-500" /> Top ML Threats
+                <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-emerald-100 text-emerald-700">ML</span>
+              </h3>
+              <div className="space-y-2">
+                {ML_POKEMON_RANKINGS.slice(0, 8).map((p, i) => {
                   const sprite = getSpriteForName(p.name);
+                  const usageData = getPokemonByName(p.name) ? _VALID_TOURNAMENT_USAGE.find(u => u.pokemonId === getPokemonByName(p.name)!.id) : null;
                   return (
                     <div key={p.name} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
-                      <span className="text-xs font-bold text-muted-foreground w-4">#{i + 1}</span>
+                      <span className={cn("w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center", i < 3 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600")}>{i + 1}</span>
                       {sprite && <Image src={sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold truncate">{p.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{p.games.toLocaleString()} games</p>
+                        <p className="text-[9px] text-muted-foreground">{p.elo.toLocaleString()} ELO{usageData ? ` · ${usageData.usageRate}% real usage` : ""}</p>
                       </div>
-                      <div className="text-right">
-                        <p className={cn("text-xs font-bold", p.wr >= 55 ? "text-green-600" : p.wr >= 50 ? "text-emerald-600" : "text-amber-600")}>{p.wr}%</p>
-                        <p className="text-[10px] text-muted-foreground">{p.elo.toLocaleString()}</p>
-                      </div>
+                      <span className={cn("text-xs font-bold", p.wr >= 55 ? "text-green-600" : p.wr >= 50 ? "text-emerald-600" : "text-amber-600")}>{p.wr}%</span>
                     </div>
                   );
                 })}
@@ -498,45 +854,26 @@ export default function MetaPage() {
               </button>
             </div>
 
-            {/* Top Archetypes */}
+            {/* ML Cores */}
             <div className="glass rounded-2xl p-5 border border-gray-200/60">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Target className="w-4 h-4 text-emerald-500" /> Dominant Archetypes
+                <Swords className="w-4 h-4 text-cyan-500" /> ML-Discovered Cores
+                <span className="px-1.5 py-0.5 text-[8px] font-bold rounded bg-emerald-100 text-emerald-700">ML</span>
               </h3>
               <div className="space-y-2">
-                {ML_ARCHETYPES.slice(0, 5).map((a, i) => (
-                  <div key={a.name} className="p-2 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setModal({ kind: "archetype", name: a.name })}>
+                {ML_BEST_CORES.slice(0, 6).map(c => (
+                  <div key={c.pair} className="p-2.5 rounded-xl bg-emerald-50/30 border border-emerald-100 cursor-pointer hover:border-emerald-300 transition-colors" onClick={() => setModal({ kind: "core", pair: c.pair })}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", i < 2 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600")}>#{i + 1}</span>
-                        <span className="text-xs font-semibold">{a.name}</span>
+                        {c.pair.split(" + ").map(name => {
+                          const sp = getSpriteForName(name);
+                          return sp ? <Image key={name} src={sp} alt={name} width={24} height={24} className="rounded" unoptimized /> : <span key={name} className="text-xs">{name}</span>;
+                        })}
+                        <span className="text-xs font-semibold">{c.pair}</span>
                       </div>
-                      <span className={cn("text-xs font-bold", a.wr >= 60 ? "text-green-600" : a.wr >= 52 ? "text-emerald-600" : "text-gray-600")}>{a.wr}%</span>
+                      <span className="text-xs font-bold text-green-600">{c.wr}%</span>
                     </div>
-                    <div className="mt-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400" style={{ width: `${a.wr}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button onClick={() => setActiveTab("matchups")} className="mt-3 text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
-                View matchup matrix <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-
-            {/* Top Cores */}
-            <div className="glass rounded-2xl p-5 border border-gray-200/60">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Swords className="w-4 h-4 text-cyan-500" /> Strongest Cores
-              </h3>
-              <div className="space-y-2">
-                {ML_BEST_CORES.slice(0, 5).map((c, i) => (
-                  <div key={c.pair} className="p-2 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setModal({ kind: "core", pair: c.pair })}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold">{c.pair}</span>
-                      <span className={cn("text-xs font-bold", c.wr >= 75 ? "text-green-600" : "text-emerald-600")}>{c.wr}%</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground">{c.games.toLocaleString()} games played</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{c.games.toLocaleString()} games</p>
                   </div>
                 ))}
               </div>
@@ -546,614 +883,206 @@ export default function MetaPage() {
             </div>
           </div>
 
-          {/* ═══ 4. META THREATS - Top 10 Pokémon extended ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-red-500" /> Top 10 Meta Threats
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Pokémon you must prepare for. ELO is their simulated strength, Win Rate is raw performance, Games is frequency across 2M battles.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {ML_POKEMON_RANKINGS.slice(0, 10).map((p, i) => {
-                const pokemon = getPokemonByName(p.name);
-                const sprite = getSpriteForName(p.name);
-                const types = getTypesForName(p.name);
-                const usageData = pokemon ? _VALID_TOURNAMENT_USAGE.find(u => u.pokemonId === pokemon.id) : null;
-                const tier = p.tier;
-                return (
-                  <div key={p.name} className={cn("p-4 rounded-xl border transition-all hover:shadow-md cursor-pointer", tier === "S" ? "bg-amber-50/50 border-amber-200" : tier === "A" ? "bg-blue-50/30 border-blue-200" : "bg-gray-50 border-gray-200")}
-                    onClick={() => setModal({ kind: "pokemon", name: p.name })}>
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        {sprite && <Image src={sprite} alt={p.name} width={48} height={48} className="rounded-lg" unoptimized />}
-                        <span className={cn("absolute -top-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold", tier === "S" ? "bg-amber-400 text-white" : tier === "A" ? "bg-blue-400 text-white" : "bg-gray-300 text-gray-700")}>{i + 1}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold">{p.name}</span>
-                          <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", tier === "S" ? "bg-amber-100 text-amber-700" : tier === "A" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{tier}-Tier</span>
-                        </div>
-                        {types && <div className="flex gap-0.5 mt-0.5">{types.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t as PokemonType]}AA` }}>{t}</span>)}</div>}
-                        <div className="flex gap-3 mt-1 text-[10px] text-muted-foreground">
-                          <span>ELO: {p.elo.toLocaleString()}</span>
-                          <span>{p.games.toLocaleString()} games</span>
-                          {usageData && <span>Tournament: {usageData.usageRate}% usage</span>}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={cn("text-lg font-bold", p.wr >= 60 ? "text-green-600" : p.wr >= 55 ? "text-emerald-600" : p.wr >= 50 ? "text-gray-700" : "text-red-600")}>{p.wr}%</p>
-                        <p className="text-[10px] text-muted-foreground">win rate</p>
-                      </div>
-                    </div>
-                    {pokemon && (
-                      <div className="mt-2 grid grid-cols-6 gap-1">
-                        {(["hp", "attack", "defense", "spAtk", "spDef", "speed"] as const).map(stat => (
-                          <div key={stat} className="text-center">
-                            <p className="text-[8px] text-muted-foreground">{{ hp: "HP", attack: "Atk", defense: "Def", spAtk: "SpA", spDef: "SpD", speed: "Spe" }[stat]}</p>
-                            <div className="h-1 bg-gray-200 rounded-full overflow-hidden"><div className={cn("h-full rounded-full", pokemon.baseStats[stat] >= 120 ? "bg-green-400" : pokemon.baseStats[stat] >= 90 ? "bg-emerald-400" : pokemon.baseStats[stat] >= 60 ? "bg-gray-400" : "bg-red-300")} style={{ width: `${Math.min(100, (pokemon.baseStats[stat] / 180) * 100)}%` }} /></div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* ═══ 5. META TRENDS - Rising & Falling ═══ */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass rounded-2xl p-5 border border-emerald-200/60">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-500" /> Rising in the Meta
-              </h3>
-              <p className="text-[10px] text-muted-foreground mb-3">Based on ML simulation data. Will be supplemented with live tournament results post-launch.</p>
-              <div className="space-y-2">
-                {trends.risers.map(p => {
-                  const pokemon = POKEMON_SEED.find(pk => pk.id === p.pokemonId);
-                  return (
-                    <div key={p.pokemonId} className="flex items-center gap-3 p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
-                      {pokemon && <Image src={pokemon.sprite} alt={p.name} width={32} height={32} className="rounded" unoptimized />}
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">{p.usageRate}% usage · {p.topCutRate}% top cut</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-emerald-600">{p.winRate}%</p>
-                        <TrendingUp className="w-3.5 h-3.5 text-emerald-500 ml-auto" />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="glass rounded-2xl p-5 border border-red-200/60">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-2">
-                <TrendingDown className="w-4 h-4 text-red-500" /> Falling in the Meta
-              </h3>
-              <p className="text-[10px] text-muted-foreground mb-3">Based on ML simulation data. Will be supplemented with live tournament results post-launch.</p>
-              <div className="space-y-2">
-                {trends.fallers.map(p => {
-                  const pokemon = POKEMON_SEED.find(pk => pk.id === p.pokemonId);
-                  return (
-                    <div key={p.pokemonId} className="flex items-center gap-3 p-2 rounded-lg bg-red-50/50 border border-red-100 cursor-pointer hover:bg-red-100/50 transition-colors" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
-                      {pokemon && <Image src={pokemon.sprite} alt={p.name} width={32} height={32} className="rounded" unoptimized />}
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">{p.usageRate}% usage · {p.topCutRate}% top cut</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-red-600">{p.winRate}%</p>
-                        <TrendingDown className="w-3.5 h-3.5 text-red-500 ml-auto" />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
 
-          {/* ═══ 6. TOP MOVES - Win rates from 2M battles ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-500" /> Highest Win-Rate Moves
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Moves that appeared on the most winning teams across 2,000,000 simulated battles. Teams running these moves won significantly more often.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-              {ML_BEST_MOVES.map((m, i) => (
-                <div key={m.name} className={cn("p-3 rounded-xl border text-center cursor-pointer hover:shadow-md transition-all", i < 3 ? "bg-amber-50/50 border-amber-200" : "bg-gray-50 border-gray-200")} onClick={() => setModal({ kind: "move", name: m.name })}>
-                  <span className={cn("inline-block w-6 h-6 rounded-lg text-[10px] font-bold leading-6 mb-1", i < 3 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600")}>#{i + 1}</span>
-                  <p className="text-sm font-bold">{m.name}</p>
-                  <p className={cn("text-lg font-extrabold", m.wr >= 65 ? "text-green-600" : m.wr >= 60 ? "text-emerald-600" : "text-gray-700")}>{m.wr}%</p>
-                  <p className="text-[10px] text-muted-foreground">{m.uses.toLocaleString()} uses</p>
-                  <div className="mt-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400" style={{ width: `${m.wr}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ═══ 7. COUNTER MATCHUPS - What beats what ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Target className="w-5 h-5 text-red-500" /> Key Counter Matchups
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Critical matchups from tournament history: which archetypes hard-counter which. Use these to know when you&apos;re favored and when to dodge.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {ARCHETYPE_MATCHUPS.filter(m => Math.abs(m.winRate1 - 50) >= 10).sort((a, b) => Math.abs(b.winRate1 - 50) - Math.abs(a.winRate1 - 50)).slice(0, 9).map((m, i) => {
-                const dominant = m.winRate1 >= 55;
-                const winner = dominant ? m.archetype1 : m.archetype2;
-                const loser = dominant ? m.archetype2 : m.archetype1;
-                const wr = dominant ? m.winRate1 : 100 - m.winRate1;
-                return (
-                  <div key={i} className="p-3 rounded-xl bg-gray-50 border border-gray-200 cursor-pointer hover:shadow-md transition-all" onClick={() => setModal({ kind: "archetype", name: winner })}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-bold text-green-600">{winner}</span>
-                      <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-xs font-bold text-red-600">{loser}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div className={cn("h-full rounded-full", wr >= 65 ? "bg-green-400" : "bg-emerald-400")} style={{ width: `${wr}%` }} />
-                      </div>
-                      <span className="text-sm font-bold text-green-600">{wr.toFixed(1)}%</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-1">{m.sampleSize} games · {wr >= 65 ? "Hard counter" : wr >= 60 ? "Strong matchup" : "Favored"}</p>
-                  </div>
-                );
-              })}
-            </div>
-            <button onClick={() => setActiveTab("matchups")} className="mt-4 text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
-              View full matchup matrix <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          {/* ═══ 8. CORE PAIR SPOTLIGHT ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Users className="w-5 h-5 text-emerald-500" /> Core Pair Spotlight
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              The best 2-Pokémon combinations from both ML simulation and 20 years of tournament data. Build your team around these proven partnerships.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* ML Cores */}
-              <div>
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Brain className="w-3.5 h-3.5 text-emerald-500" /> ML-Discovered (2M Battles)
-                </h4>
-                <div className="space-y-2">
-                  {ML_BEST_CORES.slice(0, 4).map(c => (
-                    <div key={c.pair} className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-200 cursor-pointer hover:bg-emerald-100/50 transition-colors" onClick={() => setModal({ kind: "core", pair: c.pair })}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {c.pair.split(" + ").map(name => {
-                            const sp = getSpriteForName(name);
-                            return sp ? <Image key={name} src={sp} alt={name} width={28} height={28} className="rounded" unoptimized /> : <span key={name} className="text-xs">{name}</span>;
-                          })}
-                          <span className="text-xs font-semibold">{c.pair}</span>
-                        </div>
-                        <span className="text-sm font-bold text-green-600">{c.wr}%</span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground mt-1">{c.games.toLocaleString()} games</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Tournament Cores */}
-              <div>
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Award className="w-3.5 h-3.5 text-amber-500" /> Tournament-Proven (20 Years)
-                </h4>
-                <div className="space-y-2">
-                  {_VALID_CORE_PAIRS
-                    .sort((a, b) => b.winRate - a.winRate).slice(0, 4).map(cp => {
-                    const p1 = POKEMON_SEED.find(p => p.id === cp.pokemon1);
-                    const p2 = POKEMON_SEED.find(p => p.id === cp.pokemon2);
-                    return (
-                      <div key={cp.name} className="p-3 rounded-xl bg-amber-50/50 border border-amber-200 cursor-pointer hover:bg-amber-100/50 transition-colors" onClick={() => setModal({ kind: "core", pair: cp.name })}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {p1 && <Image src={p1.sprite} alt={p1.name} width={28} height={28} className="rounded" unoptimized />}
-                            <span className="text-[10px] text-muted-foreground">+</span>
-                            {p2 && <Image src={p2.sprite} alt={p2.name} width={28} height={28} className="rounded" unoptimized />}
-                            <span className="text-xs font-semibold">{cp.name}</span>
-                          </div>
-                          <span className={cn("text-sm font-bold", cp.winRate >= 55 ? "text-green-600" : "text-gray-700")}>{cp.winRate}%</span>
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-1">{cp.usage}% usage · {cp.synergy}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-            <button onClick={() => setActiveTab("cores")} className="mt-4 text-xs text-cyan-600 hover:text-cyan-700 font-medium flex items-center gap-1">
-              View all {_VALID_CORE_PAIRS.length} core pairs <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          {/* ═══ 9. TOURNAMENT USAGE HEATMAP ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Flame className="w-5 h-5 text-orange-500" /> Tournament Usage Heatmap
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Top 20 most-used Pokémon across all VGC events. Color intensity reflects usage rate - the darker the bar, the more dominant the Pokémon.
-            </p>
-            <div className="space-y-1.5">
-              {topUsage.slice(0, 20).map((p, i) => {
-                const pokemon = POKEMON_SEED.find(pk => pk.id === p.pokemonId);
-                const maxUsage = topUsage[0]?.usageRate || 30;
-                return (
-                  <div key={p.pokemonId} className="flex items-center gap-2 group cursor-pointer" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
-                    <span className="text-[10px] font-bold text-muted-foreground w-5 text-right">{i + 1}</span>
-                    {pokemon && <Image src={pokemon.sprite} alt={p.name} width={22} height={22} className="rounded" unoptimized />}
-                    <span className="text-xs font-semibold w-24 truncate">{p.name}</span>
-                    <div className="flex-1 relative h-5 bg-gray-100 rounded overflow-hidden">
-                      <div className="absolute inset-y-0 left-0 rounded bg-gradient-to-r from-orange-400 to-red-400 opacity-80 group-hover:opacity-100 transition-opacity" style={{ width: `${(p.usageRate / maxUsage) * 100}%` }} />
-                      <div className="absolute inset-0 flex items-center px-2">
-                        <span className="text-[10px] font-bold text-white drop-shadow-sm">{p.usageRate}%</span>
-                      </div>
-                    </div>
-                    <span className={cn("text-[10px] font-bold w-10 text-right", p.winRate >= 53 ? "text-green-600" : p.winRate >= 50 ? "text-gray-700" : "text-red-600")}>{p.winRate}%</span>
-                  </div>
-                );
-              })}
-            </div>
-            <button onClick={() => setActiveTab("pokemon")} className="mt-3 text-xs text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1">
-              View full rankings <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          {/* ═══ 10. TYPE DISTRIBUTION - What types dominate ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Star className="w-5 h-5 text-emerald-500" /> Meta Type Distribution
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Which types appear most on top-performing teams. Understanding type representation helps identify under-served niches and over-saturated types.
-            </p>
-            {(() => {
-              const typeCounts: Record<string, { count: number; totalWr: number }> = {};
-              topUsage.slice(0, 30).forEach(u => {
-                const pkm = POKEMON_SEED.find(p => p.id === u.pokemonId);
-                if (pkm) pkm.types.forEach(t => {
-                  if (!typeCounts[t]) typeCounts[t] = { count: 0, totalWr: 0 };
-                  typeCounts[t].count++;
-                  typeCounts[t].totalWr += u.winRate;
-                });
-              });
-              const sorted = Object.entries(typeCounts).sort((a, b) => b[1].count - a[1].count);
-              const maxCount = sorted[0]?.[1].count || 1;
-              return (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-                  {sorted.map(([type, data]) => (
-                    <div key={type} className="p-3 rounded-xl border border-gray-200 text-center" style={{ backgroundColor: `${TYPE_COLORS[type as PokemonType]}15` }}>
-                      <div className="w-8 h-8 rounded-lg mx-auto mb-1 flex items-center justify-center text-white text-[10px] font-bold uppercase" style={{ backgroundColor: TYPE_COLORS[type as PokemonType] }}>{type.slice(0, 3)}</div>
-                      <p className="text-xs font-bold capitalize">{type}</p>
-                      <p className="text-lg font-extrabold">{data.count}</p>
-                      <p className="text-[10px] text-muted-foreground">Pokémon</p>
-                      <p className={cn("text-[10px] font-bold", (data.totalWr / data.count) >= 52 ? "text-green-600" : "text-gray-500")}>
-                        {(data.totalWr / data.count).toFixed(1)}% avg WR
-                      </p>
-                      <div className="mt-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${(data.count / maxCount) * 100}%`, backgroundColor: TYPE_COLORS[type as PokemonType] }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
-          </div>
-
-          {/* ═══ 11. ARCHETYPE POWER RANKINGS ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-cyan-500" /> Archetype Power Rankings
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Every archetype ranked by ML ELO and win rate. The most successful playstyles across 2,000,000 simulated doubles battles.
-            </p>
-            <div className="space-y-2">
-              {ML_ARCHETYPES.map((a, i) => (
-                <div key={a.name} className={cn("p-4 rounded-xl border flex items-center gap-4 cursor-pointer hover:shadow-md transition-all", i < 2 ? "bg-amber-50/30 border-amber-200" : i < 5 ? "bg-blue-50/20 border-blue-200" : "bg-gray-50 border-gray-200")} onClick={() => setModal({ kind: "archetype", name: a.name })}>
-                  <span className={cn("w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold", i < 2 ? "bg-amber-100 text-amber-700" : i < 5 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>#{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold">{a.name}</p>
-                    <p className="text-[10px] text-muted-foreground">ELO: {a.elo.toLocaleString()}</p>
-                  </div>
-                  <div className="w-32 h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div className={cn("h-full rounded-full", a.wr >= 60 ? "bg-green-400" : a.wr >= 52 ? "bg-emerald-400" : "bg-gray-400")} style={{ width: `${a.wr}%` }} />
-                  </div>
-                  <span className={cn("text-lg font-bold w-16 text-right", a.wr >= 60 ? "text-green-600" : a.wr >= 52 ? "text-emerald-600" : "text-gray-700")}>{a.wr}%</span>
-                </div>
-              ))}
-            </div>
-            <button onClick={() => setActiveTab("matchups")} className="mt-4 text-xs text-cyan-600 hover:text-cyan-700 font-medium flex items-center gap-1">
-              View matchup details <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          {/* ═══ 12. CURATED TEAMS PREVIEW ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-500" /> Curated Tournament Teams
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Hand-picked teams with full sets ready to load into the Team Builder. These represent proven archetypes from competitive play.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {_VALID_PREBUILT_TEAMS.slice(0, 6).map(team => (
-                <div key={team.id} className="p-4 rounded-xl bg-gray-50 border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer" onClick={() => setModal({ kind: "prebuilt", id: team.id })}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={cn("px-2 py-0.5 text-[9px] font-bold rounded uppercase", team.tier === "S" ? "bg-amber-100 text-amber-700" : team.tier === "A" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{team.tier}-Tier</span>
-                    <span className="px-1.5 py-0.5 text-[9px] rounded bg-emerald-50 text-emerald-600 font-medium capitalize">{team.archetype}</span>
-                  </div>
-                  <h4 className="text-sm font-bold mb-1">{team.name}</h4>
-                  <p className="text-[10px] text-muted-foreground mb-2 line-clamp-2">{team.description}</p>
-                  <div className="flex gap-1.5 mb-2">
-                    {team.pokemonIds.map(id => {
-                      const p = POKEMON_SEED.find(pk => pk.id === id);
-                      return p ? <Image key={id} src={p.sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized /> : null;
-                    })}
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {team.tags.slice(0, 4).map(tag => <span key={tag} className="px-1.5 py-0.5 text-[8px] rounded bg-gray-100 text-gray-600 font-medium">{tag}</span>)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ═══ 13. RECENT TOURNAMENT RESULTS ═══ */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
-              <Crown className="w-5 h-5 text-amber-500" /> Recent Tournament Champions
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Winning teams from the most recent VGC events. Click any team for full breakdown.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {_VALID_TOURNAMENT_TEAMS.filter(t => t.placement === 1).sort((a, b) => b.year - a.year).slice(0, 8).map(team => {
-                const teamPokemon = team.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
-                const champMegaId = getMegaIdFromArchetype(team.archetype);
-                return (
-                  <div key={team.id} className="p-4 rounded-xl bg-amber-50/30 border border-amber-200 hover:border-amber-300 hover:shadow-md transition-all cursor-pointer" onClick={() => { setActiveTab("teams"); setExpandedTeam(team.id); }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">🏆</span>
-                        <div>
-                          <p className="text-sm font-bold">{team.tournament}</p>
-                          <p className="text-[10px] text-muted-foreground">{team.year} · {team.region} · {team.player || "Unknown"}</p>
-                        </div>
-                      </div>
-                      <span className="px-1.5 py-0.5 text-[9px] rounded bg-amber-100 text-amber-700 font-medium capitalize">{team.archetype}</span>
-                    </div>
-                    <div className="flex gap-1.5">
-                      {teamPokemon.map(p => {
-                        const cIsMega = champMegaId === p.id;
-                        return (
-                          <div key={p.id} className="flex flex-col items-center">
-                            <div className="relative">
-                              <Image src={cIsMega ? getMegaSprite(p) : p.sprite} alt={cIsMega ? getMegaName(p) : p.name} width={30} height={30} className="rounded" unoptimized />
-                              {cIsMega && <span className="absolute -top-1 -right-1 px-0.5 text-[6px] font-bold bg-amber-500 text-white rounded shadow-sm">M</span>}
-                            </div>
-                            <span className={cn("text-[7px] truncate w-10 text-center", cIsMega ? "text-amber-600 font-bold" : "text-muted-foreground")}>{cIsMega ? getMegaName(p) : p.name}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <button onClick={() => setActiveTab("teams")} className="mt-4 text-xs text-amber-600 hover:text-amber-700 font-medium flex items-center gap-1">
-              View all {_VALID_TOURNAMENT_TEAMS.length} teams <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
         </motion.div>
       )}
 
       {/* ══════════ POKEMON RANKINGS TAB ══════════ */}
       {activeTab === "pokemon" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-          {/* ML Rankings */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-2 flex items-center gap-2">
-              <Brain className="w-5 h-5 text-emerald-500" /> ML Simulation Rankings
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              ELO ratings from {SIM_TOTAL_BATTLES.toLocaleString()} simulated VGC doubles battles. Tiers based on composite win rate percentiles: S (top 5%, ≥{TIER_S.toFixed(1)}%), A (top 25%, ≥{TIER_A.toFixed(1)}%), B (top 65%, ≥{TIER_B.toFixed(1)}%), C (top 88%, ≥{TIER_C.toFixed(1)}%), D (below or insufficient data).
-            </p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">#</th>
-                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Pokémon</th>
-                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">ELO</th>
-                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">Win Rate</th>
-                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">Games</th>
-                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Tier</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ML_POKEMON_RANKINGS.map((p, i) => {
-                    const sprite = getSpriteForName(p.name);
-                    const types = getTypesForName(p.name);
-                    const tier = p.tier;
-                    return (
-                      <tr key={p.name} className={cn("border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer", selectedPokemon === p.name && "bg-emerald-50")} onClick={() => setSelectedPokemon(selectedPokemon === p.name ? null : p.name)}>
-                        <td className="py-2.5 px-3 text-xs font-bold text-muted-foreground">{i + 1}</td>
-                        <td className="py-2.5 px-3">
-                          <div className="flex items-center gap-2">
-                            {sprite && <Image src={sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
-                            <div>
-                              <span className="text-sm font-semibold">{p.name}</span>
-                              {types && <div className="flex gap-0.5 mt-0.5">{types.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t as PokemonType]}AA` }}>{t.slice(0, 3)}</span>)}</div>}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-mono text-sm font-bold">{p.elo.toLocaleString()}</td>
-                        <td className={cn("py-2.5 px-3 text-right font-bold text-sm", p.wr >= 60 ? "text-green-600" : p.wr >= 52 ? "text-emerald-600" : p.wr >= 50 ? "text-gray-700" : "text-red-600")}>{p.wr}%</td>
-                        <td className="py-2.5 px-3 text-right text-xs text-muted-foreground">{p.games.toLocaleString()}</td>
-                        <td className="py-2.5 px-3">
-                          <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded", tier === "S" ? "bg-amber-100 text-amber-700" : tier === "A" ? "bg-blue-100 text-blue-700" : tier === "B" ? "bg-gray-100 text-gray-700" : tier === "C" ? "bg-gray-50 text-gray-500" : "bg-red-50 text-red-400")}>{tier}</span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+
+          {/* ═══ 1. CHAMPIONS OFFICIAL USAGE STATS ═══ */}
+          <div className="glass rounded-2xl p-6 border-2 border-amber-200/80 bg-gradient-to-br from-amber-50/40 via-white to-yellow-50/40 shadow-lg shadow-amber-100/30">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-extrabold flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-500" /> Pokémon Champions Official Usage Stats
+              </h2>
+              <span className="px-3 py-1 text-[10px] font-bold uppercase rounded-full bg-amber-100 text-amber-700 border border-amber-200">In-Game Ranked Data</span>
             </div>
+            <p className="text-sm text-muted-foreground mb-5">
+              Real usage data from Nintendo&apos;s Champions Ranked Doubles ladder (April 2026). Rankings reflect actual player pick rates across all skill brackets.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {_VALID_TOURNAMENT_USAGE
+                .sort((a, b) => b.usageRate - a.usageRate)
+                .slice(0, showAllOfficial ? 207 : 15)
+                .map((p, i) => {
+                  const pokemon = POKEMON_SEED.find(pk => pk.id === p.pokemonId);
+                  const maxUsage = _VALID_TOURNAMENT_USAGE[0]?.usageRate ?? 53;
+                  return (
+                    <div
+                      key={p.pokemonId}
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-xl transition-colors cursor-pointer",
+                        i < 5 ? "bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 hover:border-amber-300" :
+                        i < 15 ? "bg-gray-50/80 border border-gray-100 hover:border-gray-200" :
+                        "bg-gray-50/50 hover:bg-gray-100/80"
+                      )}
+                      onClick={() => setModal({ kind: "pokemon", name: p.name })}
+                    >
+                      <span className={cn(
+                        "text-sm font-extrabold w-7 text-center tabular-nums",
+                        i < 3 ? "text-amber-600" : i < 10 ? "text-gray-600" : "text-gray-400"
+                      )}>{i + 1}</span>
+                      {pokemon && <Image src={pokemon.sprite} alt={p.name} width={36} height={36} className="drop-shadow-sm" unoptimized />}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate">{p.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400" style={{ width: `${Math.min(100, (p.usageRate / maxUsage) * 100)}%` }} />
+                          </div>
+                          <span className="text-xs font-bold text-amber-700 tabular-nums shrink-0">{p.usageRate}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+            {!showAllOfficial && (
+              <button
+                onClick={() => setShowAllOfficial(true)}
+                className="mt-4 w-full py-2.5 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 text-sm font-bold hover:border-amber-300 hover:shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                Show All {_VALID_TOURNAMENT_USAGE.length} Pokémon <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
+            {showAllOfficial && (
+              <button
+                onClick={() => setShowAllOfficial(false)}
+                className="mt-4 w-full py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 text-sm font-medium hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+              >
+                Show Less <ChevronUp className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
-          {/* Pokemon Detail Panel */}
-          <AnimatePresence>
-            {selectedPokemon && (() => {
-              const pokemon = getPokemonByName(selectedPokemon);
-              const mlData = ML_POKEMON_RANKINGS.find(p => p.name === selectedPokemon);
-              const usageData = pokemon ? _VALID_TOURNAMENT_USAGE.find(u => u.pokemonId === pokemon.id) : null;
-              const corePairs = pokemon ? getCorePairsForPokemon(pokemon.id) : [];
-              const teamAppearances = pokemon ? getTournamentTeamsWithPokemon(pokemon.id) : [];
-              if (!pokemon) return null;
-              return (
-                <motion.div key={selectedPokemon} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass rounded-2xl p-6 border border-emerald-200/60">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <Image src={pokemon.officialArt} alt={pokemon.name} width={80} height={80} className="drop-shadow-lg" unoptimized />
-                      <div>
-                        <h3 className="text-xl font-bold">{pokemon.name}</h3>
-                        <div className="flex gap-1 mt-1">{pokemon.types.map(t => <span key={t} className="px-2 py-0.5 text-[10px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t]}AA` }}>{t}</span>)}</div>
-                      </div>
-                    </div>
-                    <button onClick={() => setSelectedPokemon(null)} className="p-2 rounded-lg hover:bg-gray-100"><X className="w-5 h-5" /></button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* ML Stats */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-muted-foreground uppercase mb-2">ML Simulation Stats</h4>
-                      {mlData && (
-                        <div className="space-y-2">
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">ELO Rating</span><span className="text-xs font-bold">{mlData.elo.toLocaleString()}</span></div>
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">Win Rate</span><span className={cn("text-xs font-bold", mlData.wr >= 55 ? "text-green-600" : "text-foreground")}>{mlData.wr}%</span></div>
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">Games Played</span><span className="text-xs font-bold">{mlData.games.toLocaleString()}</span></div>
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">ML Tier</span><span className="text-xs font-bold">{mlData.tier}</span></div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Tournament Stats */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-muted-foreground uppercase mb-2">Tournament Data</h4>
-                      {usageData ? (
-                        <div className="space-y-2">
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">Usage Rate</span><span className="text-xs font-bold">{usageData.usageRate}%</span></div>
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">Win Rate</span><span className="text-xs font-bold">{usageData.winRate}%</span></div>
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">Top Cut Rate</span><span className="text-xs font-bold">{usageData.topCutRate}%</span></div>
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">Lead Rate</span><span className="text-xs font-bold">{usageData.leadRate}%</span></div>
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">Bring Rate</span><span className="text-xs font-bold">{usageData.bringRate}%</span></div>
-                          <div className="flex justify-between p-2 bg-gray-50 rounded-lg"><span className="text-xs text-muted-foreground">Avg Placement</span><span className="text-xs font-bold">#{usageData.avgPlacement}</span></div>
-                        </div>
-                      ) : <p className="text-xs text-muted-foreground">No tournament data available</p>}
-                    </div>
-
-                    {/* Core Partners */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-muted-foreground uppercase mb-2">Best Partners ({corePairs.length} cores)</h4>
-                      {corePairs.length > 0 ? (
-                        <div className="space-y-2">
-                          {corePairs.sort((a, b) => b.winRate - a.winRate).slice(0, 6).map(cp => {
-                            const partnerId = cp.pokemon1 === pokemon.id ? cp.pokemon2 : cp.pokemon1;
-                            const partner = POKEMON_SEED.find(p => p.id === partnerId);
-                            return (
-                              <div key={cp.name} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                                {partner && <Image src={partner.sprite} alt={partner.name} width={24} height={24} className="rounded" unoptimized />}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-semibold truncate">{cp.name}</p>
-                                  <p className="text-[10px] text-muted-foreground">{cp.usage}% usage</p>
-                                </div>
-                                <span className={cn("text-xs font-bold", cp.winRate >= 55 ? "text-green-600" : "text-gray-700")}>{cp.winRate}%</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : <p className="text-xs text-muted-foreground">No core pair data</p>}
-
-                      {teamAppearances.length > 0 && (
-                        <div className="mt-3 pt-2 border-t border-gray-200">
-                          <p className="text-[10px] text-muted-foreground uppercase mb-1">Tournament Appearances</p>
-                          <p className="text-xs font-semibold">{teamAppearances.length} teams across {new Set(teamAppearances.map(t => t.year)).size} years</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
-                            Events: {[...new Set(teamAppearances.map(t => t.tournament))].slice(0, 3).join(", ")}{teamAppearances.length > 3 ? "..." : ""}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Base Stats */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h4 className="text-sm font-semibold text-muted-foreground uppercase mb-2">Base Stats</h4>
-                    <div className="grid grid-cols-6 gap-3">
-                      {(["hp", "attack", "defense", "spAtk", "spDef", "speed"] as const).map(stat => {
-                        const value = pokemon.baseStats[stat];
-                        const labels: Record<string, string> = { hp: "HP", attack: "Atk", defense: "Def", spAtk: "SpA", spDef: "SpD", speed: "Spe" };
-                        return (
-                          <div key={stat} className="text-center">
-                            <p className="text-[10px] text-muted-foreground uppercase">{labels[stat]}</p>
-                            <p className={cn("text-sm font-bold", value >= 120 ? "text-green-600" : value >= 90 ? "text-emerald-600" : value >= 60 ? "text-gray-700" : "text-red-600")}>{value}</p>
-                            <div className="h-1 bg-gray-200 rounded-full mt-1 overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400" style={{ width: `${Math.min(100, (value / 180) * 100)}%` }} /></div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })()}
-          </AnimatePresence>
-
-          {/* Tournament Usage Rankings */}
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-2 flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-500" /> Tournament Usage Rankings
-            </h2>
+          {/* ═══ 2. CHAMPIONS OFFICIAL & COMMUNITY TOURNAMENT USAGE ═══ */}
+          <div className="glass rounded-2xl p-6 border border-indigo-200/60 bg-gradient-to-br from-indigo-50/30 via-white to-violet-50/30">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <Award className="w-5 h-5 text-indigo-500" /> Champions Official & Community Tournament Usage
+              </h2>
+              <span className="px-3 py-1 text-[10px] font-bold uppercase rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200">
+                {CHAMPIONS_TOURNAMENT_TOTAL_TEAMS.toLocaleString()} Teams · {CHAMPIONS_TOURNAMENT_COUNT} Tournaments
+              </span>
+            </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Real VGC usage data aggregated from Worlds, Regionals, and Premier Challenges. Usage rate indicates how frequently a Pokémon appears on teams.
+              Real team data from {CHAMPIONS_TOURNAMENT_COUNT} official & community Pokémon Champions tournaments on Limitless (April 2026). Shows actual competitive pick rates and top-8 conversion.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {topUsage.map((p, i) => {
-                const pokemon = POKEMON_SEED.find(pk => pk.id === p.pokemonId);
+              {CHAMPIONS_TOURNAMENT_USAGE.slice(0, 30).map((p, i) => {
+                const pokemon = getPokemonByName(p.name);
+                const sprite = pokemon?.sprite ?? getSpriteForName(p.name);
+                const maxUsage = CHAMPIONS_TOURNAMENT_USAGE[0]?.usagePct ?? 53;
+                const top8Rate = Math.round((p.top8Count / (CHAMPIONS_TOURNAMENT_COUNT * 8)) * 100);
                 return (
-                  <div key={p.pokemonId} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => setSelectedPokemon(p.name)}>
-                    <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}</span>
-                    {pokemon && <Image src={pokemon.sprite} alt={p.name} width={32} height={32} className="rounded" unoptimized />}
+                  <div
+                    key={p.name}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-xl transition-colors cursor-pointer",
+                      i < 5 ? "bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200 hover:border-indigo-300" :
+                      i < 15 ? "bg-gray-50/80 border border-gray-100 hover:border-gray-200" :
+                      "bg-gray-50/50 hover:bg-gray-100/80"
+                    )}
+                    onClick={() => setModal({ kind: "pokemon", name: p.name })}
+                  >
+                    <span className={cn(
+                      "text-sm font-extrabold w-7 text-center tabular-nums",
+                      i < 3 ? "text-indigo-600" : i < 10 ? "text-gray-600" : "text-gray-400"
+                    )}>{p.rank}</span>
+                    {sprite && <Image src={sprite} alt={p.name} width={36} height={36} className="drop-shadow-sm" unoptimized />}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate">{p.name}</p>
-                      <div className="flex gap-2 text-[10px] text-muted-foreground">
-                        <span>Usage: {p.usageRate}%</span>
-                        <span>·</span>
-                        <span>Top Cut: {p.topCutRate}%</span>
+                      <p className="text-sm font-bold truncate">{p.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-violet-400" style={{ width: `${Math.min(100, (p.usagePct / maxUsage) * 100)}%` }} />
+                        </div>
+                        <span className="text-xs font-bold text-indigo-700 tabular-nums shrink-0">{p.usagePct}%</span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={cn("text-sm font-bold", p.winRate >= 53 ? "text-green-600" : p.winRate >= 50 ? "text-gray-700" : "text-red-600")}>{p.winRate}%</p>
-                      <div className="h-1 w-12 bg-gray-200 rounded-full mt-1 overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400" style={{ width: `${p.usageRate}%` }} />
-                      </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-[10px] text-muted-foreground block">{p.count} teams</span>
+                      <span className={cn("text-[10px] font-bold", top8Rate >= 50 ? "text-green-600" : top8Rate >= 30 ? "text-amber-600" : "text-gray-500")}>Top 8: {top8Rate}%</span>
                     </div>
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* ═══ 3. ML RANKING + ANTI-META RANKING (Side by Side) ═══ */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {/* ML Simulation Ranking */}
+            <div className="glass rounded-2xl p-5 border border-emerald-200/60">
+              <h2 className="text-base font-bold mb-1 flex items-center gap-2">
+                <Brain className="w-4 h-4 text-emerald-500" /> ML Simulation Ranking
+              </h2>
+              <p className="text-xs text-muted-foreground mb-3">
+                ELO from {SIM_TOTAL_BATTLES.toLocaleString()} battles. Auto-updated after each engine run.
+              </p>
+              <div className="space-y-1.5">
+                {ML_POKEMON_RANKINGS.slice(0, 15).map((p, i) => {
+                  const sprite = getSpriteForName(p.name);
+                  return (
+                    <div
+                      key={p.name}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => setModal({ kind: "pokemon", name: p.name })}
+                    >
+                      <span className={cn("text-xs font-extrabold w-5 text-center tabular-nums", i < 3 ? "text-emerald-600" : "text-gray-400")}>{i + 1}</span>
+                      {sprite && <Image src={sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold truncate block">{p.name}</span>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-gray-600 tabular-nums">{p.elo.toLocaleString()}</span>
+                      <span className={cn("text-xs font-bold tabular-nums", p.wr >= 55 ? "text-green-600" : p.wr >= 50 ? "text-gray-700" : "text-red-500")}>{p.wr}%</span>
+                      <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded",
+                        p.tier === "S" ? "bg-amber-100 text-amber-700" : p.tier === "A" ? "bg-blue-100 text-blue-700" : p.tier === "B" ? "bg-gray-100 text-gray-700" : p.tier === "C" ? "bg-gray-50 text-gray-500" : "bg-red-50 text-red-400"
+                      )}>{p.tier}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Anti-Meta Ranking */}
+            <div className="glass rounded-2xl p-5 border border-purple-200/60">
+              <h2 className="text-base font-bold mb-1 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-purple-500" /> Anti-Meta Pokémon Ranking
+              </h2>
+              <p className="text-xs text-muted-foreground mb-3">
+                Pokémon that counter the current meta. Scored by win rate vs top 15 threats. Auto-updated after engine runs.
+              </p>
+              <div className="space-y-1.5">
+                {ANTI_META_RANKINGS.slice(0, 15).map((p, i) => {
+                  const pokemon = POKEMON_SEED.find(pk => pk.id === p.id);
+                  return (
+                    <div
+                      key={p.id}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => setModal({ kind: "pokemon", name: p.name })}
+                    >
+                      <span className={cn("text-xs font-extrabold w-5 text-center tabular-nums", i < 3 ? "text-purple-600" : "text-gray-400")}>{i + 1}</span>
+                      {pokemon && <Image src={pokemon.sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />}
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold truncate block">{p.name}</span>
+                        <span className="text-[10px] text-muted-foreground">Beats: {p.bestInto.slice(0, 3).join(", ")}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className={cn("text-xs font-bold tabular-nums", p.winVsMeta >= 55 ? "text-green-600" : p.winVsMeta >= 52 ? "text-emerald-600" : "text-gray-700")}>{p.winVsMeta}%</span>
+                        <div className="flex items-center gap-0.5 mt-0.5">
+                          <div className="w-10 h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-purple-400 to-fuchsia-400" style={{ width: `${p.score}%` }} />
+                          </div>
+                          <span className="text-[9px] text-purple-600 font-bold">{p.score}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -1162,17 +1091,184 @@ export default function MetaPage() {
       {/* ══════════ TOURNAMENT TEAMS TAB ══════════ */}
       {activeTab === "teams" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-          <div className="glass rounded-2xl p-6 border border-gray-200/60">
-            <h2 className="text-lg font-bold mb-2">Tournament Team Database</h2>
+
+          {/* ═══ 1. CHAMPIONS TOURNAMENT TEAMS ═══ */}
+          <div className="glass rounded-2xl p-6 border border-amber-200/60 bg-gradient-to-br from-amber-50/30 via-white to-yellow-50/30">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-500" /> Tournament Teams
+              </h2>
+              <span className="px-3 py-1 text-[10px] font-bold uppercase rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                {_VALID_CHAMPIONS_TEAMS.length} Teams
+              </span>
+            </div>
             <p className="text-sm text-muted-foreground mb-4">
-              {_VALID_TOURNAMENT_TEAMS.length} teams from major VGC events (2005–2025). Click any team for detailed breakdown including archetype analysis, event context, and Pokémon roles.
+              Top teams from {CHAMPIONS_TOURNAMENT_COUNT}+ official and community Pokémon Champions tournaments. Click any team for full breakdown.
             </p>
-            <div className="space-y-3">
-              {_VALID_TOURNAMENT_TEAMS.map(team => (
-                <TournamentTeamCard key={team.id} team={team} expanded={expandedTeam === team.id} onToggle={() => setExpandedTeam(expandedTeam === team.id ? null : team.id)} />
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {([..._VALID_CHAMPIONS_TEAMS]
+                .sort((a, b) => a.placement === b.placement ? b.players - a.players : a.placement - b.placement)
+                .slice(0, showAllTournament ? undefined : 12)
+              ).map(team => {
+                const teamPokemon = team.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter(Boolean);
+                return (
+                  <div
+                    key={team.id}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-amber-100 bg-white/60 hover:border-amber-300 hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => setModal({ kind: "tournament-team", id: team.id })}
+                  >
+                    <div className="flex -space-x-1 shrink-0">
+                      {teamPokemon.slice(0, 6).map((p, pi) => p && (
+                        <Image key={pi} src={p.sprite} alt={p.name} width={28} height={28} className="drop-shadow-sm" unoptimized />
+                      ))}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={cn("px-1.5 py-0.5 text-[9px] font-bold uppercase rounded", team.placement <= 1 ? "bg-amber-100 text-amber-700" : team.placement <= 2 ? "bg-gray-200 text-gray-700" : "bg-gray-100 text-gray-500")}>
+                          {team.placement === 1 ? "🥇" : team.placement === 2 ? "🥈" : `Top ${team.placement}`}
+                        </span>
+                        <span className="text-xs font-semibold truncate">{team.tournament}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="px-1.5 py-0.5 text-[8px] rounded bg-emerald-50 text-emerald-600 font-medium">{team.wins}W-{team.losses}L</span>
+                        <span className="text-[9px] text-muted-foreground">{team.player} · {team.players} players</span>
+                      </div>
+                    </div>
+                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  </div>
+                );
+              })}
+            </div>
+            {!showAllTournament && _VALID_CHAMPIONS_TEAMS.length > 12 && (
+              <button
+                onClick={() => setShowAllTournament(true)}
+                className="mt-4 w-full py-2.5 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 text-sm font-bold hover:border-amber-300 hover:shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                Show All {_VALID_CHAMPIONS_TEAMS.length} Teams <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
+            {showAllTournament && (
+              <button
+                onClick={() => setShowAllTournament(false)}
+                className="mt-4 w-full py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 text-sm font-medium hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+              >
+                Show Less <ChevronUp className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* ═══ 2. CURATED + ANTI-META TEAMS (Side by Side) ═══ */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            {/* Left: Curated Teams */}
+            <div className="glass rounded-2xl p-5 border border-emerald-200/60 bg-gradient-to-br from-emerald-50/30 via-white to-cyan-50/30">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-base font-bold flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-500" /> Curated Teams
+                </h2>
+                <span className="px-2 py-0.5 text-[9px] font-bold uppercase rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">
+                  {_VALID_PREBUILT_TEAMS.length} Teams
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Hand-built competitive teams with full sets, items, and SP spreads. Ready to load into the Team Builder.
+              </p>
+              <div className="space-y-2">
+                {_VALID_PREBUILT_TEAMS
+                  .sort((a, b) => { const o = { S: 0, A: 1, B: 2 }; return (o[a.tier] ?? 3) - (o[b.tier] ?? 3); })
+                  .slice(0, showAllCurated ? undefined : 10)
+                  .map(team => {
+                    const teamPokemon = team.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter(Boolean);
+                    return (
+                      <div
+                        key={team.id}
+                        className="flex items-center gap-3 p-3 rounded-xl border border-emerald-100 bg-white/60 hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer"
+                        onClick={() => setModal({ kind: "prebuilt", id: team.id })}
+                      >
+                        <div className="flex -space-x-1.5 shrink-0">
+                          {teamPokemon.slice(0, 6).map((p, pi) => p && (
+                            <Image key={pi} src={p.sprite} alt={p.name} width={26} height={26} className="rounded border border-white shadow-sm" unoptimized />
+                          ))}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", team.tier === "S" ? "bg-amber-100 text-amber-700" : team.tier === "A" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{team.tier}</span>
+                            <span className="text-xs font-semibold truncate">{team.name}</span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground truncate block">{team.archetype}</span>
+                        </div>
+                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      </div>
+                    );
+                  })}
+              </div>
+              {!showAllCurated && _VALID_PREBUILT_TEAMS.length > 8 && (
+                <button
+                  onClick={() => setShowAllCurated(true)}
+                  className="mt-3 w-full py-2 rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-cyan-50 text-emerald-700 text-xs font-bold hover:border-emerald-300 hover:shadow-md transition-all flex items-center justify-center gap-2"
+                >
+                  Show All {_VALID_PREBUILT_TEAMS.length} Teams <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {showAllCurated && (
+                <button
+                  onClick={() => setShowAllCurated(false)}
+                  className="mt-3 w-full py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 text-xs font-medium hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+                >
+                  Show Less <ChevronUp className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Right: Anti-Meta Teams */}
+            <div className="glass rounded-2xl p-5 border border-purple-200/60 bg-gradient-to-br from-purple-50/30 via-white to-fuchsia-50/30">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-base font-bold flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-purple-500" /> Anti-Meta Teams
+                </h2>
+                <span className="px-2 py-0.5 text-[9px] font-bold uppercase rounded-full bg-purple-100 text-purple-700 border border-purple-200">
+                  {ANTI_META_TEAMS.length} Teams
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Counter-teams designed to beat the most common tournament strategies. Built around top anti-meta cores.
+              </p>
+              <div className="space-y-2">
+                {ANTI_META_TEAMS.map(team => {
+                  const teamPokemon = team.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter(Boolean);
+                  const corePokemon = team.coreIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter(Boolean);
+                  return (
+                    <div
+                      key={team.id}
+                      className="p-3 rounded-xl border border-purple-100 bg-white/60 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => setModal({ kind: "anti-meta", id: team.id })}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", team.winVsMeta >= 55 ? "bg-green-100 text-green-700" : "bg-purple-100 text-purple-700")}>{team.winVsMeta}% WR</span>
+                        <span className="text-xs font-semibold truncate">{team.name}</span>
+                      </div>
+                      <div className="flex gap-1 mb-2">
+                        {teamPokemon.slice(0, 6).map((p, pi) => {
+                          const isCore = corePokemon.some(c => c?.id === p?.id);
+                          return p && (
+                            <div key={pi} className="relative">
+                              <Image src={p.sprite} alt={p.name} width={26} height={26} className={cn("rounded", isCore && "ring-1 ring-purple-400")} unoptimized />
+                              {isCore && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-purple-500 border border-white" />}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground line-clamp-2">{team.strategy}</p>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {team.counters.map(c => <span key={c} className="px-1.5 py-0.5 text-[8px] font-medium rounded bg-green-50 text-green-600">✓ {c}</span>)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
+
         </motion.div>
       )}
 
@@ -1186,68 +1282,68 @@ export default function MetaPage() {
               ML simulation cores are shown separately below.
             </p>
 
-            {/* ML Cores */}
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Brain className="w-4 h-4 text-emerald-500" /> ML-Discovered Cores <span className="text-xs font-normal text-muted-foreground">(from 2M battles)</span>
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-              {ML_BEST_CORES.map((c, i) => (
-                <div key={c.pair} className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-bold">{c.pair}</span>
-                    <span className={cn("text-sm font-bold", c.wr >= 75 ? "text-green-600" : "text-emerald-600")}>{c.wr}% WR</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {c.pair.split(" + ").map(name => {
-                      const sp = getSpriteForName(name);
-                      return sp ? <Image key={name} src={sp} alt={name} width={36} height={36} className="rounded" unoptimized /> : <span key={name} className="text-xs">{name}</span>;
-                    })}
-                    <div className="flex-1" />
-                    <span className="text-xs text-muted-foreground">{c.games.toLocaleString()} games</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Tournament Cores */}
+            {/* Tournament Core Pairs (card grid) */}
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
               <Award className="w-4 h-4 text-amber-500" /> Tournament Core Pairs
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              {_VALID_CORE_PAIRS
+                .sort((a, b) => b.winRate - a.winRate).map((cp, idx) => {
+                const p1 = POKEMON_SEED.find(p => p.id === cp.pokemon1);
+                const p2 = POKEMON_SEED.find(p => p.id === cp.pokemon2);
+                const tier = cp.usage >= 20 ? "S" : cp.usage >= 12 ? "A" : cp.usage >= 6 ? "B" : "C";
+                return (
+                  <div key={`${cp.name}-${idx}`} className="p-4 rounded-xl bg-amber-50/50 border border-amber-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", tier === "S" ? "bg-amber-100 text-amber-700" : tier === "A" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>{tier}</span>
+                        <span className="text-sm font-bold">{cp.name}</span>
+                      </div>
+                      <span className={cn("text-sm font-bold", cp.winRate >= 55 ? "text-green-600" : "text-emerald-600")}>{cp.winRate}% WR</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {p1 && <Image src={p1.sprite} alt={p1.name} width={36} height={36} className="rounded" unoptimized />}
+                      {p2 && <Image src={p2.sprite} alt={p2.name} width={36} height={36} className="rounded" unoptimized />}
+                      <div className="flex-1" />
+                      <span className="text-xs text-muted-foreground">{cp.usage}% usage · {cp.synergy}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ML-Discovered Cores (table) */}
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mt-6 mb-3 flex items-center gap-2">
+              <Brain className="w-4 h-4 text-emerald-500" /> ML-Discovered Cores <span className="text-xs font-normal text-muted-foreground">(from 2M battles)</span>
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Tier</th>
+                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">#</th>
                     <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Core</th>
                     <th className="text-center py-2 px-3 text-xs text-muted-foreground font-medium">Pokémon</th>
                     <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">Win Rate</th>
-                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">Usage</th>
-                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Synergy</th>
+                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">Games</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {_VALID_CORE_PAIRS
-                    .sort((a, b) => b.winRate - a.winRate).map(cp => {
-                    const p1 = POKEMON_SEED.find(p => p.id === cp.pokemon1);
-                    const p2 = POKEMON_SEED.find(p => p.id === cp.pokemon2);
-                    const tier = cp.usage >= 20 ? "S" : cp.usage >= 12 ? "A" : cp.usage >= 6 ? "B" : "C";
-                    return (
-                      <tr key={cp.name} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-2 px-3"><span className={cn("px-2 py-0.5 text-[10px] font-bold rounded", tier === "S" ? "bg-amber-100 text-amber-700" : tier === "A" ? "bg-blue-100 text-blue-700" : tier === "B" ? "bg-gray-100 text-gray-700" : "bg-gray-50 text-gray-500")}>{tier}</span></td>
-                        <td className="py-2 px-3 font-semibold text-sm">{cp.name}</td>
-                        <td className="py-2 px-3">
-                          <div className="flex items-center justify-center gap-1">
-                            {p1 && <Image src={p1.sprite} alt={p1.name} width={24} height={24} className="rounded" unoptimized />}
-                            <span className="text-xs text-muted-foreground">+</span>
-                            {p2 && <Image src={p2.sprite} alt={p2.name} width={24} height={24} className="rounded" unoptimized />}
-                          </div>
-                        </td>
-                        <td className={cn("py-2 px-3 text-right font-bold", cp.winRate >= 55 ? "text-green-600" : "text-gray-700")}>{cp.winRate}%</td>
-                        <td className="py-2 px-3 text-right text-muted-foreground">{cp.usage}%</td>
-                        <td className="py-2 px-3 text-xs text-muted-foreground">{cp.synergy}</td>
-                      </tr>
-                    );
-                  })}
+                  {ML_BEST_CORES.map((c, i) => (
+                    <tr key={c.pair} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-2 px-3"><span className={cn("px-2 py-0.5 text-[10px] font-bold rounded", i < 3 ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600")}>#{i + 1}</span></td>
+                      <td className="py-2 px-3 font-semibold text-sm">{c.pair}</td>
+                      <td className="py-2 px-3">
+                        <div className="flex items-center justify-center gap-1">
+                          {c.pair.split(" + ").map(name => {
+                            const sp = getSpriteForName(name);
+                            return sp ? <Image key={name} src={sp} alt={name} width={24} height={24} className="rounded" unoptimized /> : <span key={name} className="text-xs">{name}</span>;
+                          })}
+                        </div>
+                      </td>
+                      <td className={cn("py-2 px-3 text-right font-bold", c.wr >= 75 ? "text-green-600" : "text-emerald-600")}>{c.wr}%</td>
+                      <td className="py-2 px-3 text-right text-muted-foreground">{c.games.toLocaleString()}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -1265,56 +1361,57 @@ export default function MetaPage() {
               This data combines tournament results with ML simulation insights.
             </p>
 
-            {/* ML Archetype Rankings */}
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Brain className="w-4 h-4 text-emerald-500" /> ML Archetype Rankings
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-              {ML_ARCHETYPES.map((a, i) => (
-                <div key={a.name} className="p-3 rounded-xl bg-gray-50 border border-gray-200">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", i < 2 ? "bg-amber-100 text-amber-700" : i < 5 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>#{i + 1}</span>
-                    <span className="text-sm font-semibold">{a.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400" style={{ width: `${a.wr}%` }} /></div>
-                    <span className={cn("text-sm font-bold", a.wr >= 60 ? "text-green-600" : "text-gray-700")}>{a.wr}%</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mt-1">ELO: {a.elo.toLocaleString()}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Tournament Matchup Table */}
+            {/* Tournament Matchup Data (card grid) */}
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
               <Swords className="w-4 h-4 text-cyan-500" /> Tournament Matchup Data
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+              {ARCHETYPE_MATCHUPS.sort((a, b) => Math.abs(b.winRate1 - 50) - Math.abs(a.winRate1 - 50)).map((m, i) => {
+                const dominant = m.winRate1 >= 50;
+                const winner = dominant ? m.archetype1 : m.archetype2;
+                const loser = dominant ? m.archetype2 : m.archetype1;
+                const wr = dominant ? m.winRate1 : 100 - m.winRate1;
+                return (
+                  <div key={i} className="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-bold text-green-600 truncate">{winner}</span>
+                      <ArrowRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <span className="text-xs font-bold text-red-600 truncate">{loser}</span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden"><div className={cn("h-full rounded-full", wr >= 55 ? "bg-green-400" : "bg-emerald-400")} style={{ width: `${wr}%` }} /></div>
+                      <span className={cn("text-sm font-bold", wr >= 55 ? "text-green-600" : "text-gray-700")}>{wr.toFixed(1)}%</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-1">{m.sampleSize} games · {wr >= 55 ? `${winner} favored` : "Even"}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ML Archetype Rankings (table) */}
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mt-6 mb-3 flex items-center gap-2">
+              <Brain className="w-4 h-4 text-emerald-500" /> ML Archetype Rankings
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Archetype 1</th>
-                    <th className="text-center py-2 px-3 text-xs text-muted-foreground font-medium">vs</th>
-                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Archetype 2</th>
-                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">Win Rate 1</th>
-                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">Games</th>
-                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Verdict</th>
+                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">#</th>
+                    <th className="text-left py-2 px-3 text-xs text-muted-foreground font-medium">Archetype</th>
+                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">Win Rate</th>
+                    <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">ELO</th>
+                    <th className="text-center py-2 px-3 text-xs text-muted-foreground font-medium">Win Rate</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {ARCHETYPE_MATCHUPS.sort((a, b) => Math.abs(b.winRate1 - 50) - Math.abs(a.winRate1 - 50)).map((m, i) => (
-                    <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-2 px-3 font-medium">{m.archetype1}</td>
-                      <td className="py-2 px-3 text-center text-muted-foreground">vs</td>
-                      <td className="py-2 px-3 font-medium">{m.archetype2}</td>
-                      <td className={cn("py-2 px-3 text-right font-bold", m.winRate1 >= 55 ? "text-green-600" : m.winRate1 <= 45 ? "text-red-600" : "text-gray-700")}>{m.winRate1.toFixed(1)}%</td>
-                      <td className="py-2 px-3 text-right text-muted-foreground">{m.sampleSize}</td>
-                      <td className="py-2 px-3 text-xs">
-                        {m.winRate1 >= 60 ? <span className="text-green-600 font-medium">{m.archetype1} dominates</span> :
-                         m.winRate1 >= 55 ? <span className="text-emerald-600 font-medium">{m.archetype1} favored</span> :
-                         m.winRate1 <= 40 ? <span className="text-red-600 font-medium">{m.archetype2} dominates</span> :
-                         m.winRate1 <= 45 ? <span className="text-amber-600 font-medium">{m.archetype2} favored</span> :
-                         <span className="text-muted-foreground">Even</span>}
+                  {ML_ARCHETYPES.map((a, i) => (
+                    <tr key={a.name} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-2 px-3"><span className={cn("px-2 py-0.5 text-[10px] font-bold rounded", i < 2 ? "bg-amber-100 text-amber-700" : i < 5 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600")}>#{i + 1}</span></td>
+                      <td className="py-2 px-3 font-semibold text-sm">{a.name}</td>
+                      <td className={cn("py-2 px-3 text-right font-bold", a.wr >= 60 ? "text-green-600" : "text-gray-700")}>{a.wr}%</td>
+                      <td className="py-2 px-3 text-right text-muted-foreground">{a.elo.toLocaleString()}</td>
+                      <td className="py-2 px-3">
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400" style={{ width: `${a.wr}%` }} /></div>
                       </td>
                     </tr>
                   ))}
@@ -1372,7 +1469,7 @@ export default function MetaPage() {
             </div>
             <p className="text-sm text-muted-foreground mb-4">
               Complete speed tier chart for all {filteredSpeedEntries.length} Pokémon. Calculated at Level 50 with max IVs (31) and max SP investment (32) where applicable.
-              Mega Evolutions cannot hold items — Choice Scarf columns show N/A.
+              Mega Evolutions cannot hold items  -  Choice Scarf columns show N/A.
             </p>
 
             {/* ── Quick Stats ── */}
@@ -1482,7 +1579,7 @@ export default function MetaPage() {
 
                   {/* Table Rows */}
                   {bracketEntries.map((entry, i) => {
-                    const globalRank = filteredSpeedEntries.indexOf(entry) + 1;
+                    const globalRank = speedOriginalRank.get(entry.key) ?? (filteredSpeedEntries.indexOf(entry) + 1);
                     const tw = speedTailwind ? 2 : 1;
                     const displayMaxPos = entry.maxPositive * tw;
                     const displayMaxNeu = entry.maxNeutral * tw;
@@ -1541,7 +1638,7 @@ export default function MetaPage() {
                                 entry.tier === "C" ? "bg-gray-50 text-gray-500" :
                                 "bg-red-50 text-red-400"
                               )}>{entry.tier}</span>
-                            ) : <span className="text-[10px] text-gray-300">—</span>}
+                            ) : <span className="text-[10px] text-gray-300"> - </span>}
                           </div>
 
                           {/* Base Speed */}
@@ -1722,7 +1819,7 @@ export default function MetaPage() {
                 },
                 {
                   title: "Trick Room",
-                  desc: "Reverses turn order for 5 turns — slower Pokémon move first. Use Trick Room mode above to sort by who benefits most.",
+                  desc: "Reverses turn order for 5 turns  -  slower Pokémon move first. Use Trick Room mode above to sort by who benefits most.",
                   icon: "🔮", color: "from-indigo-100 to-purple-100", border: "border-indigo-200",
                 },
                 {
@@ -1750,12 +1847,12 @@ export default function MetaPage() {
             <div className="mt-5 pt-4 border-t border-gray-200">
               <h4 className="text-xs font-bold uppercase text-muted-foreground mb-2">Column Reference</h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-[10px]">
-                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gray-500" /><span><strong>Base</strong> — Raw base stat</span></div>
-                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gradient-to-r from-green-400 to-emerald-400" /><span><strong>+Nat</strong> — +Nature, 32 SP</span></div>
-                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gradient-to-r from-cyan-400 to-teal-400" /><span><strong>Neutral</strong> — Neutral, 32 SP</span></div>
-                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gray-300" /><span><strong>Uninv.</strong> — Neutral, 0 SP</span></div>
-                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gradient-to-r from-amber-400 to-orange-400" /><span><strong>Scarf+</strong> — Scarf + Nature</span></div>
-                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gradient-to-r from-amber-300 to-yellow-400" /><span><strong>Scarf</strong> — Scarf, Neutral</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gray-500" /><span><strong>Base</strong>  -  Raw base stat</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gradient-to-r from-green-400 to-emerald-400" /><span><strong>+Nat</strong>  -  +Nature, 32 SP</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gradient-to-r from-cyan-400 to-teal-400" /><span><strong>Neutral</strong>  -  Neutral, 32 SP</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gray-300" /><span><strong>Uninv.</strong>  -  Neutral, 0 SP</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gradient-to-r from-amber-400 to-orange-400" /><span><strong>Scarf+</strong>  -  Scarf + Nature</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-gradient-to-r from-amber-300 to-yellow-400" /><span><strong>Scarf</strong>  -  Scarf, Neutral</span></div>
               </div>
             </div>
           </div>
@@ -1766,7 +1863,7 @@ export default function MetaPage() {
     {/* ══════════ DETAIL MODAL OVERLAY ══════════ */}
     <AnimatePresence>
       {modal && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-start justify-center pt-[5vh] px-4 pb-8" onClick={() => setModal(null)}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-start justify-center pt-[max(5vh,5rem)] px-4 pb-8" onClick={() => setModal(null)}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <motion.div initial={{ opacity: 0, y: 30, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: 0.97 }} transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative bg-white rounded-2xl shadow-2xl border border-gray-200 max-w-4xl w-full max-h-[85vh] overflow-y-auto"
@@ -2217,7 +2314,7 @@ export default function MetaPage() {
               const names = pairName.split(" + ");
               const pokemon1 = POKEMON_SEED.find(p => p.name === names[0]);
               const pokemon2 = POKEMON_SEED.find(p => p.name === names[1]);
-              const teamsWithBoth = (pokemon1 && pokemon2) ? _VALID_TOURNAMENT_TEAMS.filter(t => t.pokemonIds.includes(pokemon1.id) && t.pokemonIds.includes(pokemon2.id)) : [];
+              const teamsWithBoth = (pokemon1 && pokemon2) ? _VALID_CHAMPIONS_TEAMS.filter(t => t.pokemonIds.includes(pokemon1.id) && t.pokemonIds.includes(pokemon2.id)) : [];
               return (
                 <div className="p-6 space-y-6">
                   <div className="flex items-center gap-5">
@@ -2276,9 +2373,9 @@ export default function MetaPage() {
                     <div>
                       <h4 className="text-sm font-bold uppercase text-muted-foreground mb-3">Tournament Teams with this Core ({teamsWithBoth.length})</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {teamsWithBoth.sort((a, b) => a.placement - b.placement || b.year - a.year).slice(0, 6).map(t => (
+                        {teamsWithBoth.sort((a, b) => a.placement - b.placement || b.players - a.players).slice(0, 6).map(t => (
                           <div key={t.id} className="p-3 bg-gray-50 rounded-xl">
-                            <div className="flex items-center gap-2 mb-1"><span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", t.placement === 1 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600")}>{t.placement === 1 ? "🥇" : `#${t.placement}`}</span><span className="text-xs font-bold">{t.tournament}</span><span className="text-[10px] text-muted-foreground">{t.year}</span></div>
+                            <div className="flex items-center gap-2 mb-1"><span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded", t.placement === 1 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600")}>{t.placement === 1 ? "🥇" : `#${t.placement}`}</span><span className="text-xs font-bold">{t.tournament}</span><span className="text-[10px] text-muted-foreground">{t.player}</span></div>
                             <div className="flex gap-1">{t.pokemonIds.map(id => { const pm = POKEMON_SEED.find(pk => pk.id === id); return pm ? <Image key={id} src={pm.sprite} alt={pm.name} width={24} height={24} className="rounded" unoptimized /> : null; })}</div>
                           </div>
                         ))}
@@ -2367,6 +2464,275 @@ export default function MetaPage() {
                   <Link href="/team-builder" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all text-sm">
                     <Sparkles className="w-4 h-4" /> Load in Team Builder <ArrowRight className="w-4 h-4" />
                   </Link>
+                </div>
+              );
+            })()}
+
+            {modal.kind === "anti-meta" && (() => {
+              const team = ANTI_META_TEAMS.find(t => t.id === modal.id);
+              if (!team) return <div className="p-8 text-center text-muted-foreground">Team not found</div>;
+              const teamPokemon = team.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
+              const corePokemon = team.coreIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
+              const builderSlots = team.pokemonIds.map(id => {
+                const sets = USAGE_DATA[id];
+                const set = sets?.[0];
+                return {
+                  p: id,
+                  a: set?.ability || undefined,
+                  t: set?.nature || undefined,
+                  m: set?.moves || [],
+                  sp: set ? [set.sp.hp, set.sp.attack, set.sp.defense, set.sp.spAtk, set.sp.spDef, set.sp.speed] : [0,0,0,0,0,0],
+                  i: set?.item || undefined,
+                };
+              });
+              const builderJson = JSON.stringify({ n: team.name, s: builderSlots });
+              return (
+                <div className="p-6 space-y-6">
+                  <div>
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <h2 className="text-2xl font-extrabold">{team.name}</h2>
+                      <span className={cn("px-2.5 py-1 text-xs font-bold rounded-lg", team.winVsMeta >= 55 ? "bg-green-100 text-green-700" : "bg-purple-100 text-purple-700")}>{team.winVsMeta}% WR vs Meta</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{team.strategy}</p>
+                  </div>
+
+                  {/* Team sprite row */}
+                  <div className="flex justify-center gap-4 py-2">
+                    {teamPokemon.map((pkm, i) => {
+                      const isCore = corePokemon.some(c => c.id === pkm.id);
+                      return (
+                        <div key={i} className="flex flex-col items-center cursor-pointer relative" onClick={() => setModal({ kind: "pokemon", name: pkm.name })}>
+                          <Image src={pkm.officialArt} alt={pkm.name} width={72} height={72} className={cn("drop-shadow-lg hover:scale-110 transition-transform", isCore && "ring-2 ring-purple-400 rounded-full")} unoptimized />
+                          <span className="text-[10px] font-semibold mt-1">{pkm.name}</span>
+                          {isCore && <span className="absolute -top-1 -right-1 px-1 py-0.5 text-[7px] font-bold bg-purple-500 text-white rounded">CORE</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Details grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Counters */}
+                    <div>
+                      <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Beats These Archetypes</h5>
+                      <div className="flex flex-wrap gap-1">
+                        {team.counters.map(c => <span key={c} className="px-2 py-1 text-xs font-medium rounded-lg bg-green-50 text-green-600 border border-green-200">✓ {c}</span>)}
+                      </div>
+                    </div>
+                    {/* Weaknesses */}
+                    <div>
+                      <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Weak To</h5>
+                      <div className="flex flex-wrap gap-1">
+                        {team.weakTo.map(w => <span key={w} className="px-2 py-1 text-xs font-medium rounded-lg bg-red-50 text-red-600 border border-red-200">✗ {w}</span>)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Member sets from USAGE_DATA */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {teamPokemon.map((pkm) => {
+                      const set = USAGE_DATA[pkm.id]?.[0];
+                      if (!set) return (
+                        <div key={pkm.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Image src={pkm.sprite} alt={pkm.name} width={36} height={36} className="rounded" unoptimized />
+                            <p className="text-sm font-bold">{pkm.name}</p>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">No usage data available</p>
+                        </div>
+                      );
+                      return (
+                        <div key={pkm.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Image src={pkm.sprite} alt={pkm.name} width={36} height={36} className="rounded" unoptimized />
+                            <div>
+                              <p className="text-sm font-bold">{pkm.name}</p>
+                              {set.name && <p className="text-[10px] text-muted-foreground">{set.name}</p>}
+                            </div>
+                          </div>
+                          <div className="space-y-1.5 text-xs">
+                            <div className="flex justify-between"><span className="text-muted-foreground">Ability</span><span className="font-semibold">{set.ability}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Item</span><span className="font-semibold">{set.item}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Nature</span><span className="font-semibold">{set.nature}</span></div>
+                            <div className="border-t border-gray-200 pt-1.5 mt-1.5">
+                              <p className="text-[10px] text-muted-foreground uppercase mb-1">Moves</p>
+                              <div className="grid grid-cols-2 gap-1">
+                                {set.moves.map(mv => {
+                                  const moveDataFound = pkm.moves.find(m => m.name === mv);
+                                  return (
+                                    <div key={mv} className="flex items-center gap-1 p-1 bg-white rounded cursor-pointer hover:bg-gray-100" onClick={() => setModal({ kind: "move", name: mv })}>
+                                      {moveDataFound && <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: TYPE_COLORS[moveDataFound.type as PokemonType] }} />}
+                                      <span className="text-[10px] font-medium truncate">{mv}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            <div className="border-t border-gray-200 pt-1.5 mt-1.5">
+                              <p className="text-[10px] text-muted-foreground uppercase mb-1">SP Distribution</p>
+                              <div className="grid grid-cols-6 gap-1">
+                                {(["hp", "attack", "defense", "spAtk", "spDef", "speed"] as const).map(stat => (
+                                  <div key={stat} className="text-center">
+                                    <p className="text-[8px] text-muted-foreground">{{ hp: "HP", attack: "Atk", defense: "Def", spAtk: "SpA", spDef: "SpD", speed: "Spe" }[stat]}</p>
+                                    <p className={cn("text-[10px] font-bold", set.sp[stat] >= 20 ? "text-emerald-600" : set.sp[stat] > 0 ? "text-gray-700" : "text-gray-400")}>{set.sp[stat]}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <button onClick={() => window.open("/team-builder?team=" + btoa(builderJson), "_blank")} className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all text-sm">
+                    <Sparkles className="w-4 h-4" /> Open in Team Builder <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })()}
+
+            {modal.kind === "tournament-team" && (() => {
+              const team = _VALID_CHAMPIONS_TEAMS.find(t => t.id === modal.id);
+              if (!team) return <div className="p-8 text-center text-muted-foreground">Team not found</div>;
+              const teamPokemon = team.pokemonIds.map(id => POKEMON_SEED.find(p => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
+              const allTypes = [...new Set(teamPokemon.flatMap(p => p.types))];
+              const corePairs = _VALID_CORE_PAIRS.filter(cp => team.pokemonIds.includes(cp.pokemon1) && team.pokemonIds.includes(cp.pokemon2));
+              // Build team builder URL - auto-fill first usage set per Pokemon
+              const builderSlots = team.pokemonIds.map((id, idx) => {
+                const sets = USAGE_DATA[id];
+                const isMega = team.pokemonNames[idx]?.startsWith("Mega ");
+                const set = isMega
+                  ? sets?.find(s => s.name?.toLowerCase().includes("mega") || s.item?.endsWith("ite") || s.item?.endsWith("ite X") || s.item?.endsWith("ite Y")) || sets?.[0]
+                  : sets?.[0];
+                return {
+                  p: id,
+                  a: set?.ability || undefined,
+                  t: set?.nature || undefined,
+                  m: set?.moves || [],
+                  sp: set ? [set.sp.hp, set.sp.attack, set.sp.defense, set.sp.spAtk, set.sp.spDef, set.sp.speed] : [0,0,0,0,0,0],
+                  i: set?.item || undefined,
+                  mg: isMega || undefined,
+                };
+              });
+              const builderJson = JSON.stringify({ n: team.player + " - " + team.tournament, s: builderSlots });
+              return (
+                <div className="p-6 space-y-6">
+                  <div>
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <h2 className="text-2xl font-extrabold">{team.tournament}</h2>
+                      <span className={cn("px-2.5 py-1 text-xs font-bold rounded-lg", team.placement <= 1 ? "bg-amber-100 text-amber-700" : team.placement <= 2 ? "bg-gray-200 text-gray-700" : "bg-gray-100 text-gray-600")}>
+                        {team.placement === 1 ? "🥇 1st Place" : team.placement === 2 ? "🥈 2nd Place" : `Top ${team.placement}`}
+                      </span>
+                      <span className="px-2 py-1 text-[10px] rounded-lg bg-emerald-50 text-emerald-600 font-medium">{team.wins}W-{team.losses}L</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{team.player} · {team.players} players</p>
+                  </div>
+
+                  {/* Team sprite row */}
+                  <div className="flex justify-center gap-4 py-2">
+                    {teamPokemon.map((pkm, i) => (
+                      <div key={i} className="flex flex-col items-center cursor-pointer" onClick={() => setModal({ kind: "pokemon", name: pkm.name })}>
+                        <Image src={pkm.officialArt} alt={pkm.name} width={72} height={72} className="drop-shadow-lg hover:scale-110 transition-transform" unoptimized />
+                        <span className="text-[10px] font-semibold mt-1">{pkm.name}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Team details grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Members + Stats */}
+                    <div>
+                      <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Team Members</h5>
+                      <div className="space-y-2">
+                        {teamPokemon.map(p => {
+                          const usage = _VALID_TOURNAMENT_USAGE.find(u => u.pokemonId === p.id);
+                          return (
+                            <div key={p.id} className="p-2 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors bg-white/50 border-gray-100" onClick={() => setModal({ kind: "pokemon", name: p.name })}>
+                              <div className="flex items-center gap-2">
+                                <Image src={p.sprite} alt={p.name} width={28} height={28} className="rounded" unoptimized />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-semibold">{p.name}</p>
+                                  <div className="flex gap-0.5">{p.types.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t]}AA` }}>{t.slice(0, 3)}</span>)}</div>
+                                </div>
+                                {usage && <span className="text-[10px] text-muted-foreground">{usage.usageRate}% use</span>}
+                              </div>
+                              <div className="mt-1 grid grid-cols-6 gap-1">
+                                {(["hp", "attack", "defense", "spAtk", "spDef", "speed"] as const).map(stat => (
+                                  <div key={stat} className="text-center">
+                                    <p className="text-[8px] text-muted-foreground">{({ hp: "HP", attack: "Atk", defense: "Def", spAtk: "SpA", spDef: "SpD", speed: "Spe" } as Record<string, string>)[stat]}</p>
+                                    <p className="text-[9px] font-bold">{p.baseStats[stat]}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Analysis */}
+                    <div>
+                      <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Team Analysis</h5>
+                      <div className="space-y-2">
+                        <div className="p-2 bg-white/50 rounded-lg"><p className="text-[10px] text-muted-foreground uppercase">Player</p><p className="text-xs font-semibold">{team.player}</p></div>
+                        <div className="p-2 bg-white/50 rounded-lg"><p className="text-[10px] text-muted-foreground uppercase">Tournament</p><p className="text-xs font-semibold">{team.tournament}</p></div>
+                        <div className="p-2 bg-white/50 rounded-lg"><p className="text-[10px] text-muted-foreground uppercase">Placement</p><p className="text-xs font-semibold">{team.placement === 1 ? "1st Place (Champion)" : team.placement === 2 ? "2nd Place (Finalist)" : `Top ${team.placement}`}</p></div>
+                        <div className="p-2 bg-white/50 rounded-lg"><p className="text-[10px] text-muted-foreground uppercase">Record</p><p className="text-xs font-semibold">{team.wins}W - {team.losses}L ({((team.wins / (team.wins + team.losses)) * 100).toFixed(0)}% WR)</p></div>
+                        <div className="p-2 bg-white/50 rounded-lg"><p className="text-[10px] text-muted-foreground uppercase">Tournament Size</p><p className="text-xs font-semibold">{team.players} players</p></div>
+                        <div className="p-2 bg-white/50 rounded-lg">
+                          <p className="text-[10px] text-muted-foreground uppercase">Type Coverage</p>
+                          <div className="flex flex-wrap gap-0.5 mt-0.5">{allTypes.map(t => <span key={t} className="px-1 py-0.5 text-[7px] font-bold uppercase rounded text-white/90" style={{ backgroundColor: `${TYPE_COLORS[t]}AA` }}>{t}</span>)}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Cores + Speed */}
+                    <div>
+                      <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Core Pairs in Team</h5>
+                      {corePairs.length > 0 ? (
+                        <div className="space-y-2">
+                          {corePairs.sort((a, b) => b.winRate - a.winRate).map(cp => {
+                            const p1 = POKEMON_SEED.find(p => p.id === cp.pokemon1);
+                            const p2 = POKEMON_SEED.find(p => p.id === cp.pokemon2);
+                            return (
+                              <div key={cp.name} className="p-2 rounded-lg bg-white/50 border border-gray-100 cursor-pointer hover:bg-gray-50" onClick={() => setModal({ kind: "core", pair: cp.name })}>
+                                <div className="flex items-center gap-2">
+                                  {p1 && <Image src={p1.sprite} alt={p1.name} width={20} height={20} className="rounded" unoptimized />}
+                                  <span className="text-[10px] text-muted-foreground">+</span>
+                                  {p2 && <Image src={p2.sprite} alt={p2.name} width={20} height={20} className="rounded" unoptimized />}
+                                  <span className="text-xs font-semibold flex-1">{cp.name}</span>
+                                  <span className={cn("text-xs font-bold", cp.winRate >= 55 ? "text-green-600" : "text-gray-700")}>{cp.winRate}%</span>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">{cp.usage}% usage · {cp.synergy}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">No tracked core pairs in this team</p>
+                      )}
+
+                      <div className="mt-3 pt-2 border-t border-gray-200">
+                        <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Speed Tiers</h5>
+                        <div className="space-y-1">
+                          {[...teamPokemon].sort((a, b) => b.baseStats.speed - a.baseStats.speed).map(p => (
+                            <div key={p.id} className="flex items-center gap-2">
+                              <span className="text-[10px] font-mono font-bold w-6 text-right">{p.baseStats.speed}</span>
+                              <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400" style={{ width: `${Math.min(100, (p.baseStats.speed / 150) * 100)}%` }} />
+                              </div>
+                              <span className="text-[10px] text-muted-foreground w-16 truncate">{p.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button onClick={() => window.open("/team-builder?team=" + btoa(builderJson), "_blank")} className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all text-sm">
+                    <Sparkles className="w-4 h-4" /> Open in Team Builder <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               );
             })()}
