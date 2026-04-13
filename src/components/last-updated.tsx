@@ -11,6 +11,16 @@ interface ChangelogEntry {
 
 const SHARED_ENTRIES: ChangelogEntry[] = [
   {
+    date: "13/04/2026",
+    items: [
+      "🧠 Fresh 2M battle engine simulation  -  re-ran the full ML simulation with 2,000,000 battles across 789 teams and 270 Pokémon, updating all engine-powered sections with fresh data",
+      "⚔️ Anti-Meta Teams now engine-generated  -  6 counter teams are now auto-built from simulation results using top anti-meta anchors and their best partners, replacing hand-written placeholders",
+      "📊 Anti-Meta Pokémon Rankings refreshed  -  15 anti-meta Pokémon rankings regenerated from new sim data with updated scores, counter matchups, and weaknesses",
+      "🔗 ML-Discovered Cores updated  -  top 50 core pairs refreshed from 2M battle simulation results",
+      "🏗️ ML Archetype Rankings updated  -  50 archetype rankings recalculated from fresh simulation ELO and win rates",
+    ],
+  },
+  {
     date: "12/04/2026",
     items: [
       "🏆 Meta Overview reworked  -  real tournament data now leads the page: Pokémon Champions usage rankings (top 20 with bars), tournament winning teams, core pairs, archetype rankings, and curated teams all appear before ML/simulation sections",

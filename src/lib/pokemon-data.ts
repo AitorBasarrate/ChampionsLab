@@ -154,7 +154,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "S",
     "usageRate": 10.5,
   },
   {
@@ -468,7 +468,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 3.8,
   },
   {
@@ -594,7 +594,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.12,
   },
   {
@@ -703,7 +703,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.1,
   },
   {
@@ -824,7 +824,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.07,
   },
   {
@@ -933,7 +933,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.15,
   },
   {
@@ -1048,7 +1048,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.11,
   },
   {
@@ -1166,7 +1166,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.39,
   },
   {
@@ -1547,7 +1547,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.17,
   },
   {
@@ -1672,7 +1672,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.64,
   },
   {
@@ -1942,7 +1942,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 0.84,
   },
   {
@@ -2212,7 +2212,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.36,
   },
   {
@@ -2341,7 +2341,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.13,
   },
   {
@@ -2445,7 +2445,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.1,
   },
   {
@@ -2549,7 +2549,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.08,
   },
   {
@@ -2784,7 +2784,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.09,
   },
   {
@@ -3210,7 +3210,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.03,
   },
   {
@@ -3309,7 +3309,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.04,
   },
   {
@@ -3500,7 +3500,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.23,
   },
   {
@@ -3617,7 +3617,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.17,
   },
   {
@@ -3743,7 +3743,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.11,
   },
   {
@@ -3834,7 +3834,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.05,
   },
   {
@@ -3966,7 +3966,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.08,
   },
   {
@@ -4060,7 +4060,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.11,
   },
   {
@@ -4148,7 +4148,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.03,
   },
   {
@@ -4465,7 +4465,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.08,
   },
   {
@@ -4785,7 +4785,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.19,
   },
   {
@@ -4994,7 +4994,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.12,
   },
   {
@@ -5083,7 +5083,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.22,
   },
   {
@@ -5190,7 +5190,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.29,
   },
   {
@@ -5306,7 +5306,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.36,
   },
   {
@@ -5475,7 +5475,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 3.24,
   },
   {
@@ -5591,7 +5591,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.19,
   },
   {
@@ -5814,7 +5814,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 3.65,
   },
   {
@@ -5930,7 +5930,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.43,
   },
   {
@@ -6198,7 +6198,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.19,
   },
   {
@@ -6355,7 +6355,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.46,
   },
   {
@@ -6497,7 +6497,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.23,
   },
   {
@@ -6643,7 +6643,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 9,
   },
   {
@@ -6787,7 +6787,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 2.98,
   },
   {
@@ -6928,7 +6928,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 3.37,
   },
   {
@@ -7058,7 +7058,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.09,
   },
   {
@@ -7167,7 +7167,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.05,
   },
   {
@@ -7264,7 +7264,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Scarlet/Violet"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.05,
   },
   {
@@ -7368,7 +7368,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Scarlet/Violet"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.21,
   },
   {
@@ -7473,7 +7473,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Scarlet/Violet"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.58,
   },
   {
@@ -7672,7 +7672,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.3,
   },
   {
@@ -7779,7 +7779,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.12,
   },
   {
@@ -7886,7 +7886,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.24,
   },
   {
@@ -7991,7 +7991,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.05,
   },
   {
@@ -8265,7 +8265,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.76,
   },
   {
@@ -8422,7 +8422,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Let's Go"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 12,
   },
   {
@@ -8559,7 +8559,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 4.7,
   },
   {
@@ -8668,7 +8668,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.15,
   },
   {
@@ -8781,7 +8781,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 2.46,
   },
   {
@@ -8939,7 +8939,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 0.87,
   },
   {
@@ -9077,7 +9077,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.34,
   },
   {
@@ -9196,7 +9196,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 1.08,
   },
   {
@@ -9305,7 +9305,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 4.25,
   },
   {
@@ -9677,7 +9677,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.3,
   },
   {
@@ -9824,7 +9824,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.39,
   },
   {
@@ -9969,7 +9969,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.24,
   },
   {
@@ -10112,7 +10112,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 3.11,
   },
   {
@@ -10257,7 +10257,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.16,
   },
   {
@@ -10386,7 +10386,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 1.12,
   },
   {
@@ -10530,7 +10530,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.07,
   },
   {
@@ -10959,7 +10959,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 7.8,
   },
   {
@@ -11125,7 +11125,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 2.59,
   },
   {
@@ -11285,7 +11285,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.26,
   },
   {
@@ -11394,7 +11394,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 5.4,
   },
   {
@@ -11532,7 +11532,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.62,
   },
   {
@@ -11645,7 +11645,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 9.75,
   },
   {
@@ -11868,7 +11868,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.1,
   },
   {
@@ -12980,7 +12980,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.1,
   },
   {
@@ -13116,7 +13116,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.25,
   },
   {
@@ -13238,7 +13238,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.78,
   },
   {
@@ -13392,7 +13392,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.05,
   },
   {
@@ -13495,7 +13495,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.22,
   },
   {
@@ -13789,7 +13789,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 1.71,
   },
   {
@@ -13887,7 +13887,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.21,
   },
   {
@@ -14026,7 +14026,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.54,
   },
   {
@@ -14147,7 +14147,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.74,
   },
   {
@@ -14292,7 +14292,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.5,
   },
   {
@@ -14398,7 +14398,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.07,
   },
   {
@@ -14503,7 +14503,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.4,
   },
   {
@@ -14630,7 +14630,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.25,
   },
   {
@@ -14814,7 +14814,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.47,
   },
   {
@@ -14956,7 +14956,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 8.2,
   },
   {
@@ -15042,7 +15042,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.04,
   },
   {
@@ -15130,7 +15130,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 2.13,
   },
   {
@@ -15218,7 +15218,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "A",
+    "tier": "S",
     "usageRate": 17.5,
   },
   {
@@ -15306,7 +15306,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.7,
   },
   {
@@ -15394,7 +15394,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.07,
   },
   {
@@ -15482,7 +15482,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.38,
   },
   {
@@ -15580,7 +15580,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.32,
   },
   {
@@ -15730,7 +15730,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.2,
   },
   {
@@ -15951,7 +15951,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.33,
   },
   {
@@ -16081,7 +16081,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 7.4,
   },
   {
@@ -16226,7 +16226,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.07,
   },
   {
@@ -16338,7 +16338,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.22,
   },
   {
@@ -16575,7 +16575,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.26,
   },
   {
@@ -16679,7 +16679,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.03,
   },
   {
@@ -16791,7 +16791,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.09,
   },
   {
@@ -16906,7 +16906,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.92,
   },
   {
@@ -16998,7 +16998,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.56,
   },
   {
@@ -17091,7 +17091,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.08,
   },
   {
@@ -17190,7 +17190,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.06,
   },
   {
@@ -17284,7 +17284,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.03,
   },
   {
@@ -17439,7 +17439,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 2.33,
   },
   {
@@ -17559,7 +17559,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 2.85,
   },
   {
@@ -17662,7 +17662,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 2.72,
   },
   {
@@ -17820,7 +17820,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.68,
   },
   {
@@ -17963,7 +17963,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 7,
   },
   {
@@ -18098,7 +18098,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 1.4,
   },
   {
@@ -18208,7 +18208,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.11,
   },
   {
@@ -18399,7 +18399,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 0.8,
   },
   {
@@ -18479,7 +18479,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.04,
   },
   {
@@ -18613,7 +18613,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 1.33,
   },
   {
@@ -18744,7 +18744,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.12,
   },
   {
@@ -18922,7 +18922,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.09,
   },
   {
@@ -19033,7 +19033,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.11,
   },
   {
@@ -19389,7 +19389,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 0.91,
   },
   {
@@ -19480,7 +19480,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.52,
   },
   {
@@ -19592,7 +19592,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.04,
   },
   {
@@ -19707,7 +19707,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.31,
   },
   {
@@ -19821,7 +19821,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.06,
   },
   {
@@ -19934,7 +19934,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.37,
   },
   {
@@ -20168,7 +20168,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 6.2,
   },
   {
@@ -20272,7 +20272,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.06,
   },
   {
@@ -20411,7 +20411,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.99,
   },
   {
@@ -20520,7 +20520,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.48,
   },
   {
@@ -20623,7 +20623,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.15,
   },
   {
@@ -20719,7 +20719,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.33,
   },
   {
@@ -20817,7 +20817,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 0.94,
   },
   {
@@ -21668,7 +21668,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.57,
   },
   {
@@ -21770,7 +21770,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.64,
   },
   {
@@ -21913,7 +21913,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.85,
   },
   {
@@ -22150,7 +22150,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 6.6,
   },
   {
@@ -22341,7 +22341,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.07,
   },
   {
@@ -22451,7 +22451,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 1.5,
   },
   {
@@ -22596,7 +22596,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.14,
   },
   {
@@ -22802,7 +22802,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 0.22,
   },
   {
@@ -22908,7 +22908,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.08,
   },
   {
@@ -23131,7 +23131,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "S",
     "usageRate": 0.6,
   },
   {
@@ -23867,7 +23867,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 1.4,
   },
   {
@@ -24069,7 +24069,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.29,
   },
   {
@@ -24293,7 +24293,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 2.06,
   },
   {
@@ -24398,7 +24398,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.27,
   },
   {
@@ -25189,7 +25189,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 11.25,
   },
   {
@@ -25291,7 +25291,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.44,
   },
   {
@@ -25392,7 +25392,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "A",
     "usageRate": 0.72,
   },
   {
@@ -25493,7 +25493,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.42,
   },
   {
@@ -25617,7 +25617,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 1.15,
   },
   {
@@ -25715,7 +25715,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "usageRate": 0.66,
   },
   {
@@ -25813,7 +25813,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 3.5,
   },
   {
@@ -25898,7 +25898,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "usageRate": 1.78,
   },
   {
@@ -26015,7 +26015,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "B",
+    "tier": "A",
     "usageRate": 5,
   },
   {
@@ -26471,7 +26471,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Pokémon GO"
     ],
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "usageRate": 1.3,
   },
   {
@@ -26865,7 +26865,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Legends Z-A",
       "Pokémon GO"
     ],
-    "tier": "D",
+    "tier": "C",
     "usageRate": 1.3,
     "recruitmentCost": null
   },
@@ -27270,7 +27270,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Legends Z-A"
     ],
     "season": 1,
-    "tier": "A",
+    "tier": "S",
     "usageRate": 14.25,
   },
   {
@@ -27476,7 +27476,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
@@ -27605,7 +27605,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "hasMega": true,
     "season": 1,
-    "tier": "C",
+    "tier": "B",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
@@ -27714,7 +27714,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     ],
     "hasMega": true,
     "season": 1,
-    "tier": "A",
+    "tier": "S",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
@@ -27828,7 +27828,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
@@ -27936,7 +27936,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
       "Legends: Arceus"
     ],
     "season": 1,
-    "tier": "C",
+    "tier": "A",
     "usageRate": 1.19,
   },
   {
@@ -28154,7 +28154,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
@@ -28619,7 +28619,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "D",
+    "tier": "C",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
@@ -28720,7 +28720,7 @@ export const POKEMON_SEED: ChampionsPokemon[] = [
     "forms": [],
     "hasMega": false,
     "season": 1,
-    "tier": "D",
+    "tier": "B",
     "recruitmentCost": null,
     "homeCompatible": true,
     "homeSource": [
